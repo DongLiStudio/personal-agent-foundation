@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：项目对齐"
+  short_description: "GLOBAL 规则更新后审计项目继承并对齐登记项目"
+  default_prompt: "Use $align-agent-projects-with-global to audit registered Agent projects against the latest GLOBAL rules before applying changes."

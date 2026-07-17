@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：初始化 Agent 项目"
+  short_description: "初始化并规范管理项目制 Agent 工作区与基础文件"
+  default_prompt: "使用 $init-agent-project 初始化新的 Agent 项目工作区，创建标准结构并登记到 GLOBAL。"

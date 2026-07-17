@@ -1,0 +1,129 @@
+---
+name: personal-schedule-planner
+description: 汇总 GLOBAL 记录的全部飞书 Profile 下的任务与日历、Obsidian 仪表盘以及已登记 Agent 项目进度，生成从现在开始的个人时间安排，并在用户确认后幂等同步到所有 Profile 日历。用于用户要求规划今天、未来几天或本周，询问接下来做什么、重排时间块、把同一计划同步到多个飞书账号，在早晨及工作开始时制定可执行日程，或 feishu-task 创建/更新时间、负责人、状态和工作量后移交了影响当前用户排程的任务变更。执行前复用或按需补充{{GENERAL_ASSISTANT_PROJECT}}的“个人时间管理员”；默认只读采集并先协商，未经确认不写日历，不递归遍历 Obsidian。
+---
+
+# 个人日程规划
+
+把多账号任务、既有日程、长期规划和项目进度合并为一份现实可执行的时间表。默认只把“从现在到今天结束”排成具体时间块，同时观察未来七天的截止日期和冲突；用户指定未来几天、本周或其他范围时再扩展实际排程窗口。
+
+## 固定边界
+
+- 采集阶段只读。不要修改飞书任务、项目文件、Obsidian 或日历。
+- 每次真实排程必须使用 `scripts/planner_guard.py`、`scripts/schedule_sync.py` 和临时 manifest，严格按 `collect -> draft -> confirm -> preflight -> dry-run -> write -> readback -> complete` 推进；脚本拒绝时立即停止，不得绕过。
+- 从 `GLOBAL/LARK_PROFILES.md` 获取全部治理层 Profile；不能只读取 CLI active 或默认 Profile。
+- 同一份已确认安排同步到全部目标 Profile 的主日历。默认使用适合跨组织公开的共同标题与描述，并把日程设为公开；不要改变日历容器的共享权限。
+- 用户确认排程草案，只授权草案中明确列出的创建、更新和删除动作。新增信息或扩大日期、Profile、可见性、参会人范围时重新确认。
+- 只管理带本 Skill 稳定标记的时间块。不要覆盖普通日程，也不要把未确认的旧时间块自动删除。
+- 吃饭可作为受保护时间写入日历；普通休息、任务切换、延误余量和突发容量默认只在草案中留白，使用 `action: none`，不得生成日历事件。
+- 时间换算必须使用系统日期或脚本，不靠心算；固定使用当前会话时区，除非用户明确指定其他时区。
+
+## 路由个人时间岗位
+
+本 Skill 默认由{{GENERAL_ASSISTANT_PROJECT}}的“个人时间管理员”承接。开始采集前，从 `GLOBAL/PROJECTS.md` 定位{{GENERAL_ASSISTANT_PROJECT}}并读取其 `AGENTS.md`“项目组织”模块：
+
+1. 已有“个人时间管理员”或职责等价的长期岗位时，复用并把本次排程请求或 `task_handoffs[]` 指派给它；当前会话本身已承接该岗位时直接继续，不递归转派。
+2. 没有等价岗位时，先补充“个人时间管理员”，职责限定为汇总各项目 handoff、全部治理层 Profile、Obsidian 仪表盘和项目状态，协商个人排程，并在用户确认后同步日历。
+3. 环境支持长期任务窗口管理时，建立或复用对应窗口并传递排程窗口、用户请求和 handoff。环境暂不支持时，由当前会话完成本次排程并说明岗位已登记、尚由当前会话兜底；不能因缺少窗口而阻塞。
+4. 该岗位不修改飞书任务的 Profile、负责人、状态或业务内容；项目任务仍由各项目“项目任务协调员”按本地身份规则管理。岗位补充属于用户已确认的 GLOBAL 按需规则，不需要重复询问。
+
+岗位路由不构成日历写入授权；无论由哪个窗口执行，仍必须经过完整草案确认和程序化状态机。
+
+## 依赖与实时事实
+
+1. 读取 `GLOBAL/README.md`、`GLOBAL_CONTEXT.md`、`LARK_PROFILES.md`、`SCHEDULE_PREFERENCES.md`、`PROJECTS.md` 和 `OBSIDIAN_LINK.md`；按这些文件的当前路径与边界执行，不复制静态项目、Profile 清单或个人偏好到本 Skill。
+2. 使用 `feishu-profile` 解析和核验每个 Profile。所有飞书命令显式传入 `--profile <name> --as user`，不切换全局 active，不回退 bot。
+3. 优先通过 `lark-cli skills read lark-shared`、`lark-cli skills read lark-task`、`lark-cli skills read lark-calendar` 读取与当前 CLI 匹配的规则；具体动作前继续读取对应 reference、`--help` 和 schema，不凭本 Skill 猜参数。
+4. 使用 `obsidian-cli` 读取指定 Vault，使用 `json-canvas` 解释 `仪表盘.canvas`；只有仪表盘实际关联 `.base` 时才读取 `obsidian-bases`。
+5. CLI 不可用、Profile 不存在、user 授权无效或 scope 不足时，转 `feishu-profile` 恢复。任何 Profile 失败都要显式报告，不能静默跳过后宣称“全部同步”。
+6. 接收 `feishu-task` 联动时完整读取 [飞书任务排程联动契约](references/task-schedule-handoff.md)；handoff 是增量线索，不替代全部 Profile 的实时任务与日历采集。
+
+## 工作流程
+
+### 1. 确定窗口
+
+- 获取当前准确日期、时间和时区。
+- 读取 `SCHEDULE_PREFERENCES.md` 中已确认的稳定偏好；用户当前明确指令优先。标为“未固定”的作息和节奏不能自行补成朝九晚五，只有会显著改变排程时才询问。
+- 默认排程窗口为“现在至今天结束”；默认观察窗口延伸到未来七天，只用于识别截止日期、依赖和冲突。
+- 用户明确要求未来几天、本周或某段日期时，按其范围排程；不要因 Skill 常在早晨调用而限制其他时段。
+- 存在 `task_handoffs[]` 时，影响范围至少覆盖现有受管时间块以及任务变更前后的相关日期。任务从今天移到明天时，今天的释放动作与明天是否重新安排必须放在同一份修订草案中说明。
+
+### 2. 编排只读采集
+
+完整读取 [并行采集契约](references/parallel-collection-contract.md)。运行环境支持临时子智能体且采集范围足够大时，默认并行启动三条分支：全部飞书 Profile、Obsidian 仪表盘、全部活跃项目状态；主 Agent 同时读取排程偏好并负责汇合。槽位不足、子智能体不可用或范围很小时顺序执行相同采集，不降低覆盖要求。
+
+- 子智能体只读采集，不能确认草案、写入任何来源或独立宣布完成。
+- 为三条分支提供同一采集截止时间、窗口、时区和统一回报结构；要求接收方遵循当前项目入口与 GLOBAL 边界并主动回报。
+- 主 Agent 必须等待三条分支全部返回，把覆盖、稳定来源 ID、候选事项、冲突、风险和错误写入临时 manifest。任何分支失败都要显式报告；只有用户明确接受信息缺口才能继续。
+- 汇合后按任务 GUID、日程事件 ID、项目路径和明确交付语义去重。并行采集耗时较长时，在写前预检重新回读近期日历冲突。
+- `feishu-task` 提供的 `handoffs[]` 写入 manifest 顶层 `task_handoffs[]`，同时作为 Feishu 分支的优先回读种子；逐 GUID 回读最新任务后再与完整任务列表合并，不能把交接快照直接当作当前事实。
+
+### 3. 读取所有 Profile
+
+对 `LARK_PROFILES.md` 中每个治理层 Profile 分别执行：
+
+1. 回读 Profile、user 身份、姓名、`open_id`、授权和所需 task/calendar scope。
+2. 分页列取与当前用户相关且未完成的任务，覆盖逾期、观察窗口内到期、有明确开始时间以及无日期但仍活跃的重要任务。
+3. 读取排程窗口及观察窗口内的日程详情和忙闲；把所有 Profile 的固定忙碌时间取并集。
+4. 记录 Profile 来源，不因同一任务或日程跨 Profile 可见而重复计算。
+
+任务读取是列表场景，按当前 `lark-task` 规则优先使用 `+get-my-tasks`、`+get-related-tasks` 或原生分页列表；没有查询关键词时不要伪造搜索词。
+
+### 4. 读取长期规划与项目状态
+
+1. 只读打开 Obsidian 的 `仪表盘.canvas`，解析文本节点、Wikilink 和 Dataview 查询范围。
+2. 对 Wikilink 只读取与当前排程相关的具体笔记。对 Dataview `TASK FROM "<folder>"`，优先转换为受限的 `obsidian tasks path="<folder>" todo verbose format=json`；不要递归遍历 Vault，也不要执行写命令。
+3. 从 `PROJECTS.md` 获取全部活跃项目。为理解每个项目当前进度，读取其 `AGENTS.md`、`README.md`、`STATUS.md`；只在某个候选工作项需要证据时再读取相关任务文件，不做全项目递归扫描。
+4. Obsidian 或项目中的愿景、阶段目标不能直接当作当天承诺；只提取已有行动、近期里程碑、阻塞和明确下一步。
+
+### 5. 归一化并排程
+
+完整读取 [排程决策模型](references/planning-model.md)，结合 `SCHEDULE_PREFERENCES.md` 统一任务 GUID、项目、来源 Profile、截止时间、预计时长、依赖、重要性、置信度和公开敏感级别。
+
+- 先放固定日程和不可移动承诺，再处理临近截止、依赖阻塞和高价值推进项。
+- 合并同一 GUID 或同一明确交付，不因跨 Profile、项目状态和 Obsidian 同时出现而重复排程。
+- 为深度工作保留连续时间，为沟通和杂项批处理；普通休息、切换和意外缓冲用 `none` 留白，不把可用时间排满。确认后的吃饭和确定性通勤可作为受保护时间块同步。
+- 证据不足时给出明确推定和置信度。只有会显著改变排程的歧义才询问用户。
+- handoff 的 `impact=add/remove/replan` 只描述排程影响方向，不等于任务优先级或最终日历动作；必须结合当前容量和原受管事件生成实际 `create/update/retain/delete/none`。
+
+### 6. 协商草案
+
+在任何写入前输出：
+
+- 按时间排序的“开始–结束 / 安排 / 来源与理由 / 对外标题”时间表。
+- 未排入任务、延期风险、冲突、关键推定和保留缓冲。
+- 所有目标 Profile 及每个时间块的预期动作：`create`、`update`、`retain`、`delete` 或 `none`。`none` 表示已确认的排程留白，不进入任何 Profile 的日历。
+- 若由任务变更触发，列出每个任务 GUID 的变更原因、原时间块处置和新日期安排判断；没有变化的既有受管时间块仍明确标为 `retain`。
+- 日程公开口径：跨 Profile 使用共同的最小充分信息；敏感业务使用中性对外标题，不复制客户秘密、内部链接、任务全文或人员隐私。
+
+请求用户确认这个确定版本。用户提出调整时重新生成完整草案；“看起来可以”“就这样同步”等明确肯定才构成写入授权，沉默或只讨论取舍不构成确认。
+
+将完整草案写入系统临时目录中的状态 manifest。先推进到 `draft`；用户确认后才以 `--user-confirmed` 推进到 `confirm`。确认快照中的时间、标题、Profile、动作、公开口径或其他字段发生任何变化时，原确认自动失效，必须重新输出完整草案并确认。完整字段和命令见 [程序化状态契约](references/state-contract.md)。
+
+### 7. 幂等同步全部日历
+
+用户确认后完整读取 [跨 Profile 日历同步契约](references/calendar-sync-contract.md) 和 [程序化状态契约](references/state-contract.md)。先对全部 Profile 完成身份、权限、实际目标日历 ID、现有稳定标记和 dry-run 预检；每阶段由护栏验证并推进，全部预检完成后再开始写入。
+
+完成匹配并由护栏进入 `preflight` 后，使用 `scripts/schedule_sync.py` 生成确定性请求文件并执行后续阶段；不要再临时编写批量同步脚本。执行器负责兼容当前 CLI 的普通 JSON 信封和 `=== Dry Run ===` 预览格式、逐项持久化写入结果以及安全续跑，但不替代身份核验、匹配判断或用户确认。
+
+- 个人工作时间块使用当前 schema 的原生 `calendar.events.create/patch`，显式设为无视频会议；不要使用会自动附加视频会议的会议型 shortcut。
+- 只有真实会议才进入 `lark-calendar` 的预约会议流程，并按其参会人、忙闲和会议室确认规则执行。
+- 创建时同时使用稳定日程标记和确定性 idempotency key；更新时间不能改变 `block_key`。
+- 对每个 Profile 独立匹配：零个匹配则创建，一个匹配则按确认内容更新，多个匹配则停止该块并报告重复，不能猜目标。
+- 草案没有列出的旧受管时间块默认保留。删除必须出现在已确认 change set 中，并继续遵守 CLI 的高风险确认门禁。
+- 每项真实写入前对实际请求文件运行护栏 `check-write`。只有全部 `profile + block_key` dry-run 成功、请求 SHA-256 已入 manifest，且真实写入 payload 与 dry-run 文件完全一致，护栏才放行。
+- `none` 时间块保留在确认快照中，但不得参与日历匹配、请求生成、dry-run、写入或回读；护栏和同步执行器会拒绝或跳过这些组合。
+
+### 8. 回读验收
+
+逐 Profile 回读每个受管时间块，验证实际身份、日历、标题、描述标记、开始、结束、时区、公开范围、忙闲状态和视频会议状态。
+
+最终按 Profile 报告：日历计划数、创建数、更新数、保留数、删除数、失败数和事件链接，并单列全局 `none` 留白数。只有护栏成功推进到 `complete` 才能报告“全部同步完成”；只要任一 Profile 未完成或回读不一致，就保持未完成并报告“部分同步”，列出已成功项、失败项和安全重试方式；不自动删除已成功事件来伪造回滚。
+
+## 安全与隐私
+
+- 不把 App Secret、token、device code、内部客户资料或私密任务全文写进日程。
+- 为跨组织透明而同步的是时间占用和公开安全的工作主题，不等于授权公开所有业务细节。
+- 不把“已写入每个 Profile”表述为“所有同事一定可见”；同事可见性还受组织日历权限影响，本 Skill 不擅自修改这些权限。
+- 不修改飞书任务的 start、due、负责人或状态；本 Skill 只读取任务并管理已确认的日历时间块。
+- 不写入 Obsidian；如用户另行要求沉淀规划，按 Obsidian 写入规则单独确认。

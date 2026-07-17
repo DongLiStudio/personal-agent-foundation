@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：视觉迭代工作流"
+  short_description: "在页面设计迭代中优先使用 Live Mode 完成视觉调整"
+  default_prompt: "使用 $visual-iteration-workflow 判断当前页面设计修改是否应启动 Impeccable Live Mode，并按安全流程收尾。"

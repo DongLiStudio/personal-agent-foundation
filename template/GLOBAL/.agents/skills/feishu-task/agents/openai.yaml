@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：飞书任务"
+  short_description: "跨项目创建、去重和更新飞书任务，安全脱敏上传附件并回读结果"
+  default_prompt: "使用 $feishu-task 根据当前上下文创建一条信息完整、可执行并经过回读验证的飞书任务。"

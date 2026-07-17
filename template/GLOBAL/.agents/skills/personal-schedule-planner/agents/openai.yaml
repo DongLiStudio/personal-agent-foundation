@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：个人日程规划"
+  short_description: "汇总飞书任务、日历、Obsidian 与项目进度，协商并同步时间安排"
+  default_prompt: "使用 $personal-schedule-planner 汇总当前任务与规划，和我确认从现在开始的时间安排后同步到所有飞书 Profile 日历。"

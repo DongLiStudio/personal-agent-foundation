@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：下一步该做什么"
+  short_description: "综合全局任务、仪表盘与项目状态，推荐当前最值得执行的下一步"
+  default_prompt: "使用 $decide-next-action 汇总我的当前信息，告诉我现在最该做什么。"

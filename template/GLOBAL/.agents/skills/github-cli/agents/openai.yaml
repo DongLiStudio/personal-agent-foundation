@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：GitHub CLI 助手"
+  short_description: "安全使用 GitHub CLI 处理认证、仓库与协作工作"
+  default_prompt: "使用 $github-cli 检查当前仓库、确认 GitHub active 账号，并选择安全的 gh 命令。"

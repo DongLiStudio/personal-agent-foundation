@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：记录 Skill 依赖"
+  short_description: "记录并维护可恢复、可迁移的全局 Skill 依赖清单"
+  default_prompt: "使用 $record-skill-dependency 将这个已安装或自维护的 Skill 记录到 GLOBAL/SKILL_DEPENDENCIES.md。"

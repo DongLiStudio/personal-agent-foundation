@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "source": {
+    "kind": "generalized-live-global",
+    "tracked_file_count": 56,
+    "source_commit": "efb719a8cf989bbcc2591dc64013194fc3fc7954"
+  },
+  "template_root": "template",
+  "required_paths": [
+    "GLOBAL/README.md",
+    "GLOBAL/GLOBAL_CONTEXT.md",
+    "GLOBAL/PROJECTS.md",
+    "GLOBAL/OBSIDIAN_LINK.md",
+    "GLOBAL/SKILL_DEPENDENCIES.md",
+    "GLOBAL/LARK_PROFILES.md",
+    "GLOBAL/GITHUB_ACCOUNTS.md",
+    "GLOBAL/SCHEDULE_PREFERENCES.md",
+    "GLOBAL/.agents/skills/init-agent-project/SKILL.md"
+  ],
+  "placeholders": {
+    "AGENT_ROOT": {"required": true, "description": "Agent 项目总根目录的绝对路径"},
+    "DEFAULT_LARK_PROFILE": {"required": true, "description": "治理层默认飞书 CLI Profile"},
+    "DEFAULT_GITHUB_ACCOUNT": {"required": true, "description": "治理层默认 GitHub 用户名"},
+    "DEFAULT_TIMEZONE": {"required": true, "description": "IANA 时区，例如 Asia/Shanghai"},
+    "GENERAL_ASSISTANT_PROJECT": {"required": true, "description": "承担通用协作和个人排程的 Agent 项目名"},
+    "OBSIDIAN_VAULT_PATH": {"required": true, "description": "知识库真实路径；未使用时写入未配置说明"}
+  },
+  "excluded_sources": [
+    ".git/",
+    "obsidian-resource junction target",
+    "tokens and credentials",
+    "logs, caches and runtime state",
+    "real projects, organizations, accounts and personal history"
+  ]
+}

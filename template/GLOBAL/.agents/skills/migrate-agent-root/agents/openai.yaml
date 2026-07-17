@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：Agent 根迁移"
+  short_description: "安全迁移 Agent 根目录、GLOBAL 与已登记项目"
+  default_prompt: "Use $migrate-agent-root to plan and verify an Agent root migration before executing it."

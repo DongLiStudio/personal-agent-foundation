@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：飞书账号与 Profile 管理"
+  short_description: "管理飞书多 Profile、用户授权、失效恢复、换机迁移与安全删除"
+  default_prompt: "使用 $feishu-profile 管理当前项目所需的飞书 Profile、用户授权与安全恢复。"

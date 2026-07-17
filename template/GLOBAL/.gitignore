@@ -1,0 +1,25 @@
+# External knowledge-base junction
+/obsidian-resource/
+
+# Credentials and local environment
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.pfx
+*.p12
+
+# Logs, temporary files, and archives
+*.log
+*.tmp
+*.zip
+*.7z
+*.rar
+/temp/
+/tmp/
+
+# Operating-system files
+Thumbs.db
+.DS_Store
+.idea
