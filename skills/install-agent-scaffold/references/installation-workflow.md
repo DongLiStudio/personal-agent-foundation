@@ -20,12 +20,16 @@ macOS/Linux 使用对应绝对路径。`AGENT_ROOT` 必须与命令的 `--target
 ## 状态机
 
 ```text
-collect -> audit -> plan -> confirm -> install -> verify
+collect -> runtime-preflight -> audit -> plan -> confirm -> install -> verify
         -> local-git -> skills -> identities -> knowledge-link
         -> global-prompt -> first-project -> complete
 ```
 
 任何阶段失败都保留已经验证成功的事实，不跳过失败门禁。文件安装失败时，只允许清理本轮随机 staging；目标目录和模板源不得删除。
+
+## Python 与时区数据预检
+
+护栏和 GLOBAL 内置确定性脚本要求 Python 3.11+。安装前用所选时区实际构造 `zoneinfo.ZoneInfo`；Windows 等缺少系统 IANA 时区库的环境，在安装计划确认后执行 `python -m pip install tzdata`，随后再次构造同一时区并回读版本。不要仅凭 pip 退出码判定可用。
 
 ## GLOBAL 本地 Git
 

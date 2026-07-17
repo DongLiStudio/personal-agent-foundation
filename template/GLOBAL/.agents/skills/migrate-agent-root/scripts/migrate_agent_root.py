@@ -232,6 +232,7 @@ def validate_boundaries(source: Path, destination: Path, manifest: Manifest, all
 
 def build_plan(source: Path, destination: Path, manifest: Manifest) -> None:
     variants = path_variants(source, destination)
+    canonical_source = Path(os.path.realpath(source))
     counts = {"directories": 0, "files": 0, "bytes": 0, "links": 0, "rewrite_files": 0, "rewrite_hits": 0,
               "skipped_directories": 0, "skipped_files": 0, "skipped_bytes": 0}
     for item in iter_tree(source, manifest.copy_plan["skipped"]):
@@ -243,10 +244,13 @@ def build_plan(source: Path, destination: Path, manifest: Manifest) -> None:
             internal = False
             destination_target = target_text
             try:
-                resolved_target = (item.parent / target_text).resolve() if item.is_symlink() and not Path(target_text).is_absolute() else Path(target_text).resolve()
-                internal = source == resolved_target or source in resolved_target.parents
+                # Canonicalize both sides so Windows 8.3 aliases and macOS
+                # /var -> /private/var do not break internal-link detection.
+                resolved_target = Path(os.path.realpath(item))
+                relative_target = resolved_target.relative_to(canonical_source)
+                internal = True
                 if internal:
-                    destination_target = str(destination / resolved_target.relative_to(source))
+                    destination_target = str(destination / relative_target)
             except Exception:
                 resolved_target = None
             manifest.copy_plan["links"].append({

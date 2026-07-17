@@ -21,6 +21,8 @@ $install-agent-scaffold
 
 Skill 会根据宿主能力使用图形交互或普通对话，收集安装路径、默认飞书 Profile、默认 GitHub 账号、时区、通用助手项目名和可选 Obsidian Vault 路径；确认 dry-run 后再执行安装。
 
+文件护栏及 GLOBAL 内置确定性脚本要求 Python 3.11+；安装 Skill 会预检所选 IANA 时区，并在系统缺少时区数据时把 `tzdata` 纳入经用户确认的安装计划。
+
 安装完成后，Skill 会继续引导：
 
 1. 设置当前 Agent 的全局个性化提示词。

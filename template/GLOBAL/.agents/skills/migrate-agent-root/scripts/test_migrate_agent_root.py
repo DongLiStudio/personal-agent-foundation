@@ -61,7 +61,7 @@ def make_junction(link: Path, target: Path) -> bool:
 
 def test_plan_execute_verify_and_gate() -> None:
     with tempfile.TemporaryDirectory(prefix="migrate-agent-root-") as tmp:
-        base = Path(tmp)
+        base = Path(tmp).resolve()
         source, destination = make_basic_fixture(base)
         report = base / "report"
 
@@ -109,7 +109,7 @@ def test_plan_execute_verify_and_gate() -> None:
 
 def test_hash_tamper_and_encoding_lf_block_verify() -> None:
     with tempfile.TemporaryDirectory(prefix="migrate-agent-root-hash-") as tmp:
-        base = Path(tmp)
+        base = Path(tmp).resolve()
         source, destination = make_basic_fixture(base)
         run_cmd(["execute", "--source", str(source), "--destination", str(destination), "--report", str(base / "report")])
 
@@ -133,7 +133,7 @@ def test_hash_tamper_and_encoding_lf_block_verify() -> None:
 
 def test_align_report_bom_and_bad_json() -> None:
     with tempfile.TemporaryDirectory(prefix="migrate-agent-root-align-") as tmp:
-        base = Path(tmp)
+        base = Path(tmp).resolve()
         source, destination = make_basic_fixture(base)
         run_cmd(["execute", "--source", str(source), "--destination", str(destination), "--report", str(base / "report")])
 
@@ -150,7 +150,7 @@ def test_align_report_bom_and_bad_json() -> None:
 
 def test_links_rebuild_or_clean_failure() -> None:
     with tempfile.TemporaryDirectory(prefix="migrate-agent-root-link-") as tmp:
-        base = Path(tmp)
+        base = Path(tmp).resolve()
         source, destination = make_basic_fixture(base)
         external = base / "外部 Vault"
         external.mkdir()
@@ -176,7 +176,7 @@ def test_links_rebuild_or_clean_failure() -> None:
 
 def test_source_and_destination_parent_junction_block() -> None:
     with tempfile.TemporaryDirectory(prefix="migrate-agent-root-boundary-") as tmp:
-        base = Path(tmp)
+        base = Path(tmp).resolve()
         real_source, _destination = make_basic_fixture(base / "real")
         source_link = base / "source-junction"
         if make_junction(source_link, real_source):
@@ -192,7 +192,7 @@ def test_source_and_destination_parent_junction_block() -> None:
 
 def test_nested_git_dirty_recorded() -> None:
     with tempfile.TemporaryDirectory(prefix="migrate-agent-root-git-") as tmp:
-        base = Path(tmp)
+        base = Path(tmp).resolve()
         source, destination = make_basic_fixture(base)
         repo = source / "通用 助手"
         subprocess.run(["git", "-C", str(repo), "init"], text=True, capture_output=True, encoding="utf-8", errors="replace", check=True)
@@ -205,7 +205,7 @@ def test_nested_git_dirty_recorded() -> None:
 
 def test_regenerable_outputs_are_audited_and_excluded() -> None:
     with tempfile.TemporaryDirectory(prefix="migrate-agent-root-generated-") as tmp:
-        base = Path(tmp)
+        base = Path(tmp).resolve()
         source, destination = make_basic_fixture(base)
         project = source / "通用 助手"
         generated = {
@@ -240,7 +240,7 @@ def test_regenerable_outputs_are_audited_and_excluded() -> None:
 
 def test_failed_staging_verification_is_cleaned() -> None:
     with tempfile.TemporaryDirectory(prefix="migrate-agent-root-cleanup-") as tmp:
-        base = Path(tmp)
+        base = Path(tmp).resolve()
         source, destination = make_basic_fixture(base)
         secret_fixture = "to" + "ken=" + "fixture-secret-value\n"
         write(source / "通用 助手" / "unsafe.md", secret_fixture)
@@ -255,7 +255,7 @@ def test_failed_staging_verification_is_cleaned() -> None:
 
 def test_align_empty_projects_and_junction_block() -> None:
     with tempfile.TemporaryDirectory(prefix="align-agent-projects-") as tmp:
-        base = Path(tmp)
+        base = Path(tmp).resolve()
         global_root = base / "GLOBAL"
         global_root.mkdir()
         write(global_root / "README.md", "# GLOBAL\n")
