@@ -1,4 +1,4 @@
 interface:
-  display_name: "Install Agent Scaffold"
-  short_description: "通过对话安全安装并验证完整个人 Agent GLOBAL 基座"
-  default_prompt: "使用 $install-agent-scaffold 对话式安装并验证我的个人 Agent 基座。"
+  display_name: "安装个人 Agent 基座"
+  short_description: "自动获取产品源并通过对话安全安装、验证完整 GLOBAL 基座"
+  default_prompt: "使用 $install-agent-scaffold 自动获取产品源并安装、验证我的个人 Agent 基座。"

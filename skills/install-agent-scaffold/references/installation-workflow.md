@@ -20,16 +20,47 @@ macOS/Linux 使用对应绝对路径。`AGENT_ROOT` 必须与命令的 `--target
 ## 状态机
 
 ```text
-collect -> runtime-preflight -> audit -> plan -> confirm -> install -> verify
+source-bootstrap -> collect -> runtime-preflight -> audit -> plan -> confirm -> install -> verify
         -> local-git -> skills -> identities -> knowledge-link
         -> global-prompt -> first-project -> complete
 ```
 
-任何阶段失败都保留已经验证成功的事实，不跳过失败门禁。文件安装失败时，只允许清理本轮随机 staging；目标目录和模板源不得删除。
+任何阶段失败都保留已经验证成功的事实，不跳过失败门禁。文件安装失败时，只允许清理本轮随机 staging 和本轮自动获取的临时产品源；目标目录和用户原本提供的模板源不得删除。
+
+## 产品源自举
+
+用户只需要提供官方仓库链接或表达安装意图，不需要手工克隆仓库或注册 Skill。
+
+1. 当前 Skill 已位于包含 `template/` 和 `template-manifest.json` 的完整仓库时，直接使用该仓库根目录。
+2. 否则在系统临时目录创建新的随机工作目录，禁止复用现有非空目录，也不得把产品源下载到目标 Agent 根目录。
+3. 优先通过宿主的公开 GitHub 读取能力或 `git clone --depth 1 https://github.com/DongLiStudio/personal-agent-foundation.git` 获取完整仓库；没有 Git 时可下载 GitHub 官方 ZIP 并安全解压。
+4. 网络访问需要授权时直接请求授权，不把下载步骤转交用户。下载失败时报告原始错误，不从镜像站或未知来源取文件。
+5. 回读并记录仓库 URL、ref、commit；ZIP 无法提供 commit 时记录下载 URL 和响应中的版本证据。确认 `README.md`、`template/`、`template-manifest.json`、`skills/install-agent-scaffold/SKILL.md` 全部存在。
+6. 完成或失败收口后，只清理本轮创建的临时产品源；用户原本提供的本地仓库不得删除。
+
+产品源获取只是只读准备，不构成 Agent 根目录安装确认。任何 Python/tzdata 安装、系统权限变化和 Agent 根目录写入仍分别遵循确认门禁。
 
 ## Python 与时区数据预检
 
-护栏和 GLOBAL 内置确定性脚本要求 Python 3.11+。安装前用所选时区实际构造 `zoneinfo.ZoneInfo`；Windows 等缺少系统 IANA 时区库的环境，在安装计划确认后执行 `python -m pip install tzdata`，随后再次构造同一时区并回读版本。不要仅凭 pip 退出码判定可用。
+护栏和 GLOBAL 内置确定性脚本要求 Python 3.11+，但不要求用户预先手工安装。
+
+按以下顺序自动查找运行时，并用 `sys.version_info` 回读真实版本；不要只依赖命令名或 PATH：
+
+1. 当前宿主公开的内置 Python 运行时。
+2. Windows 的 `py -3`、`python3`、`python`；macOS/Linux 的 `python3`、`python`。
+3. 当前系统已知的官方安装位置，但不得递归扫描整块磁盘。
+
+找到多个版本时选择满足要求且路径明确的版本，并在计划中显示其绝对路径和版本。
+
+没有合格版本时生成依赖安装计划：
+
+- Windows：优先使用系统已有的 `winget` 安装官方 `Python.Python.3.12` 包。
+- macOS：系统已有 Homebrew 时使用 `brew install python@3.12`；不得为了本产品静默安装 Homebrew。
+- Linux：识别发行版和现有官方包管理器，选择可提供 Python 3.11+ 的发行版包；任何 `sudo` 或系统级修改都必须在执行前单独确认。
+
+展示将执行的命令、来源、是否需要管理员权限和预计影响。用户确认后执行；随后重新查找运行时并用独立命令回读版本。官方包管理器不可用、用户拒绝或回读仍低于 3.11 时停止安装并给出准确阻断，不得下载来源不明的可执行文件。
+
+获得 Python 后，用所选时区实际构造 `zoneinfo.ZoneInfo`。Windows 等缺少系统 IANA 时区库的环境，把 `<python> -m pip install tzdata` 作为单独依赖项展示并确认；执行后再次构造同一时区并回读 `tzdata` 版本。不要仅凭安装命令退出码判定可用。
 
 ## GLOBAL 本地 Git
 
