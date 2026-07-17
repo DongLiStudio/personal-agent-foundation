@@ -19,7 +19,8 @@ SPEC.loader.exec_module(MODULE)
 
 def main() -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
-        projects_md = Path(temp_dir) / "PROJECTS.md"
+        fixture_root = Path(temp_dir).resolve()
+        projects_md = fixture_root / "PROJECTS.md"
         projects_md.write_text(
             """# 项目索引
 
@@ -48,7 +49,7 @@ def main() -> None:
         by_path = MODULE.parse_projects(projects_md, [r"X:\AgentRoot\项目甲"])
         assert [project.name for project in by_path] == ["项目甲"]
 
-        project_root = Path(temp_dir) / "project"
+        project_root = fixture_root / "project"
         project_root.mkdir()
         (project_root / "AGENTS.md").write_text(
             "本项目飞书 Profile 不继承全局默认值。\n",
@@ -56,7 +57,7 @@ def main() -> None:
             newline="\n",
         )
         report = MODULE.audit_project(
-            MODULE.Project("project", project_root), Path(temp_dir) / "GLOBAL", None, ["全局"]
+            MODULE.Project("project", project_root), fixture_root / "GLOBAL", None, ["全局"]
         )
         assert report.status == "aligned"
         assert report.checks["text_issues"]["override_or_conflict_hits"] == ["AGENTS.md"]
@@ -67,7 +68,7 @@ def main() -> None:
             newline="\n",
         )
         report = MODULE.audit_project(
-            MODULE.Project("project", project_root), Path(temp_dir) / "GLOBAL", None, ["GLOBAL"]
+            MODULE.Project("project", project_root), fixture_root / "GLOBAL", None, ["GLOBAL"]
         )
         assert report.status == "needs_manual_decision"
         assert report.checks["text_issues"]["explicit_conflict_hits"] == ["AGENTS.md"]
