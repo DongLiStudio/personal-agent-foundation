@@ -18,7 +18,7 @@ manifest 使用 `schema_version: 1`，至少包含：
 - `collection`：`parallel` 或 `sequential` 模式、统一截止时间，以及 `feishu`、`obsidian`、`projects` 三条分支的覆盖范围、状态和错误。
 - `profiles[]`：目标 Profile 名称；预检前补齐实际 `app_id`、`user_open_id`、`calendar_id` 和 `calendar_write_scope`。
 - `task_handoffs[]`：可选的飞书任务变更交接，包含来源项目名称与根目录、任务 GUID、Profile、变更前后排程字段、触发原因和影响方向；由 `feishu-task` 联动时必须记录，普通主动排程可为空。来源项目与 Profile 必须分别保留，不得互相推断。
-- `blocks[]`：稳定 `block_key`、内部标题、开始/结束、动作、理由、来源和敏感级别。日历动作 `create/update/retain/delete` 还必须包含公开标题、可选公开描述以及 `public/busy/no_meeting` 和空参会人/会议室约束；留白动作 `none` 不得包含日历字段。全部字段都属于确认快照。
+- `blocks[]`：稳定 `block_key`、唯一标题、可选描述、开始/结束、动作、理由和来源。日历动作 `create/update/retain/delete` 还必须包含 `public/busy/no_meeting` 和空参会人/会议室约束；留白动作 `none` 不得包含日历字段。全部字段都属于确认快照。
 - `unplanned[]`、`risks[]`。
 - 预检产生的 `matches[]`，真实 dry-run 产生的 `dry_runs[]`，写入返回的 `writes[]`，逐项回读产生的 `readbacks[]`。
 
@@ -28,7 +28,7 @@ manifest 使用 `schema_version: 1`，至少包含：
 
 - `collect`：按 [并行采集契约](parallel-collection-contract.md) 执行只读采集。三条分支必须全部回报；失败分支未获用户明确接受时不能进入草案。
 - `draft`：草案字段完整，但没有写入授权。
-- `confirm`：必须显式传 `--user-confirmed`。脚本保存确定版本的 SHA-256；此后时间、标题、Profile、动作、公开口径、`task_handoffs[]` 或其他确认字段发生变化，后续门禁立即失败，必须运行 `reset-draft` 清除旧证据、递增修订号，再重新确认完整草案。
+- `confirm`：必须显式传 `--user-confirmed`。脚本保存确定版本的 SHA-256；此后时间、标题、描述、Profile、动作、`task_handoffs[]` 或其他确认字段发生变化，后续门禁立即失败，必须运行 `reset-draft` 清除旧证据、递增修订号，再重新确认完整草案。
 - `preflight`：每个 Profile 已核验 user 身份、写权限和真实主日历 ID；每个 `create/update/retain/delete` 时间块恰有一条匹配结果，重复匹配直接阻断；`retain` 的匹配结果必须保存已回读并验证过的完整旧稳定标记 `existing_marker` 和 `existing_revision`，该标记的 `schedule` 与 `block` 必须等于当前确认快照，`revision` 可早于当前修订；`none` 不参与匹配。
 - `dry-run`：每个 `create/update/delete` 组合均有成功 dry-run 和实际请求 payload 文件的 SHA-256；少一个也不能写。
 - `write`：只表示当前确认快照已取得写入许可。执行每项真实写入前都对同一个 payload 文件运行 `check-write`；只有文件 SHA-256 与 dry-run 记录完全相同才放行，不得扩大 change set。

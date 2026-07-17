@@ -82,10 +82,10 @@ def request_filename(profile_index: int, block_index: int) -> str:
 
 
 def event_body(manifest: dict[str, Any], block: dict[str, Any]) -> dict[str, Any]:
-    public_description = str(block.get("public_description") or PUBLIC_DESCRIPTION).strip()
+    description = str(block.get("description") or PUBLIC_DESCRIPTION).strip()
     return {
-        "summary": block["public_title"],
-        "description": f"{public_description}\n\n{marker(manifest, block['block_key'])}",
+        "summary": block["title"],
+        "description": f"{description}\n\n{marker(manifest, block['block_key'])}",
         "start_time": {"timestamp": unix_seconds(block["start"]), "timezone": manifest["timezone"]},
         "end_time": {"timestamp": unix_seconds(block["end"]), "timezone": manifest["timezone"]},
         "visibility": "public",

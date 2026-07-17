@@ -8,7 +8,7 @@
 
 只在当前用户是变更前或变更后的负责人/实际执行者时考虑触发。当前用户始终只是关注人、提出者、审核者或知悉者时不触发。
 
-以下变化在影响窗口内触发：
+以下变化在今天，或已存在受管排程的未来日期触发：
 
 - 新任务进入窗口。
 - `start` 或 `due` 进入、离开窗口，或在窗口内移动。
@@ -16,6 +16,8 @@
 - 任务完成、取消、重新打开，或其他会改变可执行性的状态变化。
 - 预计工作量发生足以改变时间块的变化。
 - 用户明确要求把任务加入当前安排；没有日期时也可触发，但仍需由排程 Skill 判断能否安排。
+
+新增到尚未建立个人受管排程的未来日期时不触发。未来七天观察窗口只用于排程时识别截止、依赖和冲突，不等于这些日期已经排程。用户明确要求安排或重排时不受此限制。
 
 只修改标题、描述、附件、关注人、验收文案等非排程字段时不触发。批量创建或更新时先完成全部任务写入和回读，再合并为一次联动，不逐条启动完整排程。
 
@@ -25,10 +27,10 @@
 
 ```json
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "now": "2026-07-16T10:00:00+08:00",
-  "timezone": "{{DEFAULT_TIMEZONE}}",
-  "window": {
+  "timezone": "Asia/Shanghai",
+  "today_window": {
     "start": "2026-07-16T00:00:00+08:00",
     "end": "2026-07-17T00:00:00+08:00"
   },
@@ -37,9 +39,11 @@
       "task_guid": "guid",
       "profile": "profile-name",
       "project_name": "project-name",
-      "project_root": "{{AGENT_ROOT}}\\project-name",
+      "project_root": "D:\\Project\\Agent\\project-name",
       "current_user_open_id": "ou_current",
       "explicit_schedule_request": false,
+      "before_target_has_managed_schedule": false,
+      "after_target_has_managed_schedule": false,
       "before": {
         "assignee_open_ids": ["ou_current"],
         "start": "2026-07-16T13:00:00+08:00",
@@ -64,7 +68,9 @@
 - `project_name`、`project_root`：任务来源项目及其当前根目录，必须从当前项目入口或 `GLOBAL/PROJECTS.md` 取得；用于保持项目语义和身份路由，不得根据 Profile 猜测项目。
 - `start`、`due`：先按会话时区归一化为带偏移 ISO 8601；无值为 `null`。
 - `estimated_minutes`：只有任务信息或用户上下文提供可靠估时时填写；不得编造。
-- 影响窗口使用当前已排程窗口；时间被移出当前窗口时，仍保留变更前状态以触发释放原时间块。
+- `today_window`：只表示今天的自然日范围；今天的任务变化始终可能影响当前安排。
+- `before_target_has_managed_schedule`、`after_target_has_managed_schedule`：分别表示变更前后目标日期是否已存在个人时间管理员创建的受管日历块。对于今天可以为 `false`；对于未来日期，项目任务协调员应按受影响日期轻量回读全部治理层 Profile 的稳定排程标记后填写，不得根据任务截止、普通日历忙碌或未来观察窗口猜测。无日期状态填 `false`。
+- 时间从已有受管排程的日期移出时，保留变更前的 `true` 证据，以触发释放原时间块；新增到未排程未来日期时前后均为 `false`，因此不触发。
 - 同一 Profile、同一任务 GUID 在一批操作中多次变化时，先折叠为最早 `before` 和最终 `after`；脚本拒绝重复 change，避免同一任务触发多次重排。
 
 运行：
@@ -79,10 +85,10 @@ python scripts/task_schedule_handoff.py --input <temp-change.json>
 
 当输出 `trigger=true`：
 
-1. 当前项目“项目任务协调员”把 handoff 交给{{GENERAL_ASSISTANT_PROJECT}}“个人时间管理员”，并继续调用 `personal-schedule-planner`；任一岗位缺失时先按对应 Skill 的按需岗位规则补充，不要让用户重新描述任务，也不能因缺少可调用岗位窗口而阻塞。
+1. 当前项目“项目任务协调员”把 handoff 交给通用助手“个人时间管理员”，并继续调用 `personal-schedule-planner`；任一岗位缺失时先按对应 Skill 的按需岗位规则补充，不要让用户重新描述任务，也不能因缺少可调用岗位窗口而阻塞。
 2. 将来源项目、`task_guid`、Profile、变更前后时间、执行归属、状态、估时、`reasons` 和 `impact` 作为 `task_handoffs[]` 放入采集 manifest。
 3. 重新回读该任务、全部 Profile 当前任务和日历；handoff 是增量线索，不替代实时采集。
-4. 排程范围至少覆盖现有受管时间块和变更前后受影响日期。时间移出今天时，要提出释放今天时间块的修订；是否在新日期创建时间块由完整规划决定。
+4. 排程范围至少覆盖今天及已有受管时间块的受影响日期。时间移出今天或已排程日期时，要提出释放原时间块的修订；是否在新日期创建时间块由完整规划决定。
 5. 由“个人时间管理员”输出完整修订草案，明确 `create/update/retain/delete/none`；`none` 表示为休息或弹性保留空白，不进入日历。获得用户确认后才同步所有 Profile。项目任务所属 Profile、负责人和业务内容仍由原项目管理，不随 handoff 转移。
 
 当 `trigger=false`，正常报告任务结果，不调用完整排程。仅当用户明确要求安排而脚本因输入缺失无法判断时，补齐输入后重跑，不能静默忽略。

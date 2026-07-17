@@ -14,7 +14,7 @@ def base_manifest() -> dict:
         "state": "collect",
         "schedule_key": "2026-07-16",
         "revision": 1,
-        "timezone": "{{DEFAULT_TIMEZONE}}",
+        "timezone": "Asia/Shanghai",
         "window": {"start": "2026-07-16T09:00:00+08:00", "end": "2026-07-16T18:00:00+08:00"},
         "collection": {
             "mode": "parallel",
@@ -22,16 +22,16 @@ def base_manifest() -> dict:
             "branches": [
                 {"id": "feishu", "status": "complete", "collected_at": "2026-07-16T08:57:00+08:00", "coverage": {"profiles": ["工作"]}, "errors": []},
                 {"id": "obsidian", "status": "complete", "collected_at": "2026-07-16T08:56:00+08:00", "coverage": {"canvas": "仪表盘.canvas"}, "errors": []},
-                {"id": "projects", "status": "complete", "collected_at": "2026-07-16T08:58:00+08:00", "coverage": {"projects": ["{{GENERAL_ASSISTANT_PROJECT}}"]}, "errors": []},
+                {"id": "projects", "status": "complete", "collected_at": "2026-07-16T08:58:00+08:00", "coverage": {"projects": ["通用助手"]}, "errors": []},
             ],
         },
         "profiles": [{"name": "工作", "app_id": "cli_test", "user_open_id": "ou_test", "calendar_id": "cal_test", "calendar_write_scope": True}],
-        "blocks": [{"block_key": "example-block", "title": "示例任务", "public_title": "示例工作", "start": "2026-07-16T09:00:00+08:00", "end": "2026-07-16T11:00:00+08:00", "action": "create", "reason": "示例原因", "sources": ["Feishu:task-guid"], "sensitivity": "neutralized", "visibility": "public", "free_busy_status": "busy", "vc_type": "no_meeting", "attendees": [], "room_ids": []}],
+        "blocks": [{"block_key": "agent-scaffold", "title": "制作 Agent 脚手架", "start": "2026-07-16T09:00:00+08:00", "end": "2026-07-16T11:00:00+08:00", "action": "create", "reason": "今日核心交付", "sources": ["Feishu:task-guid"], "visibility": "public", "free_busy_status": "busy", "vc_type": "no_meeting", "attendees": [], "room_ids": []}],
         "unplanned": [], "risks": [],
-        "matches": [{"profile": "工作", "block_key": "example-block", "calendar_id": "cal_test", "count": 0}],
-        "dry_runs": [{"profile": "工作", "block_key": "example-block", "ok": True, "request_sha256": "a" * 64}],
-        "writes": [{"profile": "工作", "block_key": "example-block", "ok": True, "event_id": "event_test", "request_sha256": "a" * 64}],
-        "readbacks": [{"profile": "工作", "block_key": "example-block", "ok": True, "calendar_id": "cal_test", "summary": "示例工作", "start": "2026-07-16T09:00:00+08:00", "end": "2026-07-16T11:00:00+08:00", "timezone": "{{DEFAULT_TIMEZONE}}", "visibility": "public", "free_busy_status": "busy", "vc_type": "no_meeting", "attendees": [], "room_ids": [], "marker": "AGENT-SCHEDULE|schedule=2026-07-16|block=example-block|revision=1"}],
+        "matches": [{"profile": "工作", "block_key": "agent-scaffold", "calendar_id": "cal_test", "count": 0}],
+        "dry_runs": [{"profile": "工作", "block_key": "agent-scaffold", "ok": True, "request_sha256": "a" * 64}],
+        "writes": [{"profile": "工作", "block_key": "agent-scaffold", "ok": True, "event_id": "event_test", "request_sha256": "a" * 64}],
+        "readbacks": [{"profile": "工作", "block_key": "agent-scaffold", "ok": True, "calendar_id": "cal_test", "summary": "制作 Agent 脚手架", "start": "2026-07-16T09:00:00+08:00", "end": "2026-07-16T11:00:00+08:00", "timezone": "Asia/Shanghai", "visibility": "public", "free_busy_status": "busy", "vc_type": "no_meeting", "attendees": [], "room_ids": [], "marker": "AGENT-SCHEDULE|schedule=2026-07-16|block=agent-scaffold|revision=1"}],
     }
 
 
@@ -61,7 +61,7 @@ def test_none_block_stays_out_of_calendar_pipeline() -> None:
         "block_key": "flex-buffer", "title": "弹性留白",
         "start": "2026-07-16T11:00:00+08:00", "end": "2026-07-16T11:30:00+08:00",
         "action": "none", "reason": "保留切换和延误余量", "sources": ["planning-policy"],
-        "sensitivity": "private", "attendees": [], "room_ids": [],
+        "attendees": [], "room_ids": [],
     })
     advance_to_complete(manifest)
     assert manifest["state"] == "complete"
@@ -75,14 +75,14 @@ def retain_manifest() -> dict:
     block = manifest["blocks"][0]
     block["action"] = "retain"
     manifest["matches"] = [{
-        "profile": "工作", "block_key": "example-block", "calendar_id": "cal_test",
+        "profile": "工作", "block_key": "agent-scaffold", "calendar_id": "cal_test",
         "count": 1, "event_id": "event_test",
-        "existing_marker": "AGENT-SCHEDULE|schedule=2026-07-16|block=example-block|revision=1",
+        "existing_marker": "AGENT-SCHEDULE|schedule=2026-07-16|block=agent-scaffold|revision=1",
         "existing_revision": 1,
     }]
     manifest["dry_runs"] = []
     manifest["writes"] = []
-    manifest["readbacks"][0]["marker"] = "AGENT-SCHEDULE|schedule=2026-07-16|block=example-block|revision=1"
+    manifest["readbacks"][0]["marker"] = "AGENT-SCHEDULE|schedule=2026-07-16|block=agent-scaffold|revision=1"
     return manifest
 
 
@@ -103,7 +103,7 @@ def test_retain_requires_existing_marker_at_preflight() -> None:
 
 def test_retain_marker_schedule_or_block_mismatch_fails() -> None:
     manifest = retain_manifest()
-    manifest["matches"][0]["existing_marker"] = "AGENT-SCHEDULE|schedule=2026-07-15|block=example-block|revision=1"
+    manifest["matches"][0]["existing_marker"] = "AGENT-SCHEDULE|schedule=2026-07-15|block=agent-scaffold|revision=1"
     for stage in ("draft", "confirm"):
         guard.transition(manifest, stage, user_confirmed=(stage == "confirm"))
     expect_error(lambda: guard.transition(manifest, "preflight", False), "schedule mismatch")
@@ -134,10 +134,10 @@ def test_create_and_update_still_require_current_revision_marker() -> None:
         manifest["blocks"][0]["action"] = action
         if action == "update":
             manifest["matches"][0] = {
-                "profile": "工作", "block_key": "example-block", "calendar_id": "cal_test",
+                "profile": "工作", "block_key": "agent-scaffold", "calendar_id": "cal_test",
                 "count": 1, "event_id": "event_test",
             }
-        manifest["readbacks"][0]["marker"] = "AGENT-SCHEDULE|schedule=2026-07-16|block=example-block|revision=1"
+        manifest["readbacks"][0]["marker"] = "AGENT-SCHEDULE|schedule=2026-07-16|block=agent-scaffold|revision=1"
         for stage in guard.STAGES[1:-1]:
             guard.transition(manifest, stage, user_confirmed=(stage == "confirm"))
         expect_error(lambda: guard.transition(manifest, "complete", False), "marker mismatch")
@@ -147,10 +147,10 @@ def test_none_block_rejects_calendar_metadata() -> None:
     manifest = base_manifest()
     manifest["blocks"].append({
         "block_key": "rest-buffer", "title": "普通休息",
-        "public_title": "休息", "start": "2026-07-16T11:00:00+08:00", "end": "2026-07-16T11:15:00+08:00",
-        "action": "none", "reason": "不占用日历", "sources": ["planning-policy"], "sensitivity": "private",
+        "description": "休息", "start": "2026-07-16T11:00:00+08:00", "end": "2026-07-16T11:15:00+08:00",
+        "action": "none", "reason": "不占用日历", "sources": ["planning-policy"],
     })
-    expect_error(lambda: guard.transition(manifest, "draft", False), "must not define calendar field public_title")
+    expect_error(lambda: guard.transition(manifest, "draft", False), "must not define calendar field description")
 
 
 def test_illegal_transition() -> None:
@@ -189,12 +189,12 @@ def test_confirmation_invalidated_by_change() -> None:
     expect_error(lambda: guard.transition(manifest, "preflight", False), "confirmed plan changed")
 
 
-def test_confirmation_invalidated_by_public_description_change() -> None:
+def test_confirmation_invalidated_by_description_change() -> None:
     manifest = base_manifest()
-    manifest["blocks"][0]["public_description"] = "公开说明一"
+    manifest["blocks"][0]["description"] = "说明一"
     guard.transition(manifest, "draft", False)
     guard.transition(manifest, "confirm", True)
-    manifest["blocks"][0]["public_description"] = "公开说明二"
+    manifest["blocks"][0]["description"] = "说明二"
     expect_error(lambda: guard.transition(manifest, "preflight", False), "confirmed plan changed")
 
 
@@ -275,7 +275,7 @@ def test_check_write_uses_exact_payload_file() -> None:
         for stage in guard.STAGES[1:6]:
             guard.transition(manifest, stage, user_confirmed=(stage == "confirm"))
         guard.atomic_write(manifest_path, manifest)
-        args = type("Args", (), {"manifest": str(manifest_path), "profile": "工作", "block_key": "example-block", "payload": str(payload_path)})()
+        args = type("Args", (), {"manifest": str(manifest_path), "profile": "工作", "block_key": "agent-scaffold", "payload": str(payload_path)})()
         assert guard.command_check_write(args) == 0
         payload_path.write_bytes(b'{"summary":"changed"}\n')
         expect_error(lambda: guard.command_check_write(args), "payload differs from dry-run")

@@ -62,8 +62,8 @@ def atomic_write(path: Path, data: dict[str, Any]) -> None:
 def canonical_plan(manifest: dict[str, Any]) -> dict[str, Any]:
     profile_view = [{"name": profile.get("name")} for profile in manifest.get("profiles", [])]
     fields = (
-        "block_key", "title", "public_title", "public_description", "start", "end", "action", "reason", "sources",
-        "sensitivity", "visibility", "free_busy_status", "vc_type", "attendees", "room_ids",
+        "block_key", "title", "description", "start", "end", "action", "reason", "sources",
+        "visibility", "free_busy_status", "vc_type", "attendees", "room_ids",
     )
     block_view = [{field: block.get(field) for field in fields} for block in manifest.get("blocks", [])]
     return {
@@ -157,7 +157,7 @@ def validate_draft(manifest: dict[str, Any]) -> None:
     for key in keys:
         require(not re.fullmatch(r"(?:block[-_ ]?)?\d+", key, re.IGNORECASE), f"unstable block_key: {key}")
         require(not re.fullmatch(r"\d{4}-\d{2}-\d{2}T.*", key), f"block_key must not be a timestamp: {key}")
-    required = ("title", "start", "end", "action", "reason", "sources", "sensitivity")
+    required = ("title", "start", "end", "action", "reason", "sources")
     for block in blocks:
         key = block["block_key"]
         for field in required:
@@ -165,10 +165,9 @@ def validate_draft(manifest: dict[str, Any]) -> None:
         require(block["action"] in ACTIONS, f"block {key} has invalid action")
         require(block["start"] < block["end"], f"block {key} start must be before end")
         if block["action"] == "none":
-            for field in ("public_title", "public_description", "visibility", "free_busy_status", "vc_type"):
+            for field in ("description", "visibility", "free_busy_status", "vc_type"):
                 require(not block.get(field), f"none block {key} must not define calendar field {field}")
         else:
-            require(block.get("public_title"), f"block {key} requires public_title")
             require(block.get("visibility", "public") == "public", f"block {key} visibility must be public")
             require(block.get("free_busy_status", "busy") == "busy", f"block {key} must be busy")
             require(block.get("vc_type", "no_meeting") == "no_meeting", f"block {key} must use no_meeting")
@@ -276,7 +275,7 @@ def validate_readbacks(manifest: dict[str, Any]) -> None:
             require(result.get("absent") is True, f"deleted event still exists for {pair[0]} / {pair[1]}")
             continue
         require(result.get("calendar_id") == profiles[pair[0]]["calendar_id"], f"readback calendar mismatch for {pair[0]} / {pair[1]}")
-        require(result.get("summary") == block["public_title"], f"readback title mismatch for {pair[0]} / {pair[1]}")
+        require(result.get("summary") == block["title"], f"readback title mismatch for {pair[0]} / {pair[1]}")
         require(result.get("start") == block["start"] and result.get("end") == block["end"], f"readback time mismatch for {pair[0]} / {pair[1]}")
         require(result.get("timezone") == manifest["timezone"], f"readback timezone mismatch for {pair[0]} / {pair[1]}")
         require(result.get("visibility") == "public", f"readback visibility mismatch for {pair[0]} / {pair[1]}")

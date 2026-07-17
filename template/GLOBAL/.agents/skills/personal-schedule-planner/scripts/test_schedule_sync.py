@@ -17,9 +17,9 @@ spec.loader.exec_module(sync)
 
 def block(key: str, action: str, title: str) -> dict:
     return {
-        "block_key": key, "title": title, "public_title": title,
+        "block_key": key, "title": title,
         "start": "2026-07-16T09:00:00+08:00", "end": "2026-07-16T10:00:00+08:00",
-        "action": action, "reason": "fixture", "sources": ["fixture"], "sensitivity": "public",
+        "action": action, "reason": "fixture", "sources": ["fixture"],
         "visibility": "public", "free_busy_status": "busy", "vc_type": "no_meeting",
         "attendees": [], "room_ids": [],
     }
@@ -29,7 +29,7 @@ def blank_block(key: str, title: str) -> dict:
     return {
         "block_key": key, "title": title,
         "start": "2026-07-16T10:00:00+08:00", "end": "2026-07-16T10:30:00+08:00",
-        "action": "none", "reason": "保留弹性", "sources": ["planning-policy"], "sensitivity": "private",
+        "action": "none", "reason": "保留弹性", "sources": ["planning-policy"],
         "attendees": [], "room_ids": [],
     }
 
@@ -44,7 +44,7 @@ def manifest() -> dict:
     ]
     profile = {
         "name": "fixture-profile", "app_id": "cli_fixture", "user_open_id": "ou_fixture",
-        "calendar_id": "cal_fixture", "calendar_write_scope": True,
+        "calendar_id": "fixture@example.invalid", "calendar_write_scope": True,
     }
     matches = []
     for item in blocks:
@@ -61,7 +61,7 @@ def manifest() -> dict:
         matches.append(match)
     return {
         "schema_version": 1, "state": "preflight", "schedule_key": "2026-07-16", "revision": 5,
-        "timezone": "{{DEFAULT_TIMEZONE}}", "window": {"start": blocks[0]["start"], "end": blocks[0]["end"]},
+        "timezone": "Asia/Shanghai", "window": {"start": blocks[0]["start"], "end": blocks[0]["end"]},
         "collection": {"mode": "sequential", "cutoff": "2026-07-16T08:00:00+08:00", "branches": [
             {"id": name, "status": "complete", "collected_at": "2026-07-16T08:00:00+08:00", "coverage": {"ok": True}, "errors": []}
             for name in ("feishu", "obsidian", "projects")
@@ -91,8 +91,8 @@ def fake_run_factory(fail_once: set[str] | None = None):
             event = {
                 "event_id": event_id, "summary": {"create-block": "创建事项", "update-block": "更新事项", "retain-block": "保留事项"}.get(key, "删除事项"),
                 "description": descriptions.get(key, f"AGENT-SCHEDULE|schedule=2026-07-16|block={key}|revision=1"),
-                "start_time": {"timestamp": "1784163600", "timezone": "{{DEFAULT_TIMEZONE}}"},
-                "end_time": {"timestamp": "1784167200", "timezone": "{{DEFAULT_TIMEZONE}}"},
+                "start_time": {"timestamp": "1784163600", "timezone": "Asia/Shanghai"},
+                "end_time": {"timestamp": "1784167200", "timezone": "Asia/Shanghai"},
                 "visibility": "public", "free_busy_status": "busy", "vchat": {"vc_type": "no_meeting"},
                 "attendees": [], "status": status,
             }

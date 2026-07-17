@@ -46,11 +46,11 @@ profile_app_id | calendar_id | schedule_key | block_key
 
 当前 `lark-calendar +create` 可能自动附加飞书视频会议。个人专注、业务处理、用餐或确定性通勤时间块必须使用当前 schema 的原生 `calendar.events.create`，并显式设置：
 
-- `summary`：用户确认的公开安全标题。
-- `description`：最小公开说明和稳定标记。
+- `summary`：草案中经用户确认的唯一标题。
+- `description`：可选说明和稳定标记，不包含客户秘密、内部链接或任务全文。
 - `start_time` / `end_time`：秒级时间戳与明确 IANA 时区。
 - `free_busy_status: busy`。
-- `visibility: public`，实现用户要求的跨组织时间透明；敏感内容先中性化。
+- `visibility: public`，实现用户要求的跨组织时间透明。
 - `vchat.vc_type: no_meeting`。
 - 合理提醒；没有用户偏好时不堆叠多个提醒。
 - `idempotency_key`：按本契约确定性生成。
@@ -60,7 +60,7 @@ profile_app_id | calendar_id | schedule_key | block_key
 ## 留白不写入
 
 - 普通休息、任务切换、延误余量、突发容量和仅用于容错的通勤弹性使用 `action: none`。
-- `none` 保留在用户确认快照中，用于证明计划没有排满；它没有公开标题、稳定事件标记、幂等键、匹配结果、请求文件、dry-run、写入或回读。
+- `none` 保留在用户确认快照中，用于证明计划没有排满；它没有日历标题、稳定事件标记、幂等键、匹配结果、请求文件、dry-run、写入或回读。
 - 同步执行器不得把 `none` 转换为 `create`，也不得为它查询或制造日历事件。若用户后来明确希望把某段留白变为日历占用，应重置草案、改为日历动作并重新确认。
 
 ## 更新与删除
