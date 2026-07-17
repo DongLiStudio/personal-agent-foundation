@@ -52,3 +52,9 @@ python skills/install-agent-scaffold/scripts/scaffold_guard.py audit-template --
 ## License
 
 Apache License 2.0。见 `LICENSE`。
+
+## 作者与联系
+
+- 作者：DongLi
+- GitHub：[@DongLiStudio](https://github.com/DongLiStudio)
+- 邮箱：[mr_yuxiangyu@163.com](mailto:mr_yuxiangyu@163.com)
