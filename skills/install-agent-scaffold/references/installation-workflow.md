@@ -21,7 +21,7 @@ macOS/Linux 使用对应绝对路径。`AGENT_ROOT` 必须与命令的 `--target
 
 ```text
 source-bootstrap -> collect -> runtime-preflight -> audit -> plan -> confirm -> install -> verify
-        -> local-git -> skills -> identities -> knowledge-link
+        -> knowledge-layout -> knowledge-link -> local-git -> skills -> identities
         -> global-prompt -> first-project -> complete
 ```
 
@@ -93,7 +93,13 @@ commit 不构成上传授权。除非用户另行明确要求，不配置 remote
 
 只有 `OBSIDIAN_VAULT_PATH` 指向用户确认的真实目录时才创建：
 
-- Windows：优先 Junction。
-- macOS/Linux：symlink。
+1. 完整读取 `obsidian-layout.md`，先确认 Vault 是否已有内容、是否采用现成目录约定，以及用户希望 Agent 如何理解和使用它。
+2. 对用户的现有结构，通过对话确定总览、长期资料、项目资料、日记、附件等实际位置和语义；不得根据目录名称自行猜测，也不得把作者结构当作默认标准。
+3. 如需查看现有结构，先征得用户同意，只做根目录和用户指定位置的浅层只读检查；不递归遍历，不进入 `.obsidian`，不读取正文来推断隐私边界。
+4. 先展示拟写入 `GLOBAL/OBSIDIAN_LINK.md` 的目录映射、优先入口、默认权限、允许写入位置和排除项；用户确认后只修改已安装实例，不修改产品模板。
+5. 映射确认后再创建链接：Windows 优先 Junction，macOS/Linux 使用 symlink。
+6. 同时回读链接类型、链接路径、解析目标和 `OBSIDIAN_LINK.md` 的最终内容。
 
 创建前确认目标不是 `AGENT_ROOT`、GLOBAL 或其父目录；创建后同时回读链接类型、链接路径和解析目标。不得递归复制 Vault。
+
+没有配置 Vault 时不创建伪链接，保留渲染后的通用连接约定并明确标记未配置。空 Vault 或全新 Vault 也不得自动套用作者目录；如用户希望建立新结构，应先给出方案并单独确认创建目录。

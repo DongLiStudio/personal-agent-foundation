@@ -201,6 +201,40 @@ class ProductBoundaryTests(unittest.TestCase):
             for pattern in forbidden_patterns:
                 self.assertIsNone(pattern.search(text), f"{pattern.pattern} in {path}")
 
+    def test_obsidian_contract_does_not_assume_author_layout(self) -> None:
+        contract = (TEMPLATE / "GLOBAL" / "OBSIDIAN_LINK.md").read_text(
+            encoding="utf-8"
+        )
+        for author_path in (
+            "信息\\README-信息.md",
+            "资源\\README-资源.md",
+            "想法\\README-想法.md",
+            "特殊\\README-特殊.md",
+            "想法\\发展\\优先要做的重点项目.md",
+            "知识\\方法论\\方法论路由：方法论的方法论.md",
+        ):
+            self.assertNotIn(author_path, contract)
+        self.assertIn("已确认的目录映射", contract)
+        self.assertIn("不得套用作者或其他用户的目录名称", contract)
+
+    def test_onboarding_bundles_full_host_personalization_prompt(self) -> None:
+        host_integration = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "host-integration.md"
+        ).read_text(encoding="utf-8")
+        required_text = (
+            "开始任何项目工作前，必须完整读取当前项目根目录的 "
+            "AGENTS.md、README.md 和 STATUS.md",
+            "项目实时文件优先于历史对话、摘要和旧记录",
+            "发生会话压缩、任务迁移、跨任务委派、长期岗位接单或项目归属变化后",
+            "未回报不得视为完成。已有明确决定不得重复询问。",
+        )
+        for text in required_text:
+            self.assertIn(text, host_integration)
+
     def test_all_product_text_is_utf8_without_bom_and_lf(self) -> None:
         text_suffixes = {"", ".md", ".json", ".yaml", ".yml", ".py", ".txt"}
         for path in (item for item in ROOT.rglob("*") if item.is_file()):
