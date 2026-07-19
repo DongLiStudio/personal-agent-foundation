@@ -535,6 +535,32 @@ class ProductBoundaryTests(unittest.TestCase):
         ):
             self.assertIn(text, onboarding)
 
+    def test_on_demand_roles_require_long_running_task_windows(self) -> None:
+        global_context = (TEMPLATE / "GLOBAL" / "GLOBAL_CONTEXT.md").read_text(
+            encoding="utf-8"
+        )
+        init_skill = (
+            TEMPLATE
+            / "GLOBAL"
+            / ".agents"
+            / "skills"
+            / "init-agent-project"
+            / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        combined = global_context + "\n" + init_skill
+        for text in (
+            "岗位补充不是只改 `AGENTS.md`",
+            "项目 `AGENTS.md` 已登记岗位职责",
+            "已创建或复用对应长期会话/任务窗口",
+            "岗位启动指令和当前上下文",
+            "该窗口已回报接单或阻塞",
+            "执行窗口待创建/待用户接管",
+            "不得把单纯写入 `AGENTS.md` 宣称为岗位已落地",
+            "不得宣称岗位已完整落地",
+            "长期窗口未创建",
+        ):
+            self.assertIn(text, combined)
+
     def test_all_product_text_is_utf8_without_bom_and_lf(self) -> None:
         text_suffixes = {"", ".md", ".json", ".yaml", ".yml", ".py", ".txt"}
         for path in (item for item in ROOT.rglob("*") if item.is_file()):
