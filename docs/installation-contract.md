@@ -8,7 +8,7 @@
 
 这些输入不得包含密码、token、App Secret、恢复码或私钥。
 
-飞书、GitHub 和 Obsidian 不属于初始模板渲染输入。GLOBAL 与 Skills 恢复后，安装器再分别询问是否现在连接；连接时调用对应 Skill 或官方 CLI 完成授权并回读真实身份或路径，不要求用户预先知道飞书 Profile 名、GitHub 用户名或 Obsidian 目录结构。
+飞书、GitHub 和 Obsidian 不属于初始模板渲染输入。GLOBAL 与 Skills 恢复后，安装器再分别询问是否现在连接，默认选项必须是“现在连接”；连接时调用对应 Skill 或官方 CLI 完成授权并回读真实身份或路径，不要求用户预先知道飞书 Profile 名、GitHub 用户名或 Obsidian 目录结构。
 
 ## 阶段
 
@@ -18,7 +18,7 @@
 4. `install`：在目标同级临时 staging 渲染，验证后原子移动到目标。
 5. `verify`：从目标重新读取并检查必需文件、占位符残留和编码。
 6. Skill 恢复 GLOBAL Skills。
-7. Skill 询问并调用对应能力完成飞书、GitHub 和 Obsidian 连接；用户选择稍后再配时保留未配置说明。
+7. Skill 询问并调用对应能力完成飞书、GitHub 和 Obsidian 连接；“现在连接”为默认选项，用户主动选择稍后再配时才保留未配置说明。
 8. Skill 完成 GLOBAL Git、知识库连接和 onboarding。
 
 ## 目标保护

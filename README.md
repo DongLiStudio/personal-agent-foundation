@@ -47,7 +47,7 @@ Agent 应当：
 4. 自动检测宿主或系统中的 Python 3.11+；缺失时先展示官方安装方案，经确认后自动安装。
 5. 收集最小非敏感配置并执行模板审计、安装计划和 dry-run。飞书、GitHub 和 Obsidian 在初始模板中只写入“待连接”状态，不要求用户提前知道 Profile 名或账号名。
 6. 只有在展示计划并获得明确确认后，才执行真实安装和验证。
-7. GLOBAL 和 Skills 恢复完成后，再分别询问是否现在连接飞书、GitHub 和 Obsidian；用户选择连接时，由对应 Skill 或官方 CLI 打开授权、验证码或网页登录流程，并回读真实身份后写回 GLOBAL。
+7. GLOBAL 和 Skills 恢复完成后，再分别询问是否现在连接飞书、GitHub 和 Obsidian；默认推荐并预选“现在连接”。用户选择连接时，由对应 Skill 或官方 CLI 打开授权、验证码或网页登录流程，并回读真实身份后写回 GLOBAL。只有用户主动选择稍后再配或当前没有账号/Vault 时，才保留未配置说明。
 
 Agent 如果无法读取公开仓库、执行本地工具或请求必要权限，应准确说明阻断，不应把克隆、Skill 注册、Python 安装或模板处理重新交给用户手工完成。
 
@@ -59,7 +59,7 @@ Agent 会询问以下非敏感配置：
 2. IANA 时区，例如 `Asia/Shanghai`。
 3. 默认助手项目名称。
 
-GLOBAL 和 Skills 恢复后，Agent 才会继续询问是否现在连接飞书、GitHub 和 Obsidian。用户选择连接飞书或 GitHub 时，不需要提前知道 Profile 名或账号名；Agent 应调用对应 Skill 或官方 CLI 完成授权并回读真实身份。用户选择连接 Obsidian 时，再填写 Vault 路径并确认实际目录结构、优先入口、允许读取或写入的范围和明确排除项，生成专属的 `OBSIDIAN_LINK.md`。
+GLOBAL 和 Skills 恢复后，Agent 才会继续询问是否现在连接飞书、GitHub 和 Obsidian。三个连接项的默认选项都应是“现在连接”，而不是“稍后连接”。用户选择连接飞书或 GitHub 时，不需要提前知道 Profile 名或账号名；Agent 应调用对应 Skill 或官方 CLI 完成授权并回读真实身份。用户选择连接 Obsidian 时，再填写 Vault 路径并确认实际目录结构、优先入口、允许读取或写入的范围和明确排除项，生成专属的 `OBSIDIAN_LINK.md`。
 
 不要在对话中提供 token、密码、App Secret、私钥或恢复码。需要登录时，由对应工具打开官方授权流程。
 

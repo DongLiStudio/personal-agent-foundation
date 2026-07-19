@@ -264,6 +264,7 @@ class ProductBoundaryTests(unittest.TestCase):
             "是否现在连接飞书",
             "是否现在连接 GitHub",
             "是否现在连接 Obsidian",
+            "默认推荐和预选项应为“现在连接”",
         ):
             self.assertIn(text, combined)
 
@@ -292,6 +293,40 @@ class ProductBoundaryTests(unittest.TestCase):
             self.assertIn(text, combined)
         self.assertNotIn("用户选择连接时再收集默认 Profile 名", combined)
         self.assertNotIn("用户选择连接时再收集默认账号", combined)
+
+    def test_connectors_default_to_connect_now_after_skill_restore(self) -> None:
+        installer = (
+            ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "installation-workflow.md"
+        ).read_text(encoding="utf-8")
+        host_integration = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "host-integration.md"
+        ).read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        contract = (ROOT / "docs" / "installation-contract.md").read_text(
+            encoding="utf-8"
+        )
+        combined = "\n".join(
+            [installer, workflow, host_integration, readme, contract]
+        )
+        for text in (
+            "默认推荐和预选项均为“现在连接”",
+            "默认推荐和预选项必须是“现在连接”",
+            "三个连接项的默认选项都应是“现在连接”",
+            "默认选项必须是“现在连接”",
+            "用户主动选择稍后再配时才保留未配置说明",
+        ):
+            self.assertIn(text, combined)
 
     def test_visual_install_panel_is_a_gate_when_host_supports_it(self) -> None:
         host_integration = (
