@@ -488,7 +488,7 @@ class ProductBoundaryTests(unittest.TestCase):
         ):
             self.assertIn(text, combined)
 
-    def test_onboarding_guides_first_project_and_global_skill_smoke_tests(self) -> None:
+    def test_onboarding_guides_general_assistant_and_business_project(self) -> None:
         onboarding = (
             ROOT
             / "skills"
@@ -499,7 +499,12 @@ class ProductBoundaryTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         combined = onboarding + "\n" + readme
         for text in (
-            "创建第一个项目目录",
+            "创建或打开通用助手项目",
+            "建立通用助手总经理会话",
+            "由通用助手总经理承接 GLOBAL 文件导览",
+            "GLOBAL 导览交接完成后，再询问用户是否现在创建第一个业务项目",
+            "不要把通用助手项目和业务项目混成一个",
+            "建立业务项目总经理会话",
             "打开目录、添加项目或导入工作区",
             "GLOBAL Skill 快速试用",
             "已可用、需要授权、待安装外部依赖、当前宿主不支持",
@@ -517,7 +522,9 @@ class ProductBoundaryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         for text in (
             "GLOBAL 文件导览",
-            "先列出 `GLOBAL` 根目录中的文件和关键目录",
+            "全局个性化提示词保存、通用助手项目创建、通用助手总经理会话建立之后",
+            "由通用助手总经理继续承接",
+            "先列出 GLOBAL 根目录文件",
             "它是什么、为什么这样设计、什么时候要看",
             "你想先了解哪个",
             "一个一个讲",
@@ -530,10 +537,43 @@ class ProductBoundaryTests(unittest.TestCase):
             "GITHUB_ACCOUNTS.md",
             "SCHEDULE_PREFERENCES.md",
             ".agents/skills/",
-            "项目目录与 `GLOBAL` 同级",
-            "GLOBAL 导览完成前，不要直接跳到“安装成功”",
+            "GLOBAL 导览待通用助手总经理承接",
+            "GLOBAL 导览未完成",
         ):
             self.assertIn(text, onboarding)
+
+    def test_installation_state_survives_user_interruptions_and_late_steps_keep_gates(self) -> None:
+        installer = (
+            ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "installation-workflow.md"
+        ).read_text(encoding="utf-8")
+        onboarding = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "onboarding.md"
+        ).read_text(encoding="utf-8")
+        combined = "\n".join([installer, workflow, onboarding])
+        for text in (
+            "安装是一个连续状态机",
+            "不因用户插入其他话题而丢失进度",
+            "当前阶段、已完成证据、下一门禁和待用户确认项",
+            "恢复检查点",
+            "无关插话只简短回应并回到当前安装阶段",
+            "identities",
+            "global-tour-handoff",
+            "仍必须遵守",
+            "真实操作前取得确认",
+            "操作后独立回读证据",
+        ):
+            self.assertIn(text, combined)
 
     def test_on_demand_roles_require_long_running_task_windows(self) -> None:
         global_context = (TEMPLATE / "GLOBAL" / "GLOBAL_CONTEXT.md").read_text(
