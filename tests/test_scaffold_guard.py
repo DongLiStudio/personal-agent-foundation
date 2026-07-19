@@ -40,7 +40,6 @@ def values(target: Path) -> dict[str, str]:
         "DEFAULT_GITHUB_ACCOUNT": "example-user",
         "DEFAULT_TIMEZONE": "Asia/Shanghai",
         "GENERAL_ASSISTANT_PROJECT": "示例通用助手",
-        "OBSIDIAN_VAULT_PATH": "未配置（首次连接 Obsidian 时设置）",
     }
 
 
@@ -63,7 +62,6 @@ class ScaffoldGuardTests(unittest.TestCase):
                 "DEFAULT_LARK_PROFILE",
                 "DEFAULT_TIMEZONE",
                 "GENERAL_ASSISTANT_PROJECT",
-                "OBSIDIAN_VAULT_PATH",
             },
             set(report["placeholders"]),
         )
@@ -226,8 +224,58 @@ class ProductBoundaryTests(unittest.TestCase):
             "知识\\方法论\\方法论路由：方法论的方法论.md",
         ):
             self.assertNotIn(author_path, contract)
-        self.assertIn("已确认的目录映射", contract)
-        self.assertIn("不得套用作者或其他用户的目录名称", contract)
+        for text in (
+            "Obsidian Vault Link",
+            "个人 Obsidian 库入口",
+            "{{AGENT_ROOT}}\\GLOBAL\\obsidian-resource",
+            "## 安全规则",
+            "## 目录理解",
+            "## 优先阅读",
+            "## 未配置判定",
+            "仅仅创建 `obsidian-resource` 软连接/Junction 不等于配置完成",
+        ):
+            self.assertIn(text, contract)
+        self.assertNotIn("{{OBSIDIAN_VAULT_PATH}}", contract)
+        self.assertNotIn("Vault：", contract)
+
+    def test_obsidian_connection_requires_structure_before_completion(self) -> None:
+        installer = (
+            ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "installation-workflow.md"
+        ).read_text(encoding="utf-8")
+        obsidian_layout = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "obsidian-layout.md"
+        ).read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        contract = (ROOT / "docs" / "installation-contract.md").read_text(
+            encoding="utf-8"
+        )
+        manifest = MANIFEST_PATH.read_text(encoding="utf-8")
+        combined = "\n".join([installer, workflow, obsidian_layout, readme, contract])
+        for text in (
+            "不能只询问软连接路径",
+            "基础结构",
+            "目录理解",
+            "优先阅读入口",
+            "只读列出 Vault 根目录一层",
+            "与模板整体结构同构",
+            "不记录 Vault 原始绝对路径",
+            "不得长期写入 `GLOBAL/OBSIDIAN_LINK.md`",
+            "只创建 `GLOBAL/obsidian-resource` 软连接/Junction 不构成 Obsidian 配置完成",
+            "只有用户明确说“之后再定”",
+        ):
+            self.assertIn(text, combined)
+        self.assertNotIn("OBSIDIAN_VAULT_PATH", manifest)
 
     def test_onboarding_bundles_full_host_personalization_prompt(self) -> None:
         host_integration = (
@@ -284,7 +332,7 @@ class ProductBoundaryTests(unittest.TestCase):
         )
         combined = installer + "\n" + workflow + "\n" + contract
         for text in (
-            "初始安装阶段不得询问用户飞书 Profile 名或 GitHub 账号名",
+            "初始安装阶段不得询问用户飞书 Profile 名、GitHub 账号名或 Obsidian Vault 路径",
             "先安装 GLOBAL 和 Skills",
             "不要向用户询问“Profile 名是什么”作为前置条件",
             "不要向用户询问“GitHub 用户名是什么”作为前置条件",
@@ -361,6 +409,46 @@ class ProductBoundaryTests(unittest.TestCase):
         self.assertNotIn("默认复用本机已有 Profile", combined)
         self.assertNotIn("自动复用 active Profile", combined)
 
+    def test_identity_records_use_authoritative_provider_names(self) -> None:
+        installer = (
+            ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "installation-workflow.md"
+        ).read_text(encoding="utf-8")
+        contract = (ROOT / "docs" / "installation-contract.md").read_text(
+            encoding="utf-8"
+        )
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        lark_profiles = (TEMPLATE / "GLOBAL" / "LARK_PROFILES.md").read_text(
+            encoding="utf-8"
+        )
+        github_accounts = (TEMPLATE / "GLOBAL" / "GITHUB_ACCOUNTS.md").read_text(
+            encoding="utf-8"
+        )
+        combined = "\n".join(
+            [installer, workflow, contract, readme, lark_profiles, github_accounts]
+        )
+        for text in (
+            "公司列表标题和公司名称",
+            "真实公司/租户名称",
+            "CLI profile 名只",
+            "不得使用程序自拟",
+            "账号列表标题、username 和切换命令",
+            "gh api user --jq '.login'",
+            "真实 login",
+            "Display name",
+            "不得替代 username/login",
+        ):
+            self.assertIn(text, combined)
+        self.assertNotIn("程序自拟账号名称", github_accounts)
+        self.assertNotIn("默认组织（安装时配置）", lark_profiles)
+        self.assertNotIn("默认账号（安装时配置）", github_accounts)
+
     def test_visual_install_panel_is_a_gate_when_host_supports_it(self) -> None:
         host_integration = (
             ROOT
@@ -418,6 +506,34 @@ class ProductBoundaryTests(unittest.TestCase):
             "不要把“源稿存在”等同于“宿主已经可调用”",
         ):
             self.assertIn(text, combined)
+
+    def test_onboarding_teaches_global_files_interactively(self) -> None:
+        onboarding = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "onboarding.md"
+        ).read_text(encoding="utf-8")
+        for text in (
+            "GLOBAL 文件导览",
+            "先列出 `GLOBAL` 根目录中的文件和关键目录",
+            "它是什么、为什么这样设计、什么时候要看",
+            "你想先了解哪个",
+            "一个一个讲",
+            "README.md",
+            "GLOBAL_CONTEXT.md",
+            "PROJECTS.md",
+            "OBSIDIAN_LINK.md",
+            "SKILL_DEPENDENCIES.md",
+            "LARK_PROFILES.md",
+            "GITHUB_ACCOUNTS.md",
+            "SCHEDULE_PREFERENCES.md",
+            ".agents/skills/",
+            "项目目录与 `GLOBAL` 同级",
+            "GLOBAL 导览完成前，不要直接跳到“安装成功”",
+        ):
+            self.assertIn(text, onboarding)
 
     def test_all_product_text_is_utf8_without_bom_and_lf(self) -> None:
         text_suffixes = {"", ".md", ".json", ".yaml", ".yml", ".py", ".txt"}

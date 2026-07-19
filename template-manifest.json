@@ -22,8 +22,7 @@
     "DEFAULT_LARK_PROFILE": {"required": true, "description": "治理层默认飞书 CLI Profile"},
     "DEFAULT_GITHUB_ACCOUNT": {"required": true, "description": "治理层默认 GitHub 用户名"},
     "DEFAULT_TIMEZONE": {"required": true, "description": "IANA 时区，例如 Asia/Shanghai"},
-    "GENERAL_ASSISTANT_PROJECT": {"required": true, "description": "承担通用协作和个人排程的 Agent 项目名"},
-    "OBSIDIAN_VAULT_PATH": {"required": true, "description": "知识库真实路径；未使用时写入未配置说明"}
+    "GENERAL_ASSISTANT_PROJECT": {"required": true, "description": "承担通用协作和个人排程的 Agent 项目名"}
   },
   "excluded_sources": [
     ".git/",

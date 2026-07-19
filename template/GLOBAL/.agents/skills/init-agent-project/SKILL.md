@@ -135,7 +135,7 @@ description: 使用用户的项目制管理规则初始化 Agent 项目工作区
 
 除非用户明确要求某个具体操作，否则以下位置视为受保护：
 
-- `{{OBSIDIAN_VAULT_PATH}}`
+- 用户在 `GLOBAL\OBSIDIAN_LINK.md` 中确认的外部 Obsidian Vault 真实目录
 - `{{AGENT_ROOT}}\GLOBAL\obsidian-resource`
 - 当前 Agent 的用户级配置、Skill 安装和运行时资产目录
 - 插件缓存目录

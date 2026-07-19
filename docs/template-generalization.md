@@ -15,7 +15,7 @@
 - 真实默认 GitHub 账号改为 `{{DEFAULT_GITHUB_ACCOUNT}}`。
 - 时区改为 `{{DEFAULT_TIMEZONE}}`。
 - 承担通用协作的项目名改为 `{{GENERAL_ASSISTANT_PROJECT}}`。
-- 外部知识库真实路径改为 `{{OBSIDIAN_VAULT_PATH}}`。
+- 外部知识库真实路径不进入公开模板占位符；安装连接阶段只临时用于创建和验证 `GLOBAL/obsidian-resource`，`OBSIDIAN_LINK.md` 只记录稳定入口、目录理解和优先阅读规则。
 - `PROJECTS.md` 删除全部真实项目，等待首次项目教程登记。
 - 飞书和 GitHub 文件删除真实组织、App ID、多账号用途与账号清单，只保留安装期默认入口和扩展规则。
 - 稳定的个人排程值改为最小初始配置和待确认项。

@@ -10,14 +10,13 @@
   "DEFAULT_LARK_PROFILE": "待连接（安装后通过 feishu-profile 授权回读）",
   "DEFAULT_GITHUB_ACCOUNT": "待连接（安装后通过 github-cli 授权回读）",
   "DEFAULT_TIMEZONE": "Asia/Shanghai",
-  "GENERAL_ASSISTANT_PROJECT": "通用助手",
-  "OBSIDIAN_VAULT_PATH": "待连接（安装后询问是否连接 Obsidian）"
+  "GENERAL_ASSISTANT_PROJECT": "通用助手"
 }
 ```
 
 macOS/Linux 使用对应绝对路径。`AGENT_ROOT` 必须与命令的 `--target` 解析到同一路径。
 
-初始配置 JSON 只用于渲染可验证的 GLOBAL 基座。`DEFAULT_LARK_PROFILE`、`DEFAULT_GITHUB_ACCOUNT` 和 `OBSIDIAN_VAULT_PATH` 在初始安装阶段写入待连接说明；不得要求用户预先知道飞书 Profile 名、GitHub 用户名或 Obsidian Vault 路径。GLOBAL 和 Skills 恢复后，再通过连接流程回写真实状态。
+初始配置 JSON 只用于渲染可验证的 GLOBAL 基座。`DEFAULT_LARK_PROFILE` 和 `DEFAULT_GITHUB_ACCOUNT` 在初始安装阶段写入待连接说明；不得要求用户预先知道飞书 Profile 名或 GitHub 用户名。Obsidian Vault 路径不属于模板渲染输入，真实路径只在连接阶段作为临时输入用于创建和验证 `GLOBAL/obsidian-resource`，不得长期写入 `GLOBAL/OBSIDIAN_LINK.md`。
 
 ## 路径推荐
 
@@ -39,6 +38,8 @@ GLOBAL 安装验证和 Skill 恢复完成后，分别询问：
 每一项都必须得到明确回答。安装器展示选项时，默认推荐和预选项必须是“现在连接”；“稍后连接 / 当前没有账号 / 当前没有 Vault”只能作为用户主动选择的备选项。用户选择连接时，不询问实现标识；直接调用对应 Skill 或官方 CLI 发起授权、验证码或网页登录流程，并用回读结果写入 GLOBAL。用户选择稍后再配、当前没有账号或当前没有 Vault 时，才保留未配置说明。认证过程中只走官方 OAuth、CLI 或宿主授权流程，不能要求用户在对话中提供 token、密码、App Secret、私钥或恢复码。
 
 飞书连接有额外硬门禁：首次连接默认创建新的飞书应用和新的专用 Profile，用于当前 Agent 根目录和 GLOBAL。安装器不得自动复用本机已有 Profile、active Profile、旧应用或其他项目应用；也不得把它们作为默认值、预选项或失败回退。允许只读列出已有 Profile 以避免命名冲突；若建议名称已存在，生成带后缀的新名称或请用户确认新名称。复用已有飞书应用/Profile 只能作为“高级迁移/共用已有配置”路径，并且必须由用户明确选择，同时先说明这会共享原应用权限、身份路由和审计边界。
+
+连接完成后的身份写回必须以官方回读事实为准。飞书写入 `GLOBAL/LARK_PROFILES.md` 时，公司列表章节标题和公司名称使用授权后 `whoami` 或等价接口回读到的真实公司/租户名称；CLI profile 名只用于 `--profile`、profile 字段和冲突处理，不能代替公司名称。GitHub 写入 `GLOBAL/GITHUB_ACCOUNTS.md` 时，账号列表章节标题、username 和 `gh auth switch --user` 都使用 `gh api user --jq '.login'` 回读的真实 login；显示名只能作为补充字段，不能替代 login。程序不得自行编造公司、组织、账号或展示名称。
 
 ## 状态机
 
@@ -109,21 +110,21 @@ commit 不构成上传授权。除非用户另行明确要求，不配置 remote
 
 ## 身份配置
 
-- 飞书：用户选择现在连接时，调用 `feishu-profile`，默认创建新的飞书应用和新的专用 Profile，完成验证码/OAuth 和 `whoami` 回读；把工具回读出的真实 Profile 写回 `GLOBAL/LARK_PROFILES.md`。不要向用户询问“Profile 名是什么”作为前置条件；必要名称由 Skill 创建或从工具回读。不得自动复用本机已有 Profile、active Profile、旧应用或其他项目应用；已有 Profile 只用于只读冲突检查。复用已有配置只能在用户明确选择高级迁移/共用路径并确认共享权限、身份路由和审计边界后执行。
-- GitHub：用户选择现在连接时，调用 `github-cli`，完成 `gh auth status` 和 `gh api user` 回读；把工具回读出的真实账号写回 `GLOBAL/GITHUB_ACCOUNTS.md`。不要向用户询问“GitHub 用户名是什么”作为前置条件；必要账号由 CLI 授权和回读确定。
+- 飞书：用户选择现在连接时，调用 `feishu-profile`，默认创建新的飞书应用和新的专用 Profile，完成验证码/OAuth 和 `whoami` 回读；把工具回读出的真实 Profile 写回 `GLOBAL/LARK_PROFILES.md`。不要向用户询问“Profile 名是什么”作为前置条件；必要名称由 Skill 创建或从工具回读。不得自动复用本机已有 Profile、active Profile、旧应用或其他项目应用；已有 Profile 只用于只读冲突检查。复用已有配置只能在用户明确选择高级迁移/共用路径并确认共享权限、身份路由和审计边界后执行。公司列表标题和公司名称使用回读到的真实公司/租户名称，不使用程序自拟名或 CLI profile 名。
+- GitHub：用户选择现在连接时，调用 `github-cli`，完成 `gh auth status` 和 `gh api user --jq '.login'` 回读；把工具回读出的真实账号写回 `GLOBAL/GITHUB_ACCOUNTS.md`。不要向用户询问“GitHub 用户名是什么”作为前置条件；必要账号由 CLI 授权和回读确定。账号列表标题、username 和切换命令必须使用回读到的真实 login，不使用程序自拟名。
 - 所有认证页面由用户确认；不得读取或保存 token。
 
 ## 知识库链接
 
-只有 `OBSIDIAN_VAULT_PATH` 指向用户确认的真实目录时才创建：
+只有用户在连接阶段确认真实 Obsidian Vault 目录时才创建：
 
-1. 完整读取 `obsidian-layout.md`，先确认 Vault 是否已有内容、是否采用现成目录约定，以及用户希望 Agent 如何理解和使用它。
-2. 对用户的现有结构，通过对话确定总览、长期资料、项目资料、日记、附件等实际位置和语义；不得根据目录名称自行猜测，也不得把作者结构当作默认标准。
+1. 完整读取 `obsidian-layout.md`，先确认 Vault 是否已有内容、是否采用现成目录约定，以及用户希望 Agent 如何理解和使用它；不能只询问软连接路径。
+2. 对用户的现有结构，用通俗语言说明“我先看第一层目录，猜一下用途，再请你纠偏”；用户同意后做有界只读发现并列出初步解析。用户不同意发现时，再请用户用自己的话描述结构。不得把目录名称猜测直接写成事实，也不得把作者结构当作用户事实。
 3. 如需查看现有结构，先征得用户同意，只做根目录和用户指定位置的浅层只读检查；不递归遍历，不进入 `.obsidian`，不读取正文来推断隐私边界。
-4. 先展示拟写入 `GLOBAL/OBSIDIAN_LINK.md` 的目录映射、优先入口、默认权限、允许写入位置和排除项；用户确认后只修改已安装实例，不修改产品模板。
+4. 先展示拟写入 `GLOBAL/OBSIDIAN_LINK.md` 的完整草案。草案应与模板整体结构同构，只替换“目录理解”和“优先阅读”中涉及用户实际 Vault 的条目；不得写入 Vault 原始绝对路径，不得生成过度泛化的替代表格。用户确认后只修改已安装实例，不修改产品模板。
 5. 映射确认后再创建链接：Windows 优先 Junction，macOS/Linux 使用 symlink。
 6. 同时回读链接类型、链接路径、解析目标和 `OBSIDIAN_LINK.md` 的最终内容。
 
 创建前确认目标不是 `AGENT_ROOT`、GLOBAL 或其父目录；创建后同时回读链接类型、链接路径和解析目标。不得递归复制 Vault。
 
-没有配置 Vault 时不创建伪链接，保留渲染后的通用连接约定并明确标记未配置。空 Vault 或全新 Vault 也不得自动套用作者目录；如用户希望建立新结构，应先给出方案并单独确认创建目录。
+没有配置 Vault 时不创建伪链接，保留渲染后的通用连接约定并明确标记未配置。用户已提供 Vault 但明确表示目录理解和优先阅读之后再定时，也应标记为 Obsidian 待配置，不能仅凭软连接创建宣布完成。空 Vault、全新 Vault 或目录很少尚未形成结构时，先推荐默认五类结构（信息、资源、想法、知识、特殊），用户同意后展示将创建的目录和入口文件清单并单独确认；用户不同意时询问想要的结构；用户跳过时才标记为待补充。
