@@ -193,13 +193,26 @@ def render(text: str, values: dict[str, str], relative: Path) -> str:
     return result
 
 
+def ensure_target_available(target: Path) -> str:
+    if not target.exists():
+        return "will_create"
+    if not target.is_dir():
+        raise GuardError(f"target path exists but is not a directory: {target}")
+    try:
+        next(target.iterdir())
+    except StopIteration:
+        return "will_use_empty_directory"
+    except OSError as exc:
+        raise GuardError(f"cannot inspect target directory: {target}: {exc}") from exc
+    raise GuardError(f"target directory is not empty; refusing merge: {target}")
+
+
 def plan_install(
     template: Path, manifest: dict[str, Any], values_path: Path, target: Path
 ) -> tuple[dict[str, Any], list[tuple[TemplateFile, bytes]]]:
     template = template.resolve()
     target = target.expanduser().resolve()
-    if target.exists():
-        raise GuardError(f"target already exists; refusing overwrite: {target}")
+    target_status = ensure_target_available(target)
     audit = audit_template(template, manifest)
     values = load_values(values_path, manifest, target)
     rendered: list[tuple[TemplateFile, bytes]] = []
@@ -222,6 +235,7 @@ def plan_install(
             "ok": True,
             "mode": "dry-run",
             "target": str(target),
+            "target_status": target_status,
             "template_audit": audit,
             "file_count": len(plan_files),
             "files": plan_files,
@@ -271,9 +285,13 @@ def install(
             destination.write_bytes(content)
             os.chmod(destination, stat.S_IMODE(item.source.stat().st_mode))
         verify_target(staging, manifest)
-        if target.exists():
-            raise GuardError(f"target appeared during install; refusing overwrite: {target}")
-        os.replace(staging, target)
+        target_status = ensure_target_available(target)
+        if target_status == "will_use_empty_directory":
+            for child in staging.iterdir():
+                shutil.move(str(child), str(target / child.name))
+            staging.rmdir()
+        else:
+            os.replace(staging, target)
         verification = verify_target(target, manifest)
     except Exception:
         if staging.exists():

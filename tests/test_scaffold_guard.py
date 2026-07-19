@@ -91,8 +91,20 @@ class ScaffoldGuardTests(unittest.TestCase):
             result = guard.install(TEMPLATE, self.manifest, config, target)
             self.assertTrue(result["verification"]["ok"])
             self.assertTrue((target / "GLOBAL" / "README.md").is_file())
-            with self.assertRaisesRegex(guard.GuardError, "target already exists"):
+            with self.assertRaisesRegex(guard.GuardError, "target directory is not empty"):
                 guard.install(TEMPLATE, self.manifest, config, target)
+
+    def test_existing_empty_target_directory_is_allowed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            temp_path = Path(temp)
+            target = temp_path / "Agent"
+            target.mkdir()
+            config = self.write_values(temp_path, target)
+            report, _ = guard.plan_install(TEMPLATE, self.manifest, config, target)
+            self.assertEqual("will_use_empty_directory", report["target_status"])
+            result = guard.install(TEMPLATE, self.manifest, config, target)
+            self.assertTrue(result["verification"]["ok"])
+            self.assertTrue((target / "GLOBAL" / "README.md").is_file())
 
     def test_rendered_global_skill_test_suites_pass(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -123,14 +135,14 @@ class ScaffoldGuardTests(unittest.TestCase):
                         completed.stdout + completed.stderr,
                     )
 
-    def test_existing_target_is_never_merged(self) -> None:
+    def test_existing_nonempty_target_is_never_merged(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             target = Path(temp) / "existing"
             target.mkdir()
             marker = target / "user-file.txt"
             marker.write_text("preserve", encoding="utf-8")
             config = self.write_values(Path(temp), target)
-            with self.assertRaisesRegex(guard.GuardError, "target already exists"):
+            with self.assertRaisesRegex(guard.GuardError, "target directory is not empty"):
                 guard.plan_install(TEMPLATE, self.manifest, config, target)
             self.assertEqual("preserve", marker.read_text(encoding="utf-8"))
 
@@ -234,6 +246,44 @@ class ProductBoundaryTests(unittest.TestCase):
         )
         for text in required_text:
             self.assertIn(text, host_integration)
+
+    def test_installer_requires_explicit_connector_choices(self) -> None:
+        installer = (
+            ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "installation-workflow.md"
+        ).read_text(encoding="utf-8")
+        combined = installer + "\n" + workflow
+        for text in (
+            "不得把飞书、GitHub 或 Obsidian 静默设为“未配置”",
+            "是否现在连接飞书",
+            "是否现在连接 GitHub",
+            "是否现在连接 Obsidian",
+        ):
+            self.assertIn(text, combined)
+
+    def test_installer_documents_agent_root_and_empty_target_policy(self) -> None:
+        installer = (
+            ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        contract = (ROOT / "docs" / "installation-contract.md").read_text(
+            encoding="utf-8"
+        )
+        combined = installer + "\n" + readme + "\n" + contract
+        for text in (
+            "默认推荐的 Agent 根目录最终文件夹名为 `Agent`",
+            "目标不存在时创建",
+            "目标已存在且为空时",
+            "目标已有内容时",
+            "不得合并、覆盖或删除用户文件",
+        ):
+            self.assertIn(text, combined)
 
     def test_all_product_text_is_utf8_without_bom_and_lf(self) -> None:
         text_suffixes = {"", ".md", ".json", ".yaml", ".yml", ".py", ".txt"}
