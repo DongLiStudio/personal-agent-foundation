@@ -47,14 +47,18 @@ GLOBAL 安装验证和 Skill 恢复完成后，分别询问：
 source-bootstrap -> collect-minimal -> runtime-preflight -> audit -> plan -> confirm
         -> install -> verify -> skills -> identities -> knowledge-layout
         -> knowledge-link -> local-git -> global-prompt -> general-assistant
-        -> global-tour-handoff -> first-project -> skill-smoke-tests -> complete
+        -> general-assistant-open-gate -> general-assistant-manager
+        -> global-tour-handoff -> first-project-open-gate
+        -> first-project-manager -> skill-smoke-tests -> complete
 ```
 
 任何阶段失败都保留已经验证成功的事实，不跳过失败门禁。文件安装失败时，只允许清理本轮随机 staging 和本轮自动获取的临时产品源；目标目录、目标父目录和用户原本提供的模板源不得删除。
 
 安装器必须把当前阶段当作可恢复状态保存到对话中：每次等待用户输入前，明确当前阶段、已完成证据、下一步会做什么、是否会写入或授权。用户在安装过程中说起其他事情时，不得丢失状态或重新开始；先判断该输入是安装补充、暂停请求还是无关插话。无关插话只简短回应并继续当前阶段；暂停请求必须输出恢复检查点、已完成步骤、未完成门禁和建议恢复命令。
 
-交互式操作和安装护栏贯穿全流程，不只适用于前半段。进入 `identities`、`knowledge-layout`、`knowledge-link`、`local-git`、`global-prompt`、`general-assistant`、`global-tour-handoff`、`first-project` 和 `skill-smoke-tests` 时，仍必须遵守：宿主有可视化能力先尝试、写入前展示计划、外部授权前说明权限、真实操作前取得确认、操作后独立回读证据、失败时保留诊断并停止越权推进。
+交互式操作和安装护栏贯穿全流程，不只适用于前半段。进入 `identities`、`knowledge-layout`、`knowledge-link`、`local-git`、`global-prompt`、`general-assistant`、`general-assistant-open-gate`、`general-assistant-manager`、`global-tour-handoff`、`first-project-open-gate`、`first-project-manager` 和 `skill-smoke-tests` 时，仍必须遵守：宿主有可视化能力先尝试、写入前展示计划、外部授权前说明权限、真实操作前取得确认、操作后独立回读证据、失败时保留诊断并停止越权推进。
+
+`general-assistant-open-gate` 和 `first-project-open-gate` 是硬门禁：先创建或复用项目目录，再通过宿主的打开目录、添加项目或导入工作区能力把该目录作为当前项目根。不得先创建或重命名长期任务来替代打开项目。没有可调用接口时，必须先给用户手动打开/添加项目步骤并等待确认；只有用户明确选择无法打开项目的降级路径，才允许创建独立长期任务，并且启动指令必须要求对方先核验唯一项目根目录、cwd 和 `AGENTS.md` / `README.md` / `STATUS.md`，否则停止。
 
 ## 产品源自举
 

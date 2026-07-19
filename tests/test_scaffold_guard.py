@@ -512,6 +512,42 @@ class ProductBoundaryTests(unittest.TestCase):
         ):
             self.assertIn(text, combined)
 
+    def test_manager_task_requires_project_open_gate_first(self) -> None:
+        installer = (
+            ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "installation-workflow.md"
+        ).read_text(encoding="utf-8")
+        onboarding = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "onboarding.md"
+        ).read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        combined = "\n".join([installer, workflow, onboarding, readme])
+        for text in (
+            "打开/添加通用助手项目是建立通用助手总经理会话前的硬门禁",
+            "不得先创建或重命名长期任务来替代打开项目",
+            "没有可调用的添加项目接口",
+            "先给出用户手动操作步骤",
+            "等待用户确认该项目已在宿主中打开",
+            "只有用户明确选择无法打开项目的降级路径",
+            "必须核验当前项目根目录",
+            "cwd",
+            "三入口文件",
+            "建立业务项目总经理会话前同样适用项目打开门禁",
+            "general-assistant-open-gate",
+            "first-project-open-gate",
+        ):
+            self.assertIn(text, combined)
+
     def test_onboarding_teaches_global_files_interactively(self) -> None:
         onboarding = (
             ROOT
