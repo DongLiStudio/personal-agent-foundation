@@ -285,6 +285,25 @@ class ProductBoundaryTests(unittest.TestCase):
         ):
             self.assertIn(text, combined)
 
+    def test_onboarding_guides_first_project_and_global_skill_smoke_tests(self) -> None:
+        onboarding = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "onboarding.md"
+        ).read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        combined = onboarding + "\n" + readme
+        for text in (
+            "创建第一个项目目录",
+            "打开目录、添加项目或导入工作区",
+            "GLOBAL Skill 快速试用",
+            "已可用、需要授权、待安装外部依赖、当前宿主不支持",
+            "不要把“源稿存在”等同于“宿主已经可调用”",
+        ):
+            self.assertIn(text, combined)
+
     def test_all_product_text_is_utf8_without_bom_and_lf(self) -> None:
         text_suffixes = {"", ".md", ".json", ".yaml", ".yml", ".py", ".txt"}
         for path in (item for item in ROOT.rglob("*") if item.is_file()):
