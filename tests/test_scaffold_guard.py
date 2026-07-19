@@ -267,6 +267,53 @@ class ProductBoundaryTests(unittest.TestCase):
         ):
             self.assertIn(text, combined)
 
+    def test_installer_defers_identity_names_until_tools_can_authorize(self) -> None:
+        installer = (
+            ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "installation-workflow.md"
+        ).read_text(encoding="utf-8")
+        contract = (ROOT / "docs" / "installation-contract.md").read_text(
+            encoding="utf-8"
+        )
+        combined = installer + "\n" + workflow + "\n" + contract
+        for text in (
+            "初始安装阶段不得询问用户飞书 Profile 名或 GitHub 账号名",
+            "先安装 GLOBAL 和 Skills",
+            "不要向用户询问“Profile 名是什么”作为前置条件",
+            "不要向用户询问“GitHub 用户名是什么”作为前置条件",
+            "飞书、GitHub 和 Obsidian 不属于初始模板渲染输入",
+        ):
+            self.assertIn(text, combined)
+        self.assertNotIn("用户选择连接时再收集默认 Profile 名", combined)
+        self.assertNotIn("用户选择连接时再收集默认账号", combined)
+
+    def test_visual_install_panel_is_a_gate_when_host_supports_it(self) -> None:
+        host_integration = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "host-integration.md"
+        ).read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        combined = host_integration + "\n" + readme
+        for text in (
+            "任何宿主支持可视化安装面板",
+            "当前宿主可用时必须优先尝试可视化安装面板或确认摘要",
+            "例如 Codex 中可能表现为 `Visualize` 插件/能力",
+            "不要把某个宿主或插件名称当作唯一实现",
+            "必须先尝试",
+            "本次安装不得直接继续收集配置",
+            "图形交互未使用",
+        ):
+            self.assertIn(text, combined)
+
     def test_installer_documents_agent_root_and_empty_target_policy(self) -> None:
         installer = (
             ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"

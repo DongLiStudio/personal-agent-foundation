@@ -7,17 +7,17 @@
 ```json
 {
   "AGENT_ROOT": "D:\\Agent",
-  "DEFAULT_LARK_PROFILE": "my-default-profile",
-  "DEFAULT_GITHUB_ACCOUNT": "my-github-user",
+  "DEFAULT_LARK_PROFILE": "待连接（安装后通过 feishu-profile 授权回读）",
+  "DEFAULT_GITHUB_ACCOUNT": "待连接（安装后通过 github-cli 授权回读）",
   "DEFAULT_TIMEZONE": "Asia/Shanghai",
   "GENERAL_ASSISTANT_PROJECT": "通用助手",
-  "OBSIDIAN_VAULT_PATH": "未配置（首次连接 Obsidian 时设置）"
+  "OBSIDIAN_VAULT_PATH": "待连接（安装后询问是否连接 Obsidian）"
 }
 ```
 
 macOS/Linux 使用对应绝对路径。`AGENT_ROOT` 必须与命令的 `--target` 解析到同一路径。
 
-`DEFAULT_LARK_PROFILE`、`DEFAULT_GITHUB_ACCOUNT` 和 `OBSIDIAN_VAULT_PATH` 只有在用户明确回答“稍后再配”“当前没有账号/Vault”或等价意思后，才可以写入未配置说明。安装器不得因为用户尚未主动提供这些值就自动填入未配置。
+初始配置 JSON 只用于渲染可验证的 GLOBAL 基座。`DEFAULT_LARK_PROFILE`、`DEFAULT_GITHUB_ACCOUNT` 和 `OBSIDIAN_VAULT_PATH` 在初始安装阶段写入待连接说明；不得要求用户预先知道飞书 Profile 名、GitHub 用户名或 Obsidian Vault 路径。GLOBAL 和 Skills 恢复后，再通过连接流程回写真实状态。
 
 ## 路径推荐
 
@@ -30,20 +30,21 @@ macOS/Linux 使用对应绝对路径。`AGENT_ROOT` 必须与命令的 `--target
 
 ## 连接意图门禁
 
-在生成配置 JSON 前，分别询问：
+GLOBAL 安装验证和 Skill 恢复完成后，分别询问：
 
 1. 是否现在连接飞书账号或创建默认飞书 Profile。
 2. 是否现在连接 GitHub 账号并设置默认账号。
 3. 是否现在连接 Obsidian Vault。
 
-每一项都必须得到明确回答。用户选择连接时，再收集非敏感标识或路径；用户选择稍后再配、当前没有账号或当前没有 Vault 时，才写入未配置说明。认证过程中只走官方 OAuth、CLI 或宿主授权流程，不能要求用户在对话中提供 token、密码、App Secret、私钥或恢复码。
+每一项都必须得到明确回答。用户选择连接时，不询问实现标识；直接调用对应 Skill 或官方 CLI 发起授权、验证码或网页登录流程，并用回读结果写入 GLOBAL。用户选择稍后再配、当前没有账号或当前没有 Vault 时，才保留未配置说明。认证过程中只走官方 OAuth、CLI 或宿主授权流程，不能要求用户在对话中提供 token、密码、App Secret、私钥或恢复码。
 
 ## 状态机
 
 ```text
-source-bootstrap -> collect -> runtime-preflight -> audit -> plan -> confirm -> install -> verify
-        -> knowledge-layout -> knowledge-link -> local-git -> skills -> identities
-        -> global-prompt -> first-project -> complete
+source-bootstrap -> collect-minimal -> runtime-preflight -> audit -> plan -> confirm
+        -> install -> verify -> skills -> identities -> knowledge-layout
+        -> knowledge-link -> local-git -> global-prompt -> first-project
+        -> skill-smoke-tests -> complete
 ```
 
 任何阶段失败都保留已经验证成功的事实，不跳过失败门禁。文件安装失败时，只允许清理本轮随机 staging 和本轮自动获取的临时产品源；目标目录、目标父目录和用户原本提供的模板源不得删除。
@@ -106,8 +107,8 @@ commit 不构成上传授权。除非用户另行明确要求，不配置 remote
 
 ## 身份配置
 
-- 飞书：调用 `feishu-profile`，完成应用、OAuth 和 `whoami` 回读；把治理默认值与 CLI active 区分开。
-- GitHub：调用 `github-cli`，完成 `gh auth status` 和 `gh api user` 回读；active 账号必须匹配 `DEFAULT_GITHUB_ACCOUNT`。
+- 飞书：用户选择现在连接时，调用 `feishu-profile`，完成应用、验证码/OAuth 和 `whoami` 回读；把工具回读出的真实 Profile 写回 `GLOBAL/LARK_PROFILES.md`。不要向用户询问“Profile 名是什么”作为前置条件；必要名称由 Skill 创建或从工具回读。
+- GitHub：用户选择现在连接时，调用 `github-cli`，完成 `gh auth status` 和 `gh api user` 回读；把工具回读出的真实账号写回 `GLOBAL/GITHUB_ACCOUNTS.md`。不要向用户询问“GitHub 用户名是什么”作为前置条件；必要账号由 CLI 授权和回读确定。
 - 所有认证页面由用户确认；不得读取或保存 token。
 
 ## 知识库链接

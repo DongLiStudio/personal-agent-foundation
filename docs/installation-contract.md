@@ -3,13 +3,12 @@
 ## 输入
 
 - Agent 根绝对路径。
-- 是否现在连接飞书；连接时提供默认飞书 CLI Profile，否则必须由用户明确选择稍后再配或当前没有账号。
-- 是否现在连接 GitHub；连接时提供默认 GitHub 账号，否则必须由用户明确选择稍后再配或当前没有账号。
 - IANA 时区。
 - 通用助手项目名。
-- 是否现在连接 Obsidian；连接时提供 Obsidian Vault 绝对路径，否则必须由用户明确选择稍后再配或当前没有 Vault。
 
 这些输入不得包含密码、token、App Secret、恢复码或私钥。
+
+飞书、GitHub 和 Obsidian 不属于初始模板渲染输入。GLOBAL 与 Skills 恢复后，安装器再分别询问是否现在连接；连接时调用对应 Skill 或官方 CLI 完成授权并回读真实身份或路径，不要求用户预先知道飞书 Profile 名、GitHub 用户名或 Obsidian 目录结构。
 
 ## 阶段
 
@@ -18,7 +17,9 @@
 3. 用户确认计划。
 4. `install`：在目标同级临时 staging 渲染，验证后原子移动到目标。
 5. `verify`：从目标重新读取并检查必需文件、占位符残留和编码。
-6. Skill 完成 GLOBAL Git、Skill 恢复、账号配置、知识库连接和 onboarding。
+6. Skill 恢复 GLOBAL Skills。
+7. Skill 询问并调用对应能力完成飞书、GitHub 和 Obsidian 连接；用户选择稍后再配时保留未配置说明。
+8. Skill 完成 GLOBAL Git、知识库连接和 onboarding。
 
 ## 目标保护
 
