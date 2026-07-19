@@ -328,6 +328,39 @@ class ProductBoundaryTests(unittest.TestCase):
         ):
             self.assertIn(text, combined)
 
+    def test_feishu_connection_defaults_to_new_dedicated_profile(self) -> None:
+        installer = (
+            ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "installation-workflow.md"
+        ).read_text(encoding="utf-8")
+        contract = (ROOT / "docs" / "installation-contract.md").read_text(
+            encoding="utf-8"
+        )
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        lark_profiles = (TEMPLATE / "GLOBAL" / "LARK_PROFILES.md").read_text(
+            encoding="utf-8"
+        )
+        combined = "\n".join([installer, workflow, contract, readme, lark_profiles])
+        for text in (
+            "默认创建新的飞书应用",
+            "新的专用 Profile",
+            "不得自动复用本机已有 Profile",
+            "active Profile",
+            "已有 Profile 只用于只读冲突检查",
+            "用户明确选择高级迁移/共用",
+            "共享权限、身份路由和审计边界",
+            "若建议名称已存在",
+        ):
+            self.assertIn(text, combined)
+        self.assertNotIn("默认复用本机已有 Profile", combined)
+        self.assertNotIn("自动复用 active Profile", combined)
+
     def test_visual_install_panel_is_a_gate_when_host_supports_it(self) -> None:
         host_integration = (
             ROOT

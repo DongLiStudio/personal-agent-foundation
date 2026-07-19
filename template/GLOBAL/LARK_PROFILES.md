@@ -9,6 +9,8 @@ Profile 的新增、授权、恢复、迁移、重命名和删除统一使用全
 - GLOBAL 全局默认 Profile：`{{DEFAULT_LARK_PROFILE}}`。
 - 项目未覆盖时，飞书命令显式传入 `--profile "{{DEFAULT_LARK_PROFILE}}"`。
 - CLI active 只是本机运行状态，不得覆盖本文件的治理默认值。
+- 首次安装连接飞书时，默认创建新的飞书应用和新的专用 Profile；不得自动复用本机已有 Profile、active Profile、旧应用或其他项目应用。
+- 已有 Profile 最多用于只读冲突检查。复用已有飞书应用/Profile 只能作为用户明确选择的高级迁移/共用路径，并需先确认共享权限、身份路由和审计边界。
 - 安装完成后，使用 `feishu-profile` 完成登录并把公司、App ID、App 名称和用途补充到下方列表。
 
 ## 公司列表
