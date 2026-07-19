@@ -500,6 +500,10 @@ class ProductBoundaryTests(unittest.TestCase):
         combined = onboarding + "\n" + readme
         for text in (
             "创建或打开通用助手项目",
+            "教学项目应该在哪里创建",
+            "全局个性化提示词保存后、创建通用助手项目之前",
+            "不能等项目已经创建、任务已经启动后才补讲",
+            "通用助手这个示范项目",
             "建立通用助手总经理会话",
             "由通用助手总经理承接 GLOBAL 文件导览",
             "GLOBAL 导览交接完成后，再询问用户是否现在创建第一个业务项目",
@@ -511,6 +515,53 @@ class ProductBoundaryTests(unittest.TestCase):
             "不要把“源稿存在”等同于“宿主已经可调用”",
         ):
             self.assertIn(text, combined)
+
+    def test_project_layout_lesson_precedes_general_assistant_creation(self) -> None:
+        installer = (
+            ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "installation-workflow.md"
+        ).read_text(encoding="utf-8")
+        onboarding = (
+            ROOT
+            / "skills"
+            / "install-agent-scaffold"
+            / "references"
+            / "onboarding.md"
+        ).read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        combined = "\n".join([installer, workflow, onboarding, readme])
+        for text in (
+            "project-layout-lesson",
+            "全局个性化提示词保存后的教学门禁",
+            "通用助手创建前的教学门禁",
+            "先让宿主继承完整全局提示词",
+            "创建通用助手项目前",
+            "先让用户把全局个性化提示词保存到宿主",
+            "所有项目都创建在 `AGENT_ROOT` 下面，和 `GLOBAL` 同级",
+            "全局个性化提示词保存后、创建通用助手项目之前",
+            "`GLOBAL` 是公共底座，不是项目目录",
+            "用户没有确认前，不进入通用助手项目创建",
+            "通用助手项目是安装后的第一个示范项目",
+        ):
+            self.assertIn(text, combined)
+        self.assertLess(
+            onboarding.index("## 2. 设置全局个性化提示词"),
+            onboarding.index("## 3. 教学项目应该在哪里创建"),
+        )
+        self.assertLess(
+            onboarding.index("## 3. 教学项目应该在哪里创建"),
+            onboarding.index("## 4. 创建或打开通用助手项目"),
+        )
+        self.assertLess(
+            workflow.index("global-prompt"),
+            workflow.index("project-layout-lesson"),
+        )
 
     def test_manager_task_requires_project_open_gate_first(self) -> None:
         installer = (
@@ -604,6 +655,7 @@ class ProductBoundaryTests(unittest.TestCase):
             "恢复检查点",
             "无关插话只简短回应并回到当前安装阶段",
             "identities",
+            "project-layout-lesson",
             "global-tour-handoff",
             "仍必须遵守",
             "真实操作前取得确认",
