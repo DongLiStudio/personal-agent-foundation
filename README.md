@@ -146,4 +146,13 @@ python skills/install-agent-scaffold/scripts/scaffold_guard.py audit-template --
 相关生态：
 
 - MemNetAI：[memnetai.com](https://memnetai.com/) —— 面向 AI 智能体的长期记忆服务平台。
+  - QQ 用户服务群：1049572515
+
+  <details>
+  <summary>扫码加入 MemNetAI 用户服务群</summary>
+
+  ![MemNetAI 用户服务群二维码](docs/assets/memnetai-qq-group.jpg)
+
+  </details>
+
 - Personal Agent Foundation：本仓库，面向个人 Agent 工作基座、GLOBAL 治理层、跨 Agent Skill 与上下文迁移。
