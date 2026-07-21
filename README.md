@@ -137,8 +137,13 @@ python skills/install-agent-scaffold/scripts/scaffold_guard.py audit-template --
 
 本项目采用 [Apache License 2.0](LICENSE)。
 
-## 作者与联系
+## 作者、生态与联系
 
 - 作者：DongLi
 - GitHub：[@DongLiStudio](https://github.com/DongLiStudio)
 - 邮箱：[mr_yuxiangyu@163.com](mailto:mr_yuxiangyu@163.com)
+
+相关生态：
+
+- MemNetAI：[memnetai.com](https://memnetai.com/) —— 面向 AI 智能体的长期记忆服务平台。
+- Personal Agent Foundation：本仓库，面向个人 Agent 工作基座、GLOBAL 治理层、跨 Agent Skill 与上下文迁移。
