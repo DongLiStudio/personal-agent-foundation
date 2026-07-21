@@ -51,6 +51,14 @@ Agent 应当：
 
 Agent 如果无法读取公开仓库、执行本地工具或请求必要权限，应准确说明阻断，不应把克隆、Skill 注册、Python 安装或模板处理重新交给用户手工完成。
 
+## 开源交流社区
+
+欢迎加入 AI 开源交流社区，交流与共享各种开源 AI 相关资讯，以开源精神为导向，共建 AI 时代数据主权空间。
+
+<p>
+  <img src="docs/assets/feishu-open-source-community.jpg" alt="AI 开源交流社区飞书二维码" width="360">
+</p>
+
 ## 安装时会询问什么
 
 Agent 会询问以下非敏感配置：
@@ -160,11 +168,3 @@ python skills/install-agent-scaffold/scripts/scaffold_guard.py audit-template --
 </p>
 
 </details>
-
-## 开源交流社区
-
-欢迎加入 AI 开源交流社区，交流与共享各种开源 AI 相关资讯，以开源精神为导向，共建 AI 时代数据主权空间。
-
-<p>
-  <img src="docs/assets/feishu-open-source-community.jpg" alt="AI 开源交流社区飞书二维码" width="360">
-</p>
