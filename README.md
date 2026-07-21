@@ -51,14 +51,6 @@ Agent 应当：
 
 Agent 如果无法读取公开仓库、执行本地工具或请求必要权限，应准确说明阻断，不应把克隆、Skill 注册、Python 安装或模板处理重新交给用户手工完成。
 
-## 开源交流社区
-
-欢迎加入 AI 开源交流社区，交流与共享各种开源 AI 相关资讯，以开源精神为导向，共建 AI 时代数据主权空间。
-
-<p>
-  <img src="docs/assets/feishu-open-source-community.jpg" alt="AI 开源交流社区飞书二维码" width="360">
-</p>
-
 ## 安装时会询问什么
 
 Agent 会询问以下非敏感配置：
@@ -157,14 +149,13 @@ python skills/install-agent-scaffold/scripts/scaffold_guard.py audit-template --
 
 | 生态 | 入口 | 说明 |
 | --- | --- | --- |
-| MemNetAI | [memnetai.com](https://memnetai.com/) | 面向 AI 智能体的长期记忆服务平台；QQ 用户服务群：`1049572515` |
+| MemNetAI | [memnetai.com](https://memnetai.com/) | 面向 AI 智能体的长期记忆服务平台 |
 | Personal Agent Foundation | 本仓库 | 面向个人 Agent 工作基座、GLOBAL 治理层、跨 Agent Skill 与上下文迁移 |
 
-<details>
-<summary>扫码加入 MemNetAI 用户服务群</summary>
+## 开源交流社区
+
+欢迎加入 AI 开源交流社区，交流与共享各种开源 AI 相关资讯，以开源精神为导向，共建 AI 时代数据主权空间。
 
 <p>
-  <img src="docs/assets/memnetai-qq-group.jpg" alt="MemNetAI 用户服务群二维码" width="360">
+  <img src="docs/assets/feishu-open-source-community.jpg" alt="AI 开源交流社区飞书二维码" width="360">
 </p>
-
-</details>
