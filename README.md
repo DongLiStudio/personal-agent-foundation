@@ -160,3 +160,11 @@ python skills/install-agent-scaffold/scripts/scaffold_guard.py audit-template --
 </p>
 
 </details>
+
+## 开源交流社区
+
+欢迎加入东黎智元 AI 开源交流社区，交流 Personal Agent Foundation、AI Agent 工作流、长期记忆、知识库连接和多账号工具路由等话题。
+
+<p>
+  <img src="docs/assets/feishu-open-source-community.jpg" alt="东黎智元 AI 开源交流社区飞书二维码" width="360">
+</p>
