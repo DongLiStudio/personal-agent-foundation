@@ -349,7 +349,6 @@ def command_path(name: str) -> str | None:
         return str(lexical_abs(Path(discovered)))
 
     candidates: list[Path] = []
-    home = Path.home()
     if os.name == "nt":
         appdata = os.environ.get("APPDATA")
         if appdata:
@@ -367,6 +366,7 @@ def command_path(name: str) -> str | None:
                 )
             )
     else:
+        home = Path.home()
         candidates.extend(
             (
                 home / ".local" / "bin" / name,

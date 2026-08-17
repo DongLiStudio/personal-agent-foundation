@@ -55,6 +55,7 @@ class FoundationRecoveryTests(unittest.TestCase):
             self.assertIsNone(recovery.obsidian_cli_path())
 
     def make_foundation(self, base: Path, include_state: bool = True) -> tuple[Path, str]:
+        base = base.resolve()
         root = base / "新电脑 Agent"
         global_root = root / "GLOBAL"
         skills = global_root / ".agents" / "skills"
