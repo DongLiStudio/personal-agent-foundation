@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 
 SCRIPT = Path(__file__).with_name("foundation_recovery.py")
@@ -32,6 +33,27 @@ CORE = (
 
 
 class FoundationRecoveryTests(unittest.TestCase):
+    def test_command_path_discovers_windows_user_npm_shim(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            appdata = Path(temp) / "AppData" / "Roaming"
+            shim = appdata / "npm" / "lark-cli.cmd"
+            shim.parent.mkdir(parents=True)
+            shim.write_text("@echo off\n", encoding="utf-8")
+            with (
+                mock.patch.object(recovery.os, "name", "nt"),
+                mock.patch.object(recovery.shutil, "which", return_value=None),
+                mock.patch.dict(recovery.os.environ, {"APPDATA": str(appdata)}, clear=False),
+            ):
+                self.assertEqual(str(recovery.lexical_abs(shim)), recovery.command_path("lark-cli"))
+
+    def test_obsidian_gui_is_not_accepted_as_cli(self) -> None:
+        with (
+            mock.patch.object(recovery.os, "name", "nt"),
+            mock.patch.object(recovery.shutil, "which", return_value=None),
+            mock.patch.dict(recovery.os.environ, {"LOCALAPPDATA": "Z:\\missing"}, clear=False),
+        ):
+            self.assertIsNone(recovery.obsidian_cli_path())
+
     def make_foundation(self, base: Path, include_state: bool = True) -> tuple[Path, str]:
         root = base / "新电脑 Agent"
         global_root = root / "GLOBAL"

@@ -344,7 +344,60 @@ def parse_projects(root: Path) -> list[dict[str, Any]]:
 
 
 def command_path(name: str) -> str | None:
-    return shutil.which(name)
+    discovered = shutil.which(name)
+    if discovered:
+        return str(lexical_abs(Path(discovered)))
+
+    candidates: list[Path] = []
+    home = Path.home()
+    if os.name == "nt":
+        appdata = os.environ.get("APPDATA")
+        if appdata:
+            npm_bin = Path(appdata) / "npm"
+            candidates.extend(
+                npm_bin / suffix
+                for suffix in (name, f"{name}.cmd", f"{name}.ps1", f"{name}.exe")
+            )
+        localappdata = os.environ.get("LOCALAPPDATA")
+        if localappdata:
+            candidates.extend(
+                (
+                    Path(localappdata) / "Microsoft" / "WindowsApps" / f"{name}.exe",
+                    Path(localappdata) / "Programs" / name / f"{name}.com",
+                )
+            )
+    else:
+        candidates.extend(
+            (
+                home / ".local" / "bin" / name,
+                home / ".npm-global" / "bin" / name,
+            )
+        )
+    for candidate in candidates:
+        try:
+            if candidate.is_file():
+                return str(lexical_abs(candidate))
+        except OSError:
+            continue
+    return None
+
+
+def obsidian_cli_path() -> str | None:
+    """Discover only the registered CLI, never the GUI executable."""
+    if os.name == "nt":
+        discovered = command_path("Obsidian.com")
+        if discovered:
+            return discovered
+        localappdata = os.environ.get("LOCALAPPDATA")
+        if localappdata:
+            redirector = Path(localappdata) / "Programs" / "Obsidian" / "Obsidian.com"
+            try:
+                if redirector.is_file():
+                    return str(lexical_abs(redirector))
+            except OSError:
+                pass
+        return None
+    return command_path("obsidian")
 
 
 def runtime_checks() -> dict[str, Any]:
@@ -357,11 +410,11 @@ def runtime_checks() -> dict[str, Any]:
         "git": {"path": command_path("git")},
         "github_cli": {"path": command_path("gh"), "authorization": "not_checked"},
         "lark_cli": {
-            "path": command_path("lark-cli") or command_path("lark-cli.cmd"),
+            "path": command_path("lark-cli"),
             "authorization": "not_checked",
         },
         "obsidian_cli": {
-            "path": command_path("obsidian") or command_path("obsidian.exe"),
+            "path": obsidian_cli_path(),
             "authorization": "not_checked",
         },
         "ssh": {

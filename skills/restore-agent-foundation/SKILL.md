@@ -78,8 +78,8 @@ Python 必须为 3.11+。当前 Python 不满足时，展示当前系统的官�
 确定性修复成功后，继续处理脚本标记的 `interactive_gates`。这些步骤由本 Skill 直接编排，不要求其他 Skill 已可调用：
 
 - **GitHub**：发现 `gh`；执行 `gh auth status` 和 `gh api user`。缺失时使用 GitHub CLI 官方安装方式；未登录时打开官方登录流程。回读真实 login，核对 `GITHUB_ACCOUNTS.md`，不输出 token。
-- **飞书**：发现 `lark-cli` 及用户级 shim；按 `LARK_PROFILES.md` 的每个 Profile 显式执行用户身份验证。失效时打开官方授权流程并等待用户完成；不得把 App Secret 写入报告或命令历史。
-- **Obsidian**：检查 `GLOBAL/obsidian-resource` 链接本体和目标可达性；有官方 CLI 时执行版本及有界只读检查，没有 CLI 时以开放文件格式做最小只读验证。禁止递归遍历 Vault。
+- **飞书**：发现 `lark-cli` 及用户级 shim；按 `LARK_PROFILES.md` 的每个 Profile 显式执行 `lark-cli auth status --verify --json --profile <Profile>`，并回读用户身份。`auth status` 不附加业务命令才使用的 `--as user`。失效时打开官方授权流程并等待用户完成；不得把 App Secret 写入报告或命令历史。
+- **Obsidian**：检查 `GLOBAL/obsidian-resource` 链接本体和目标可达性；只把官方注册的 CLI（Windows 为 1.12.7+ 安装器随附的 `Obsidian.com` 重定向器）判定为 CLI，不把 GUI `Obsidian.exe` 误判为 CLI。有官方 CLI 时执行版本及有界只读检查，没有 CLI 时按官方设置完成注册，或以开放文件格式做最小只读验证。禁止递归遍历 Vault。
 - **服务器**：读取 `SERVER_PROFILES.md` 的非敏感路由，发现 `ssh` 客户端；由用户明确选择需要恢复的服务器 Profile 后，检查本机 SSH 别名、身份文件是否存在但不读取私钥，先从可信渠道核验主机指纹，再以 `BatchMode` 做身份和目标服务的有界只读回读。缺少私钥或权限时引导用户通过安全渠道恢复或重新授权，不把私钥、密码、票据写入 GLOBAL、报告或命令历史。不得设置隐式默认服务器，也不得自动部署、重启、改网、改卷或修改远端配置。
 - **宿主**：确认全部自维护 Skill 已被当前 Agent 发现；宿主需要重启或重新加载时明确提示并在恢复后复查。检查全局个性化提示词是否已设置，不能从界面回读时标记为待用户确认。
 
