@@ -33,14 +33,17 @@ CORE = (
 
 
 class FoundationRecoveryTests(unittest.TestCase):
+    def temp_path(self, temp: str) -> Path:
+        return Path(temp).resolve()
+
     def test_command_path_discovers_windows_user_npm_shim(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            appdata = Path(temp) / "AppData" / "Roaming"
+            appdata = self.temp_path(temp) / "AppData" / "Roaming"
             shim = appdata / "npm" / "lark-cli.cmd"
             shim.parent.mkdir(parents=True)
             shim.write_text("@echo off\n", encoding="utf-8")
             with (
-                mock.patch.object(recovery.os, "name", "nt"),
+                mock.patch.object(recovery, "is_windows", return_value=True),
                 mock.patch.object(recovery.shutil, "which", return_value=None),
                 mock.patch.dict(recovery.os.environ, {"APPDATA": str(appdata)}, clear=False),
             ):
@@ -48,7 +51,7 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_obsidian_gui_is_not_accepted_as_cli(self) -> None:
         with (
-            mock.patch.object(recovery.os, "name", "nt"),
+            mock.patch.object(recovery, "is_windows", return_value=True),
             mock.patch.object(recovery.shutil, "which", return_value=None),
             mock.patch.dict(recovery.os.environ, {"LOCALAPPDATA": "Z:\\missing"}, clear=False),
         ):
@@ -101,9 +104,9 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_plan_is_read_only_and_detects_moved_root(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, old_root = self.make_foundation(Path(temp))
+            root, old_root = self.make_foundation(self.temp_path(temp))
             before = recovery.tree_inventory(root)
-            target = Path(temp) / "host skills"
+            target = self.temp_path(temp) / "host skills"
             plan = recovery.make_plan(root, None, [target], None)
             self.assertEqual(old_root, plan["old_root"])
             self.assertTrue(plan["path_rewrites"])
@@ -114,14 +117,14 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_project_parser_ignores_non_project_sections(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, _ = self.make_foundation(Path(temp))
+            root, _ = self.make_foundation(self.temp_path(temp))
             projects = recovery.parse_projects(root)
             self.assertEqual(1, len(projects))
             self.assertTrue(projects[0]["path"].endswith("示例项目"))
 
     def test_missing_state_is_recoverable_when_old_root_is_explicit(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, old_root = self.make_foundation(Path(temp), include_state=False)
+            root, old_root = self.make_foundation(self.temp_path(temp), include_state=False)
             plan = recovery.make_plan(root, old_root, [], None)
             self.assertNotIn("FOUNDATION_STATE.json", plan["missing_core_files"])
             self.assertFalse(plan["blocking_issues"])
@@ -129,7 +132,7 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_missing_state_requests_old_root_without_guessing(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, _ = self.make_foundation(Path(temp), include_state=False)
+            root, _ = self.make_foundation(self.temp_path(temp), include_state=False)
             plan = recovery.make_plan(root, None, [], None)
             self.assertTrue(
                 any(
@@ -140,7 +143,7 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_server_profile_is_core_and_ssh_is_an_interactive_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, _ = self.make_foundation(Path(temp))
+            root, _ = self.make_foundation(self.temp_path(temp))
             server_profiles = root / "GLOBAL" / "SERVER_PROFILES.md"
             server_profiles.unlink()
             plan = recovery.make_plan(root, None, [], None)
@@ -151,7 +154,7 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_unrelated_mustache_template_is_not_foundation_residue(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, _ = self.make_foundation(Path(temp))
+            root, _ = self.make_foundation(self.temp_path(temp))
             project_template = root / "示例项目" / "docs" / "template.md"
             project_template.parent.mkdir()
             project_template.write_text(
@@ -165,7 +168,7 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_project_code_encoding_and_foundation_tokens_are_not_repaired(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, _ = self.make_foundation(Path(temp))
+            root, _ = self.make_foundation(self.temp_path(temp))
             project_file = root / "示例项目" / "src" / "fixture.txt"
             project_file.parent.mkdir()
             project_file.write_bytes(
@@ -197,19 +200,19 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_repair_requires_exact_confirmed_plan_hash(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, _ = self.make_foundation(Path(temp))
+            root, _ = self.make_foundation(self.temp_path(temp))
             plan = recovery.make_plan(root, None, [], None)
-            plan_path = Path(temp) / "plan.json"
+            plan_path = self.temp_path(temp) / "plan.json"
             recovery.write_json_atomic(plan_path, plan)
             with self.assertRaisesRegex(recovery.RecoveryError, "plan hash mismatch"):
                 recovery.execute_repair(plan_path, "0" * 64, False)
 
     def test_repair_restores_paths_skills_and_verifies(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, old_root = self.make_foundation(Path(temp))
-            target = Path(temp) / "host skills"
+            root, old_root = self.make_foundation(self.temp_path(temp))
+            target = self.temp_path(temp) / "host skills"
             plan = recovery.make_plan(root, None, [target], None)
-            plan_path = Path(temp) / "plan.json"
+            plan_path = self.temp_path(temp) / "plan.json"
             recovery.write_json_atomic(plan_path, plan)
             result = recovery.execute_repair(plan_path, plan["plan_sha256"], False)
             self.assertEqual("complete", result["status"])
@@ -223,9 +226,9 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_plan_detects_post_plan_file_change(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, _ = self.make_foundation(Path(temp))
+            root, _ = self.make_foundation(self.temp_path(temp))
             plan = recovery.make_plan(root, None, [], None)
-            plan_path = Path(temp) / "plan.json"
+            plan_path = self.temp_path(temp) / "plan.json"
             recovery.write_json_atomic(plan_path, plan)
             changed = root / "GLOBAL" / "README.md"
             changed.write_text("changed\n", encoding="utf-8", newline="\n")
@@ -234,10 +237,10 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_post_write_failure_rolls_back_files_and_new_skill_installation(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, old_root = self.make_foundation(Path(temp))
-            target = Path(temp) / "host skills"
+            root, old_root = self.make_foundation(self.temp_path(temp))
+            target = self.temp_path(temp) / "host skills"
             plan = recovery.make_plan(root, None, [target], None)
-            plan_path = Path(temp) / "plan.json"
+            plan_path = self.temp_path(temp) / "plan.json"
             recovery.write_json_atomic(plan_path, plan)
             original_verify = recovery.verify_foundation
             recovery.verify_foundation = lambda *_: {"ok": False, "issues": ["fixture"]}
@@ -255,20 +258,20 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_different_skill_copy_requires_extra_confirmation_and_rolls_back(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, _ = self.make_foundation(Path(temp))
-            target = Path(temp) / "host skills"
+            root, _ = self.make_foundation(self.temp_path(temp))
+            target = self.temp_path(temp) / "host skills"
             installed = target / "sample-skill"
             installed.mkdir(parents=True)
             (installed / "SKILL.md").write_text("local customization\n", encoding="utf-8")
             plan = recovery.make_plan(root, None, [target], None)
-            plan_path = Path(temp) / "plan.json"
+            plan_path = self.temp_path(temp) / "plan.json"
             recovery.write_json_atomic(plan_path, plan)
             with self.assertRaisesRegex(recovery.RecoveryError, "differs"):
                 recovery.execute_repair(plan_path, plan["plan_sha256"], False)
             self.assertFalse((root / "GLOBAL" / ".foundation-recovery").exists())
 
             plan = recovery.make_plan(root, None, [target], None)
-            plan_path = Path(temp) / "plan-2.json"
+            plan_path = self.temp_path(temp) / "plan-2.json"
             recovery.write_json_atomic(plan_path, plan)
             result = recovery.execute_repair(plan_path, plan["plan_sha256"], True)
             self.assertEqual("complete", result["status"])
@@ -283,9 +286,9 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_rollback_refuses_to_overwrite_post_repair_user_change(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, _ = self.make_foundation(Path(temp))
+            root, _ = self.make_foundation(self.temp_path(temp))
             plan = recovery.make_plan(root, None, [], None)
-            plan_path = Path(temp) / "plan.json"
+            plan_path = self.temp_path(temp) / "plan.json"
             recovery.write_json_atomic(plan_path, plan)
             result = recovery.execute_repair(plan_path, plan["plan_sha256"], False)
             changed = root / "GLOBAL" / "README.md"
@@ -297,8 +300,8 @@ class FoundationRecoveryTests(unittest.TestCase):
 
     def test_tree_walk_does_not_follow_external_link(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            root, _ = self.make_foundation(Path(temp))
-            external = Path(temp) / "external"
+            root, _ = self.make_foundation(self.temp_path(temp))
+            external = self.temp_path(temp) / "external"
             external.mkdir()
             sentinel = external / "sentinel.txt"
             sentinel.write_text("KEEP", encoding="utf-8")

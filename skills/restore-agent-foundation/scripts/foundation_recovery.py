@@ -142,6 +142,10 @@ def is_link_or_reparse(path: Path) -> bool:
     )
 
 
+def is_windows() -> bool:
+    return os.name == "nt"
+
+
 def existing_chain_has_link(path: Path) -> Path | None:
     current = lexical_abs(path)
     parts = current.parts
@@ -349,7 +353,7 @@ def command_path(name: str) -> str | None:
         return str(lexical_abs(Path(discovered)))
 
     candidates: list[Path] = []
-    if os.name == "nt":
+    if is_windows():
         appdata = os.environ.get("APPDATA")
         if appdata:
             npm_bin = Path(appdata) / "npm"
@@ -384,7 +388,7 @@ def command_path(name: str) -> str | None:
 
 def obsidian_cli_path() -> str | None:
     """Discover only the registered CLI, never the GUI executable."""
-    if os.name == "nt":
+    if is_windows():
         discovered = command_path("Obsidian.com")
         if discovered:
             return discovered
