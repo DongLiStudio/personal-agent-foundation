@@ -54,7 +54,7 @@ class ScaffoldGuardTests(unittest.TestCase):
 
     def test_full_template_inventory_and_placeholders(self) -> None:
         report = guard.audit_template(TEMPLATE, self.manifest)
-        self.assertEqual(63, report["file_count"])
+        self.assertEqual(64, report["file_count"])
         self.assertEqual(
             {
                 "AGENT_ROOT",
@@ -76,7 +76,7 @@ class ScaffoldGuardTests(unittest.TestCase):
                 TEMPLATE, self.manifest, config, target
             )
             self.assertEqual("dry-run", report["mode"])
-            self.assertEqual(63, report["file_count"])
+            self.assertEqual(64, report["file_count"])
             self.assertFalse(target.exists())
             self.assertTrue(all(b"{{" not in content for _, content in rendered))
         self.assertEqual(before, tree_hash(TEMPLATE))
@@ -673,6 +673,7 @@ class ProductBoundaryTests(unittest.TestCase):
             "OBSIDIAN_LINK.md",
             "SKILL_DEPENDENCIES.md",
             "LARK_PROFILES.md",
+            "SERVER_PROFILES.md",
             "GITHUB_ACCOUNTS.md",
             "SCHEDULE_PREFERENCES.md",
             ".agents/skills/",

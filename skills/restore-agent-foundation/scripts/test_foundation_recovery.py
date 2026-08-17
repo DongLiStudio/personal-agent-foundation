@@ -25,6 +25,7 @@ CORE = (
     "OBSIDIAN_LINK.md",
     "SKILL_DEPENDENCIES.md",
     "LARK_PROFILES.md",
+    "SERVER_PROFILES.md",
     "GITHUB_ACCOUNTS.md",
     "SCHEDULE_PREFERENCES.md",
 )
@@ -114,6 +115,17 @@ class FoundationRecoveryTests(unittest.TestCase):
                 )
             )
 
+    def test_server_profile_is_core_and_ssh_is_an_interactive_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root, _ = self.make_foundation(Path(temp))
+            server_profiles = root / "GLOBAL" / "SERVER_PROFILES.md"
+            server_profiles.unlink()
+            plan = recovery.make_plan(root, None, [], None)
+            self.assertIn("SERVER_PROFILES.md", plan["missing_core_files"])
+            self.assertTrue(
+                any(item["kind"] == "server_connection" for item in plan["interactive_gates"])
+            )
+
     def test_unrelated_mustache_template_is_not_foundation_residue(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root, _ = self.make_foundation(Path(temp))
@@ -126,6 +138,38 @@ class FoundationRecoveryTests(unittest.TestCase):
             plan = recovery.make_plan(root, None, [], None)
             self.assertNotIn(
                 "示例项目/docs/template.md", plan["placeholder_residue"]
+            )
+
+    def test_project_code_encoding_and_foundation_tokens_are_not_repaired(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root, _ = self.make_foundation(Path(temp))
+            project_file = root / "示例项目" / "src" / "fixture.txt"
+            project_file.parent.mkdir()
+            project_file.write_bytes(
+                b"\xef\xbb\xbf"
+                + (chr(123) * 2 + "AGENT_ROOT" + chr(125) * 2 + "\r\n").encode(
+                    "ascii"
+                )
+            )
+            plan = recovery.make_plan(root, None, [], None)
+            self.assertNotIn(
+                "示例项目/src/fixture.txt", plan["placeholder_residue"]
+            )
+            self.assertFalse(
+                any(
+                    item["path"] == "示例项目/src/fixture.txt"
+                    for item in plan["text_issues"]
+                )
+            )
+
+            global_readme = root / "GLOBAL" / "README.md"
+            global_readme.write_bytes(b"# governance\r\n")
+            plan = recovery.make_plan(root, None, [], None)
+            self.assertTrue(
+                any(
+                    item["path"] == "GLOBAL/README.md"
+                    for item in plan["text_issues"]
+                )
             )
 
     def test_repair_requires_exact_confirmed_plan_hash(self) -> None:

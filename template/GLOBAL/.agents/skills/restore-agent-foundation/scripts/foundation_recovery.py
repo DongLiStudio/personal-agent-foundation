@@ -35,6 +35,7 @@ CORE_GLOBAL_FILES = (
     "OBSIDIAN_LINK.md",
     "SKILL_DEPENDENCIES.md",
     "LARK_PROFILES.md",
+    "SERVER_PROFILES.md",
     "GITHUB_ACCOUNTS.md",
     "SCHEDULE_PREFERENCES.md",
     "FOUNDATION_STATE.json",
@@ -69,6 +70,7 @@ SKIP_DIRS = {
     ".git",
     ".hg",
     ".svn",
+    ".idea",
     "__pycache__",
     "node_modules",
     "target",
@@ -271,6 +273,10 @@ def read_text_candidate(root: Path, path: Path) -> TextFile | None:
     return TextFile(path, path.relative_to(root), raw, text)
 
 
+def is_governance_text(relative: Path) -> bool:
+    return bool(relative.parts) and relative.parts[0] == "GLOBAL"
+
+
 def tree_inventory(root: Path) -> dict[str, str]:
     files, _ = iter_tree(root)
     return {
@@ -358,6 +364,10 @@ def runtime_checks() -> dict[str, Any]:
             "path": command_path("obsidian") or command_path("obsidian.exe"),
             "authorization": "not_checked",
         },
+        "ssh": {
+            "path": command_path("ssh") or command_path("ssh.exe"),
+            "authorization": "not_checked",
+        },
     }
 
 
@@ -434,15 +444,16 @@ def make_plan(
         item = read_text_candidate(root, path)
         if item is None:
             continue
-        issues: list[str] = []
-        if item.raw.startswith(b"\xef\xbb\xbf"):
-            issues.append("utf8_bom")
-        if "\r" in item.text:
-            issues.append("crlf_or_cr")
-        if issues:
-            text_issues.append({"path": item.relative.as_posix(), "issues": issues})
-        if FOUNDATION_PLACEHOLDER_RE.search(item.text):
-            placeholder_residue.append(item.relative.as_posix())
+        if is_governance_text(item.relative):
+            issues: list[str] = []
+            if item.raw.startswith(b"\xef\xbb\xbf"):
+                issues.append("utf8_bom")
+            if "\r" in item.text:
+                issues.append("crlf_or_cr")
+            if issues:
+                text_issues.append({"path": item.relative.as_posix(), "issues": issues})
+            if FOUNDATION_PLACEHOLDER_RE.search(item.text):
+                placeholder_residue.append(item.relative.as_posix())
         if replacements:
             rewritten, count = rewrite_text(item.text, replacements)
             if count:
@@ -517,11 +528,18 @@ def make_plan(
         ("github_authorization", "github_cli"),
         ("feishu_authorization", "lark_cli"),
         ("obsidian_connection", "obsidian_cli"),
+        ("server_connection", "ssh"),
     ):
         if checks[key]["path"] is None:
             interactive_gates.append({"kind": kind, "reason": f"{key} is not available"})
         else:
-            interactive_gates.append({"kind": kind, "reason": "requires live identity/readback check"})
+            reason = "requires live identity/readback check"
+            if kind == "server_connection":
+                reason = (
+                    "requires explicit target selection, host fingerprint verification, "
+                    "SSH identity check and bounded read-only service readback"
+                )
+            interactive_gates.append({"kind": kind, "reason": reason})
 
     plan: dict[str, Any] = {
         "schema_version": 1,
@@ -869,10 +887,11 @@ def verify_foundation(
         item = read_text_candidate(root, path)
         if item is None:
             continue
-        if item.raw.startswith(b"\xef\xbb\xbf") or "\r" in item.text:
-            issues.append(f"encoding or LF issue: {item.relative.as_posix()}")
-        if FOUNDATION_PLACEHOLDER_RE.search(item.text):
-            issues.append(f"placeholder residue: {item.relative.as_posix()}")
+        if is_governance_text(item.relative):
+            if item.raw.startswith(b"\xef\xbb\xbf") or "\r" in item.text:
+                issues.append(f"encoding or LF issue: {item.relative.as_posix()}")
+            if FOUNDATION_PLACEHOLDER_RE.search(item.text):
+                issues.append(f"placeholder residue: {item.relative.as_posix()}")
         if old_root and old_root != str(root) and any(
             old in item.text for old, _ in path_replacements(old_root, str(root))
         ):

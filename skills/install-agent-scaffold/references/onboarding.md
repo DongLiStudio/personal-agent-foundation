@@ -110,6 +110,7 @@ GLOBAL 文件导览应该发生在全局个性化提示词保存、通用助手�
 - `OBSIDIAN_LINK.md`：Obsidian 外部知识库的入口、只读边界、目录理解和优先阅读顺序。
 - `SKILL_DEPENDENCIES.md`：需要恢复、安装、同步的全局 Skill 清单。
 - `LARK_PROFILES.md`：飞书公司、应用和 Profile 路由；不放 token。
+- `SERVER_PROFILES.md`：服务器 Profile、服务归属和操作边界；不放私钥、密码或票据。
 - `GITHUB_ACCOUNTS.md`：GitHub 账号和仓库操作路由；不放 token。
 - `SCHEDULE_PREFERENCES.md`：个人排程稳定偏好和跨账号日历同步口径。
 - `.agents/skills/`：用户自维护的全局 Skill 源稿，不等于宿主运行时安装目录。
@@ -120,7 +121,7 @@ GLOBAL 文件导览应该发生在全局个性化提示词保存、通用助手�
 1. 先展示完整文件列表。
 2. 用一句话解释每个文件的作用。
 3. 问用户：“你想先了解哪个？我可以按你选的顺序一个一个讲，也可以按推荐顺序讲。”
-4. 如果用户没有偏好，按推荐顺序讲：`README.md` → `GLOBAL_CONTEXT.md` → `PROJECTS.md` → `OBSIDIAN_LINK.md` → `SKILL_DEPENDENCIES.md` → `LARK_PROFILES.md` / `GITHUB_ACCOUNTS.md` → `SCHEDULE_PREFERENCES.md` → `.agents/skills/`。
+4. 如果用户没有偏好，按推荐顺序讲：`README.md` → `GLOBAL_CONTEXT.md` → `PROJECTS.md` → `OBSIDIAN_LINK.md` → `SKILL_DEPENDENCIES.md` → `LARK_PROFILES.md` / `GITHUB_ACCOUNTS.md` → `SERVER_PROFILES.md` → `SCHEDULE_PREFERENCES.md` → `.agents/skills/`。
 5. 每讲完一个文件，给一个很短例子说明未来什么时候会用到，并询问是否继续下一个。
 
 用户选择跳过导览时，通用助手总经理应说明以后可以让 Agent 读取 `GLOBAL/README.md` 重新讲解，并把“GLOBAL 导览未完成”列入待办。

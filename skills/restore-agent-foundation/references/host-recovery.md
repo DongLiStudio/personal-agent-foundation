@@ -29,5 +29,6 @@
 - GitHub：以 `gh auth status` 和 `gh api user` 回读为准。
 - 飞书：逐个 GLOBAL Profile 显式验证用户身份；缺失 Profile 时恢复应用配置或重新建立授权，不复制明文 secret。
 - Obsidian：先确认 Vault 位置和边界，再重建稳定链接。
+- 服务器：从 `SERVER_PROFILES.md` 恢复非敏感 SSH 路由；私钥只通过安全渠道进入用户本机密钥目录。连接前从可信渠道核验主机指纹，再以明确 Profile 和 `BatchMode` 完成身份及目标服务只读回读。不得自动接受变化的主机密钥。
 
 授权完成只说明外部身份恢复；仍需运行最终 `verify` 和宿主 Skill 可发现性检查。
