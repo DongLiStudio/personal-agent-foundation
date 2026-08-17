@@ -35,6 +35,12 @@ Obsidian Vault 真实路径是连接阶段的临时输入，不属于模板占�
 - staging 名称随机且限定在目标父目录；失败时仅清理本次 staging。
 - 不递归跟随 symlink、Junction 或其他 reparse point。
 
+## 安装后的恢复入口
+
+首次安装必须把 `restore-agent-foundation` 及 `FOUNDATION_STATE.json` 一并写入 GLOBAL。状态文件中的 Windows 路径必须按 JSON 字符串规则转义，不能生成无效 JSON。
+
+已经存在、整体复制、移动或局部损坏的基座不再使用首次安装器合并模板，而是直接从 `GLOBAL/.agents/skills/restore-agent-foundation/SKILL.md` 启动统一恢复。恢复核心自包含，不依赖其他 Skill 已安装；其他 Skill 是恢复对象，不是恢复前提。
+
 ## 平台边界
 
 模板渲染使用跨平台文件 API。知识库链接由 Skill 根据宿主系统选择 Windows Junction 或 macOS/Linux symlink，并在创建前单独确认真实目标。

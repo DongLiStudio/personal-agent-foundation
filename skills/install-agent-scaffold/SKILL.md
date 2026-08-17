@@ -1,6 +1,6 @@
 ---
 name: install-agent-scaffold
-description: 对话式安装、恢复和验证 Personal Agent Foundation。用于用户给出 DongLiStudio/personal-agent-foundation 仓库链接并要求安装，或要求部署完整 GLOBAL、换电脑恢复 Agent 工作环境、配置默认飞书 Profile/GitHub 账号/Obsidian 连接、完成首次项目初始化教程时。自动获取完整产品源、准备运行时，并调用确定性护栏完成 dry-run、staging 渲染、目标保护、安装后验证和 onboarding。
+description: 对话式首次安装和验证 Personal Agent Foundation。用于用户给出 DongLiStudio/personal-agent-foundation 仓库链接并要求在空目录建立新基座、部署完整 GLOBAL、配置默认飞书 Profile/GitHub 账号/Obsidian 连接或完成首次项目初始化教程时。自动获取完整产品源、准备运行时，并调用确定性护栏完成 dry-run、staging 渲染、目标保护、安装后验证和 onboarding；已经存在或整体复制的基座改用 restore-agent-foundation。
 ---
 
 # 安装 Personal Agent Foundation

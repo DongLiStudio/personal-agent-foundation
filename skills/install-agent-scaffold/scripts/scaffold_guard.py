@@ -102,7 +102,9 @@ def audit_template(template: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     template = template.resolve()
     allowed = manifest_placeholders(manifest)
     files = [read_template_file(template, path) for path in walk_files(template)]
-    expected_count = manifest.get("source", {}).get("tracked_file_count")
+    expected_count = manifest.get("template_file_count")
+    if expected_count is None:
+        expected_count = manifest.get("source", {}).get("tracked_file_count")
     if expected_count is not None and len(files) != expected_count:
         raise GuardError(
             f"template inventory mismatch: expected {expected_count}, found {len(files)}"
@@ -184,7 +186,10 @@ def load_values(path: Path, manifest: dict[str, Any], target: Path) -> dict[str,
 def render(text: str, values: dict[str, str], relative: Path) -> str:
     result = text
     for key, value in values.items():
-        result = result.replace("{{" + key + "}}", value)
+        rendered_value = value
+        if relative.suffix.lower() == ".json":
+            rendered_value = json.dumps(value, ensure_ascii=False)[1:-1]
+        result = result.replace("{{" + key + "}}", rendered_value)
     residual = sorted(set(ANY_TEMPLATE_TOKEN_RE.findall(result)))
     if residual:
         raise GuardError(

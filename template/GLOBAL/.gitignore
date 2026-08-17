@@ -18,6 +18,7 @@
 *.rar
 /temp/
 /tmp/
+/.foundation-recovery/
 
 # Operating-system files
 Thumbs.db

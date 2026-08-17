@@ -24,6 +24,12 @@
 
 ## GLOBAL 自维护 Skill
 
+### `restore-agent-foundation`
+
+- 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\restore-agent-foundation`
+- 恢复方式：换机或宿主 Skill 安装副本不可用时，直接让当前 Agent 读取上述源稿中的 `SKILL.md`；该 Skill 使用自身脚本恢复包括自己在内的全部安装副本，不依赖其他 Skill 先可用。
+- 用途：对已经存在、整体复制、迁移过、局部损坏或更换宿主的 Personal Agent Foundation 进行统一发现、路径校准、链接重建、Skill 恢复、权限引导、自检修复和最终验收。
+
 ### `init-agent-project`
 
 - 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\init-agent-project`

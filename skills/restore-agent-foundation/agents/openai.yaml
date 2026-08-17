@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：恢复 Agent 基座"
+  short_description: "恢复、自检并修复已存在的 Personal Agent Foundation"
+  default_prompt: "使用 $restore-agent-foundation 全面检查当前已存在的 Agent 基座，并在确认后恢复到完整可用状态。"

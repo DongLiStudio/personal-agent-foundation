@@ -7,6 +7,8 @@
 - 模板源目录在测试前后哈希一致。
 - 目标不存在时创建、已存在空目录时使用、非空目标拒绝合并，未知占位符阻断，中文和空格路径通过。
 - Skill 结构、界面元数据、引用和脚本测试通过。
+- 模板内置 `restore-agent-foundation` 与产品源副本逐文件一致；换机路径重写、计划哈希、安装副本冲突、失败回滚和链接不跟随测试通过。
+- `FOUNDATION_STATE.json` 在 Windows、macOS 和 Linux 路径 fixture 中均可解析，并在恢复后指向当前 Agent 根。
 - Windows、macOS、Linux CI 全部通过后才能宣称跨平台实机验证。
 - README、Apache-2.0 LICENSE 和安装说明与当前行为一致。
 - 发布、remote、首次 push 和 Release 均具有当前用户明确授权。

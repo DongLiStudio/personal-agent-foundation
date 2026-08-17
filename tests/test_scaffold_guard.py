@@ -54,7 +54,7 @@ class ScaffoldGuardTests(unittest.TestCase):
 
     def test_full_template_inventory_and_placeholders(self) -> None:
         report = guard.audit_template(TEMPLATE, self.manifest)
-        self.assertEqual(56, report["file_count"])
+        self.assertEqual(63, report["file_count"])
         self.assertEqual(
             {
                 "AGENT_ROOT",
@@ -76,7 +76,7 @@ class ScaffoldGuardTests(unittest.TestCase):
                 TEMPLATE, self.manifest, config, target
             )
             self.assertEqual("dry-run", report["mode"])
-            self.assertEqual(56, report["file_count"])
+            self.assertEqual(63, report["file_count"])
             self.assertFalse(target.exists())
             self.assertTrue(all(b"{{" not in content for _, content in rendered))
         self.assertEqual(before, tree_hash(TEMPLATE))
@@ -89,8 +89,60 @@ class ScaffoldGuardTests(unittest.TestCase):
             result = guard.install(TEMPLATE, self.manifest, config, target)
             self.assertTrue(result["verification"]["ok"])
             self.assertTrue((target / "GLOBAL" / "README.md").is_file())
+            state = json.loads(
+                (target / "GLOBAL" / "FOUNDATION_STATE.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual(str(target.resolve()), state["installed_agent_root"])
+            self.assertTrue(
+                (
+                    target
+                    / "GLOBAL"
+                    / ".agents"
+                    / "skills"
+                    / "restore-agent-foundation"
+                    / "scripts"
+                    / "foundation_recovery.py"
+                ).is_file()
+            )
             with self.assertRaisesRegex(guard.GuardError, "target directory is not empty"):
                 guard.install(TEMPLATE, self.manifest, config, target)
+
+    def test_recovery_skill_product_and_template_copies_match(self) -> None:
+        product = ROOT / "skills" / "restore-agent-foundation"
+        bundled = (
+            TEMPLATE
+            / "GLOBAL"
+            / ".agents"
+            / "skills"
+            / "restore-agent-foundation"
+        )
+        self.assertEqual(tree_hash(product), tree_hash(bundled))
+        self.assertEqual(
+            sorted(path.relative_to(product).as_posix() for path in product.rglob("*") if path.is_file()),
+            sorted(path.relative_to(bundled).as_posix() for path in bundled.rglob("*") if path.is_file()),
+        )
+
+    def test_recovery_skill_uses_global_display_prefix(self) -> None:
+        for skill in (
+            ROOT / "skills" / "restore-agent-foundation",
+            TEMPLATE / "GLOBAL" / ".agents" / "skills" / "restore-agent-foundation",
+        ):
+            metadata = (skill / "agents" / "openai.yaml").read_text(encoding="utf-8")
+            self.assertIn('display_name: "GLOBAL：恢复 Agent 基座"', metadata)
+
+    def test_windows_agent_root_is_valid_json_after_render(self) -> None:
+        text = '{"installed_agent_root":"{{AGENT_ROOT}}"}\n'
+        rendered = guard.render(
+            text,
+            {"AGENT_ROOT": r"D:\Agent 用户\Agent"},
+            Path("GLOBAL/FOUNDATION_STATE.json"),
+        )
+        self.assertEqual(
+            r"D:\Agent 用户\Agent",
+            json.loads(rendered)["installed_agent_root"],
+        )
 
     def test_existing_empty_target_directory_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

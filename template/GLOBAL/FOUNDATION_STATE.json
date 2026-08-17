@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "product": "Personal Agent Foundation",
+  "installed_agent_root": "{{AGENT_ROOT}}",
+  "global_root": "{{AGENT_ROOT}}/GLOBAL",
+  "recovery_skill": "{{AGENT_ROOT}}/GLOBAL/.agents/skills/restore-agent-foundation"
+}

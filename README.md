@@ -51,6 +51,20 @@ Agent 应当：
 
 Agent 如果无法读取公开仓库、执行本地工具或请求必要权限，应准确说明阻断，不应把克隆、Skill 注册、Python 安装或模板处理重新交给用户手工完成。
 
+## 换电脑、换 Agent 或修复现有基座
+
+已经拥有基座时，不要重新走首次安装，也不要把模板覆盖到非空目录。把完整 Agent 根复制到新电脑或交给新宿主后，让 Agent 直接读取随基座携带的统一恢复入口：
+
+```text
+请读取并执行：
+<复制后的 Agent 根>/GLOBAL/.agents/skills/restore-agent-foundation/SKILL.md
+
+全面检查这套已经存在的 Personal Agent Foundation，
+并在我确认计划后恢复到当前电脑和当前 Agent 中的完整可用状态。
+```
+
+`restore-agent-foundation` 自包含路径校准、状态检查、链接重建、Skill 重装、备份、回滚和最终验证，不要求其他 Skill 先可用。它会识别换机、根目录变化、宿主变化、安装副本丢失和授权失效，并把需要 GitHub、飞书、Obsidian 或系统权限的部分转换成清晰的官方授权步骤；用户完成后继续验收，不要求手工编排多个 Skill。
+
 ## 安装时会询问什么
 
 Agent 会询问以下非敏感配置：
@@ -95,6 +109,7 @@ Skill 按以下顺序执行：
 ## 安装后会得到什么
 
 - 一个独立的 `GLOBAL/`，保存全局规则、项目索引、账号路由和 Skill 依赖记录。
+- 一个随 GLOBAL 携带的 `restore-agent-foundation`，用于换机、换 Agent、迁移和故障后的统一恢复。
 - 一套公开脱敏的自维护 Skills。
 - 飞书、GitHub 和 Obsidian 的可选连接引导，不包含任何预置凭据。
 - 内置的完整全局个性化提示词，以及针对当前宿主设置入口的保存与核验引导。
@@ -122,6 +137,7 @@ Skill 按以下顺序执行：
 
 - `template/GLOBAL/`：公开脱敏的 GLOBAL 模板。
 - `skills/install-agent-scaffold/`：对话式安装、验证和首次项目教程。
+- `skills/restore-agent-foundation/`：自包含的现有基座恢复、自检、修复与验收入口；同一副本随模板进入 `GLOBAL/.agents/skills/`。
 - `template-manifest.json`：模板文件与占位符契约。
 - `tests/`：模板完整性、脱敏、渲染、目标保护和跨平台测试。
 - `docs/`：安装契约、通用化说明和维护资料。
@@ -131,6 +147,7 @@ Skill 按以下顺序执行：
 ```shell
 python -m unittest discover -s tests -v
 python skills/install-agent-scaffold/scripts/scaffold_guard.py audit-template --template template --manifest template-manifest.json
+python skills/restore-agent-foundation/scripts/test_foundation_recovery.py -v
 ```
 
 ## 许可证

@@ -1,6 +1,6 @@
 # GLOBAL 通用化映射
 
-模板源自真实 GLOBAL 提交 `efb719a8cf989bbcc2591dc64013194fc3fc7954` 的全部 56 个受管文件。
+模板以真实 GLOBAL 提交 `efb719a8cf989bbcc2591dc64013194fc3fc7954` 的 56 个受管文件为治理基线，并增加公开产品自身的恢复状态与 `restore-agent-foundation` 模块。
 
 ## 保留
 
@@ -29,4 +29,4 @@
 
 ## 完整性要求
 
-模板受管文件数应继续为 56；有意新增或删除 GLOBAL 模块时，必须同时更新 `template-manifest.json`、本文件和测试。不能为了通过脱敏扫描静默漏掉源文件。
+当前模板受管文件数为 63：56 个治理基线文件、1 个 `FOUNDATION_STATE.json` 和 6 个恢复 Skill 文件。有意新增或删除 GLOBAL 模块时，必须同时更新 `template-manifest.json`、本文件和测试。不能为了通过脱敏扫描静默漏掉源文件。

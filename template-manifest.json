@@ -2,9 +2,10 @@
   "schema_version": 1,
   "source": {
     "kind": "generalized-live-global",
-    "tracked_file_count": 56,
+    "baseline_file_count": 56,
     "source_commit": "efb719a8cf989bbcc2591dc64013194fc3fc7954"
   },
+  "template_file_count": 63,
   "template_root": "template",
   "required_paths": [
     "GLOBAL/README.md",
@@ -15,6 +16,9 @@
     "GLOBAL/LARK_PROFILES.md",
     "GLOBAL/GITHUB_ACCOUNTS.md",
     "GLOBAL/SCHEDULE_PREFERENCES.md",
+    "GLOBAL/FOUNDATION_STATE.json",
+    "GLOBAL/.agents/skills/restore-agent-foundation/SKILL.md",
+    "GLOBAL/.agents/skills/restore-agent-foundation/scripts/foundation_recovery.py",
     "GLOBAL/.agents/skills/init-agent-project/SKILL.md"
   ],
   "placeholders": {
