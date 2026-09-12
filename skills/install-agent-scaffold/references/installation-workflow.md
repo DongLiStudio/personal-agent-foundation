@@ -34,8 +34,14 @@ GLOBAL 安装验证和 Skill 恢复完成后，分别询问：
 1. 是否现在连接飞书账号或创建默认飞书 Profile。
 2. 是否现在连接 GitHub 账号并设置默认账号。
 3. 是否现在连接 Obsidian Vault。
+4. 是否现在配置阿里云/云效身份治理。
+5. 是否现在登记或恢复服务器 Profile。
 
-每一项都必须得到明确回答。安装器展示选项时，默认推荐和预选项必须是“现在连接”；“稍后连接 / 当前没有账号 / 当前没有 Vault”只能作为用户主动选择的备选项。用户选择连接时，不询问实现标识；直接调用对应 Skill 或官方 CLI 发起授权、验证码或网页登录流程，并用回读结果写入 GLOBAL。用户选择稍后再配、当前没有账号或当前没有 Vault 时，才保留未配置说明。认证过程中只走官方 OAuth、CLI 或宿主授权流程，不能要求用户在对话中提供 token、密码、App Secret、私钥或恢复码。
+每一项都必须得到明确回答。安装器展示飞书、GitHub、Obsidian 选项时，默认推荐和预选项必须是“现在连接”；“稍后连接 / 当前没有账号 / 当前没有 Vault”只能作为用户主动选择的备选项。用户选择连接时，不询问实现标识；直接调用对应 Skill 或官方 CLI 发起授权、验证码或网页登录流程，并用回读结果写入 GLOBAL。用户选择稍后再配、当前没有账号或当前没有 Vault 时，才保留未配置说明。认证过程中只走官方 OAuth、CLI、宿主安全凭据通道或授权流程，不能要求用户在对话中提供 token、密码、App Secret、私钥、PAT、AK/SK 或恢复码。
+
+阿里云/云效连接有额外硬门禁：先用通俗语言说明“阿里云通用 Profile”和“云效 PAT 组织身份”是两套认证，再调用 `aliyun-profile` 验证 `aliyun`、`aliyun-cli-devops` 和 `ALIYUN_PROFILES.md`。PAT 只能通过宿主安全凭据通道或隐藏输入进入当前进程，不能写入 GLOBAL、命令参数、日志或普通环境变量。授权成功只代表身份可用，不自动执行仓库创建、流水线、MR 审查、合并或部署。
+
+服务器连接有额外硬门禁：先读取 `SERVER_PROFILES.md` 索引，不默认递归读取 `servers/`；用户选择具体 Profile 后，只读取对应 `servers/<profile>.md` 详情。私钥只通过安全渠道恢复到用户本机，连接前必须从可信渠道核验主机指纹，再做 `BatchMode` 身份和目标服务有界只读回读。不得自动接受未知主机密钥，不自动部署、重启、改网、改卷或读取 Secret。
 
 飞书连接有额外硬门禁：首次连接默认创建新的飞书应用和新的专用 Profile，用于当前 Agent 根目录和 GLOBAL。安装器不得自动复用本机已有 Profile、active Profile、旧应用或其他项目应用；也不得把它们作为默认值、预选项或失败回退。允许只读列出已有 Profile 以避免命名冲突；若建议名称已存在，生成带后缀的新名称或请用户确认新名称。复用已有飞书应用/Profile 只能作为“高级迁移/共用已有配置”路径，并且必须由用户明确选择，同时先说明这会共享原应用权限、身份路由和审计边界。
 
@@ -45,8 +51,8 @@ GLOBAL 安装验证和 Skill 恢复完成后，分别询问：
 
 ```text
 source-bootstrap -> collect-minimal -> runtime-preflight -> audit -> plan -> confirm
-        -> install -> verify -> skills -> identities -> knowledge-layout
-        -> knowledge-link -> local-git -> global-prompt
+        -> install -> verify -> skills -> identities -> devops-identities
+        -> server-profiles -> knowledge-layout -> knowledge-link -> local-git -> global-prompt
         -> project-layout-lesson -> general-assistant
         -> general-assistant-open-gate -> general-assistant-manager
         -> global-tour-handoff -> first-project-open-gate
@@ -57,7 +63,7 @@ source-bootstrap -> collect-minimal -> runtime-preflight -> audit -> plan -> con
 
 安装器必须把当前阶段当作可恢复状态保存到对话中：每次等待用户输入前，明确当前阶段、已完成证据、下一步会做什么、是否会写入或授权。用户在安装过程中说起其他事情时，不得丢失状态或重新开始；先判断该输入是安装补充、暂停请求还是无关插话。无关插话只简短回应并继续当前阶段；暂停请求必须输出恢复检查点、已完成步骤、未完成门禁和建议恢复命令。
 
-交互式操作和安装护栏贯穿全流程，不只适用于前半段。进入 `identities`、`knowledge-layout`、`knowledge-link`、`local-git`、`project-layout-lesson`、`global-prompt`、`general-assistant`、`general-assistant-open-gate`、`general-assistant-manager`、`global-tour-handoff`、`first-project-open-gate`、`first-project-manager` 和 `skill-smoke-tests` 时，仍必须遵守：宿主有可视化能力先尝试、写入前展示计划、外部授权前说明权限、真实操作前取得确认、操作后独立回读证据、失败时保留诊断并停止越权推进。
+交互式操作和安装护栏贯穿全流程，不只适用于前半段。进入 `identities`、`devops-identities`、`server-profiles`、`knowledge-layout`、`knowledge-link`、`local-git`、`project-layout-lesson`、`global-prompt`、`general-assistant`、`general-assistant-open-gate`、`general-assistant-manager`、`global-tour-handoff`、`first-project-open-gate`、`first-project-manager` 和 `skill-smoke-tests` 时，仍必须遵守：宿主有可视化能力先尝试、写入前展示计划、外部授权前说明权限、真实操作前取得确认、操作后独立回读证据、失败时保留诊断并停止越权推进。
 
 `project-layout-lesson` 是全局个性化提示词保存后的教学门禁，也是通用助手创建前的教学门禁：先让宿主继承完整全局提示词，再说明 `AGENT_ROOT`、`GLOBAL`、通用助手项目和业务项目的同级关系，明确所有项目都应创建在 `AGENT_ROOT` 下、与 `GLOBAL` 同级，且 `GLOBAL` 不放具体项目任务。用户确认理解后，才能进入通用助手项目创建。
 
@@ -123,7 +129,9 @@ commit 不构成上传授权。除非用户另行明确要求，不配置 remote
 
 - 飞书：用户选择现在连接时，调用 `feishu-profile`，默认创建新的飞书应用和新的专用 Profile，完成验证码/OAuth 和 `whoami` 回读；把工具回读出的真实 Profile 写回 `GLOBAL/LARK_PROFILES.md`。不要向用户询问“Profile 名是什么”作为前置条件；必要名称由 Skill 创建或从工具回读。不得自动复用本机已有 Profile、active Profile、旧应用或其他项目应用；已有 Profile 只用于只读冲突检查。复用已有配置只能在用户明确选择高级迁移/共用路径并确认共享权限、身份路由和审计边界后执行。公司列表标题和公司名称使用回读到的真实公司/租户名称，不使用程序自拟名或 CLI profile 名。
 - GitHub：用户选择现在连接时，调用 `github-cli`，完成 `gh auth status` 和 `gh api user --jq '.login'` 回读；把工具回读出的真实账号写回 `GLOBAL/GITHUB_ACCOUNTS.md`。不要向用户询问“GitHub 用户名是什么”作为前置条件；必要账号由 CLI 授权和回读确定。账号列表标题、username 和切换命令必须使用回读到的真实 login，不使用程序自拟名。
-- 所有认证页面由用户确认；不得读取或保存 token。
+- 阿里云/云效：用户选择现在配置时，调用 `aliyun-profile`，确认阿里云通用 Profile 与云效 PAT 是两套认证，安装或验证 `aliyun` 和 `aliyun-cli-devops`，再通过宿主安全凭据通道或隐藏输入恢复逻辑身份。只把非敏感路由写入 `GLOBAL/ALIYUN_PROFILES.md`；不得把 PAT、AK/SK、票据、凭据槽密文或项目专属仓库/流水线细节写入公开或通用位置。
+- 服务器：用户选择现在登记或恢复时，调用 `server-profile`，先建立或读取 `SERVER_PROFILES.md` 索引，再按单个 Profile 读取或创建 `servers/<profile>.md` 详情。私钥、密码、主机指纹可信来源和服务回读都必须单独确认；未成功只读验收时标为待验收。
+- 所有认证页面由用户确认；不得读取或保存 token、PAT、AK/SK、App Secret、私钥或恢复码。
 
 ## 知识库链接
 

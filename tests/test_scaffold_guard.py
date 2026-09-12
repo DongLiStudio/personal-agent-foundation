@@ -54,7 +54,7 @@ class ScaffoldGuardTests(unittest.TestCase):
 
     def test_full_template_inventory_and_placeholders(self) -> None:
         report = guard.audit_template(TEMPLATE, self.manifest)
-        self.assertEqual(64, report["file_count"])
+        self.assertEqual(76, report["file_count"])
         self.assertEqual(
             {
                 "AGENT_ROOT",
@@ -76,7 +76,7 @@ class ScaffoldGuardTests(unittest.TestCase):
                 TEMPLATE, self.manifest, config, target
             )
             self.assertEqual("dry-run", report["mode"])
-            self.assertEqual(64, report["file_count"])
+            self.assertEqual(76, report["file_count"])
             self.assertFalse(target.exists())
             self.assertTrue(all(b"{{" not in content for _, content in rendered))
         self.assertEqual(before, tree_hash(TEMPLATE))
@@ -360,7 +360,7 @@ class ProductBoundaryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         combined = installer + "\n" + workflow
         for text in (
-            "不得把飞书、GitHub 或 Obsidian 静默设为“未配置”",
+            "不得把飞书、GitHub、Obsidian、阿里云/云效或服务器静默设为“未配置”",
             "是否现在连接飞书",
             "是否现在连接 GitHub",
             "是否现在连接 Obsidian",
@@ -388,7 +388,7 @@ class ProductBoundaryTests(unittest.TestCase):
             "先安装 GLOBAL 和 Skills",
             "不要向用户询问“Profile 名是什么”作为前置条件",
             "不要向用户询问“GitHub 用户名是什么”作为前置条件",
-            "飞书、GitHub 和 Obsidian 不属于初始模板渲染输入",
+            "飞书、GitHub、Obsidian、阿里云/云效和服务器不属于初始模板渲染输入",
         ):
             self.assertIn(text, combined)
         self.assertNotIn("用户选择连接时再收集默认 Profile 名", combined)
@@ -673,7 +673,9 @@ class ProductBoundaryTests(unittest.TestCase):
             "OBSIDIAN_LINK.md",
             "SKILL_DEPENDENCIES.md",
             "LARK_PROFILES.md",
+            "ALIYUN_PROFILES.md",
             "SERVER_PROFILES.md",
+            "servers/",
             "GITHUB_ACCOUNTS.md",
             "SCHEDULE_PREFERENCES.md",
             ".agents/skills/",
@@ -739,6 +741,102 @@ class ProductBoundaryTests(unittest.TestCase):
             "不得把单纯写入 `AGENTS.md` 宣称为岗位已落地",
             "不得宣称岗位已完整落地",
             "长期窗口未创建",
+        ):
+            self.assertIn(text, combined)
+
+    def test_global_context_uses_delegation_report_route_not_manager_broadcast(self) -> None:
+        global_context = (TEMPLATE / "GLOBAL" / "GLOBAL_CONTEXT.md").read_text(
+            encoding="utf-8"
+        )
+        for text in (
+            "## 任务回报路由",
+            "谁派发，向谁回报",
+            "禁止默认越级或同时抄送项目总经理",
+            "岗位最初任命窗口、历史来源窗口和总经理窗口均不是永久回报地址",
+            "不构成全量任务抄送要求",
+        ):
+            self.assertIn(text, global_context)
+        self.assertNotIn("长期岗位完成每次派发任务后，必须主动向项目总经理回报", global_context)
+
+    def test_aliyun_and_yunxiao_governance_is_public_template_ready(self) -> None:
+        expected_files = (
+            TEMPLATE / "GLOBAL" / "ALIYUN_PROFILES.md",
+            TEMPLATE / "GLOBAL" / ".agents" / "skills" / "aliyun-profile" / "SKILL.md",
+            TEMPLATE / "GLOBAL" / ".agents" / "skills" / "aliyun-profile" / "references" / "identity-and-auth.md",
+            TEMPLATE / "GLOBAL" / ".agents" / "skills" / "aliyun-profile" / "scripts" / "yunxiao-credential-slot.ps1",
+            TEMPLATE / "GLOBAL" / ".agents" / "skills" / "yunxiao-mr-review" / "SKILL.md",
+            TEMPLATE / "GLOBAL" / ".agents" / "skills" / "yunxiao-mr-review" / "references" / "review-contract.md",
+        )
+        for path in expected_files:
+            self.assertTrue(path.is_file(), str(path))
+        combined = "\n".join(path.read_text(encoding="utf-8") for path in expected_files)
+        for text in (
+            "阿里云通用 OpenAPI Profile 与云效 PAT 上下文是两套认证体系",
+            "PAT 只通过宿主安全凭据通道或隐藏输入进入当前进程",
+            "不得记录 AccessKey、Secret、STS、PAT",
+            "Windows DPAPI CurrentUser",
+            "不自动合并或部署",
+            "{{AGENT_ROOT}}\\GLOBAL\\ALIYUN_PROFILES.md",
+        ):
+            self.assertIn(text, combined)
+        for forbidden in (
+            "D:\\Project\\Agent\\GLOBAL",
+            "685d08cb99e35cb6315805c4",
+            "donglizhiyuan",
+            "findround",
+        ):
+            self.assertNotIn(forbidden, combined)
+
+    def test_server_profile_uses_progressive_detail_files(self) -> None:
+        readme = (TEMPLATE / "GLOBAL" / "README.md").read_text(encoding="utf-8")
+        server_profiles = (TEMPLATE / "GLOBAL" / "SERVER_PROFILES.md").read_text(
+            encoding="utf-8"
+        )
+        server_detail_readme = (TEMPLATE / "GLOBAL" / "servers" / "README.md").read_text(
+            encoding="utf-8"
+        )
+        server_skill = (
+            TEMPLATE / "GLOBAL" / ".agents" / "skills" / "server-profile" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        combined = "\n".join([readme, server_profiles, server_detail_readme, server_skill])
+        for text in (
+            "servers/<profile>.md",
+            "不要默认递归或批量读取全部 `servers/`",
+            "每台受管服务器使用一个 `servers/<profile>.md` 文件",
+            "公开模板不预置真实服务器地址",
+            "主机指纹核验",
+            "服务表采用模板六列",
+        ):
+            self.assertIn(text, combined)
+        for forbidden in (
+            "general-prod-1",
+            "personal-blog-prod-1",
+            "donglizhiyuan-prod-1",
+            "findround-prod-1",
+        ):
+            self.assertNotIn(forbidden, combined)
+
+    def test_recovery_includes_aliyun_as_core_interactive_gate(self) -> None:
+        recovery_script = (
+            ROOT / "skills" / "restore-agent-foundation" / "scripts" / "foundation_recovery.py"
+        ).read_text(encoding="utf-8")
+        recovery_skill = (
+            ROOT / "skills" / "restore-agent-foundation" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        recovery_reference = (
+            ROOT / "skills" / "restore-agent-foundation" / "references" / "host-recovery.md"
+        ).read_text(encoding="utf-8")
+        recovery_tests = (
+            ROOT / "skills" / "restore-agent-foundation" / "scripts" / "test_foundation_recovery.py"
+        ).read_text(encoding="utf-8")
+        combined = "\n".join([recovery_script, recovery_skill, recovery_reference, recovery_tests])
+        for text in (
+            '"ALIYUN_PROFILES.md"',
+            "aliyun_cli_path",
+            "aliyun_authorization",
+            "aliyun-cli-devops",
+            "阿里云与云效",
+            "test_aliyun_is_always_an_interactive_recovery_gate",
         ):
             self.assertIn(text, combined)
 

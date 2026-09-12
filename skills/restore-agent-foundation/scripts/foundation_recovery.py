@@ -35,6 +35,7 @@ CORE_GLOBAL_FILES = (
     "OBSIDIAN_LINK.md",
     "SKILL_DEPENDENCIES.md",
     "LARK_PROFILES.md",
+    "ALIYUN_PROFILES.md",
     "SERVER_PROFILES.md",
     "GITHUB_ACCOUNTS.md",
     "SCHEDULE_PREFERENCES.md",
@@ -404,6 +405,23 @@ def obsidian_cli_path() -> str | None:
     return command_path("obsidian")
 
 
+def aliyun_cli_path() -> str | None:
+    """Discover the official CLI, including its Windows per-user install path."""
+    discovered = command_path("aliyun")
+    if discovered:
+        return discovered
+    if is_windows():
+        localappdata = os.environ.get("LOCALAPPDATA")
+        if localappdata:
+            candidate = Path(localappdata) / "AliyunCLI" / "aliyun.exe"
+            try:
+                if candidate.is_file():
+                    return str(lexical_abs(candidate))
+            except OSError:
+                pass
+    return None
+
+
 def runtime_checks() -> dict[str, Any]:
     return {
         "python": {
@@ -415,6 +433,11 @@ def runtime_checks() -> dict[str, Any]:
         "github_cli": {"path": command_path("gh"), "authorization": "not_checked"},
         "lark_cli": {
             "path": command_path("lark-cli"),
+            "authorization": "not_checked",
+        },
+        "aliyun_cli": {
+            "path": aliyun_cli_path(),
+            "devops_plugin": "not_checked",
             "authorization": "not_checked",
         },
         "obsidian_cli": {
@@ -584,13 +607,25 @@ def make_plan(
     for kind, key in (
         ("github_authorization", "github_cli"),
         ("feishu_authorization", "lark_cli"),
+        ("aliyun_authorization", "aliyun_cli"),
         ("obsidian_connection", "obsidian_cli"),
         ("server_connection", "ssh"),
     ):
         if checks[key]["path"] is None:
-            interactive_gates.append({"kind": kind, "reason": f"{key} is not available"})
+            reason = f"{key} is not available"
+            if kind == "aliyun_authorization":
+                reason = (
+                    "aliyun CLI is not available; after user confirmation install the official CLI "
+                    "and aliyun-cli-devops plugin, then restore the GLOBAL logical identities"
+                )
+            interactive_gates.append({"kind": kind, "reason": reason})
         else:
             reason = "requires live identity/readback check"
+            if kind == "aliyun_authorization":
+                reason = (
+                    "requires CLI version, aliyun-cli-devops plugin, GLOBAL Profile, secure PAT input "
+                    "and live Yunxiao organization readback checks"
+                )
             if kind == "server_connection":
                 reason = (
                     "requires explicit target selection, host fingerprint verification, "

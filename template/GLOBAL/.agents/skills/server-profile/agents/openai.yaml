@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：服务器连接管理"
+  short_description: "安全建立与恢复服务器 SSH 连接，验证密钥、主机身份并登记全局路由"
+  default_prompt: "使用 $server-profile 安全建立或诊断服务器连接，验证成功后登记 GLOBAL。"

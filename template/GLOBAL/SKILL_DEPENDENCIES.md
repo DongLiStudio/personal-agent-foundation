@@ -24,11 +24,18 @@
 
 ## GLOBAL 自维护 Skill
 
+### `server-profile`
+
+- 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\server-profile`
+- 恢复方式：从 GLOBAL 源稿同步到当前 Agent 可发现的全局 Skill 位置。
+- 运行依赖：OpenSSH 客户端及 Python 3；先验证 `ssh -V` 和 Python 可用，再按 Skill 核验密钥与指纹；私钥必须另行安全恢复，不进入基座。
+- 用途：服务器首次 SSH 接入、连接诊断、密钥轮换与全局服务器登记；不执行业务部署或重启。
+
 ### `restore-agent-foundation`
 
 - 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\restore-agent-foundation`
 - 恢复方式：换机或宿主 Skill 安装副本不可用时，直接让当前 Agent 读取上述源稿中的 `SKILL.md`；该 Skill 使用自身脚本恢复包括自己在内的全部安装副本，不依赖其他 Skill 先可用。
-- 用途：对已经存在、整体复制、迁移过、局部损坏或更换宿主的 Personal Agent Foundation 进行统一发现、路径校准、链接重建、Skill 恢复、权限引导、自检修复和最终验收。
+- 用途：对已经存在、整体复制、迁移过、局部损坏或更换宿主的 Personal Agent Foundation 进行统一发现、路径校准、链接重建、Skill 恢复、GitHub/飞书/Obsidian/阿里云/云效/服务器权限与连接引导、自检修复和最终验收；服务器恢复只处理非敏感 Profile、SSH 运行时和授权门禁，不自动执行远程变更。
 
 ### `init-agent-project`
 
@@ -65,6 +72,20 @@
 - 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\feishu-profile`
 - 恢复方式：从 GLOBAL 源稿安装或同步到当前 Agent 可发现的全局 Skill 位置。
 - 用途：统一管理飞书 CLI 多 Profile 的新增、一键创建应用、用户授权、失效恢复、换机迁移、项目局部路由、重命名与安全删除。
+
+### `aliyun-profile`
+
+- 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\aliyun-profile`
+- 恢复方式：从 GLOBAL 源稿安装或同步到当前 Agent 可发现的全局 Skill 位置。
+- 运行依赖：阿里云 CLI 与官方云效插件 `aliyun-cli-devops`；Windows 长期 PAT 槽依赖系统 DPAPI CurrentUser。恢复后先执行 `aliyun version`、`aliyun plugin list`、`aliyun devops version`，再按 `ALIYUN_PROFILES.md` 使用 `scripts/yunxiao-credential-slot.ps1 -Action connect` 隐藏输入并重新授权。DPAPI 密文不随 GLOBAL 或整套基座迁移。
+- 用途：统一管理阿里云 CLI 多 Profile、云效组织逻辑身份、插件安装、授权恢复、项目路由和安全删除；具体业务流程由对应的全局业务 Skill 或项目 Skill 承担。
+
+### `yunxiao-mr-review`
+
+- 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\yunxiao-mr-review`
+- 恢复方式：从 GLOBAL 源稿安装或同步到当前 Agent 可发现的全局 Skill 位置。
+- 运行依赖：全局 `aliyun-profile`、阿里云 CLI 与官方云效插件 `aliyun-cli-devops`；实际逻辑 Profile、组织和仓库业务路由由目标项目规则或薄覆盖层提供。
+- 用途：跨项目执行云效 Codeup 合并请求的证据化审查，发现问题时发布精确行内评论，证据完整且无问题时通过评审，但不自动合并或部署。
 
 ### `align-agent-projects-with-global`
 

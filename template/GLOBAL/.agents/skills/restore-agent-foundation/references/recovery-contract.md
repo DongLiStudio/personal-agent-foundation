@@ -40,7 +40,7 @@ discover → audit → plan → confirm → repair → interactive-gates → ver
 - 模板占位符残留。
 - 目标、父目录或 Skill 安装路径包含未知链接/reparse point。
 - 文件在计划后改变。
-- GitHub、飞书、Obsidian、服务器、宿主登录或权限缺失。
+- GitHub、飞书、Obsidian、阿里云/云效、服务器、宿主登录或权限缺失。
 - 任何覆盖项目文件、删除旧根、修改 Vault 内容、commit、push 或远程权限的动作。
 
 ## 扫描边界
@@ -62,4 +62,4 @@ discover → audit → plan → confirm → repair → interactive-gates → ver
 - GLOBAL Git 存在。
 - 链接只验证链接本体和目标可达，不遍历外部目标。
 
-交互验收至少包含 GitHub、飞书、Obsidian、服务器和当前宿主的实时发现与身份/可用性回读。服务器验收必须先选定 Profile、核验可信主机指纹，再做有界只读连接；不得仅因 `ssh` 命令存在就判定通过。不能自动验证的项目必须明确标记，不能推断为通过。
+交互验收至少包含 GitHub、飞书、Obsidian、阿里云/云效、服务器和当前宿主的实时发现与身份/可用性回读。阿里云/云效验收必须区分通用 CLI Profile 与云效 PAT 组织身份，只做安全凭据输入和最小只读回读；服务器验收必须先选定 Profile、核验可信主机指纹，再做有界只读连接；不得仅因 `ssh`、`aliyun` 或插件命令存在就判定通过。不能自动验证的项目必须明确标记，不能推断为通过。

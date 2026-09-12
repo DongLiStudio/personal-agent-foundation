@@ -26,6 +26,7 @@ CORE = (
     "OBSIDIAN_LINK.md",
     "SKILL_DEPENDENCIES.md",
     "LARK_PROFILES.md",
+    "ALIYUN_PROFILES.md",
     "SERVER_PROFILES.md",
     "GITHUB_ACCOUNTS.md",
     "SCHEDULE_PREFERENCES.md",
@@ -56,6 +57,25 @@ class FoundationRecoveryTests(unittest.TestCase):
             mock.patch.dict(recovery.os.environ, {"LOCALAPPDATA": "Z:\\missing"}, clear=False),
         ):
             self.assertIsNone(recovery.obsidian_cli_path())
+
+    def test_aliyun_cli_discovers_windows_per_user_install(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            localappdata = self.temp_path(temp) / "AppData" / "Local"
+            executable = localappdata / "AliyunCLI" / "aliyun.exe"
+            executable.parent.mkdir(parents=True)
+            executable.write_bytes(b"fixture")
+            with (
+                mock.patch.object(recovery, "is_windows", return_value=True),
+                mock.patch.object(recovery.shutil, "which", return_value=None),
+                mock.patch.dict(
+                    recovery.os.environ,
+                    {"LOCALAPPDATA": str(localappdata)},
+                    clear=False,
+                ),
+            ):
+                self.assertEqual(
+                    str(recovery.lexical_abs(executable)), recovery.aliyun_cli_path()
+                )
 
     def make_foundation(self, base: Path, include_state: bool = True) -> tuple[Path, str]:
         base = base.resolve()
@@ -150,6 +170,18 @@ class FoundationRecoveryTests(unittest.TestCase):
             self.assertIn("SERVER_PROFILES.md", plan["missing_core_files"])
             self.assertTrue(
                 any(item["kind"] == "server_connection" for item in plan["interactive_gates"])
+            )
+
+    def test_aliyun_is_always_an_interactive_recovery_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root, _ = self.make_foundation(self.temp_path(temp))
+            plan = recovery.make_plan(root, None, [], None)
+            self.assertIn("aliyun_cli", plan["runtime"])
+            self.assertTrue(
+                any(
+                    item["kind"] == "aliyun_authorization"
+                    for item in plan["interactive_gates"]
+                )
             )
 
     def test_unrelated_mustache_template_is_not_foundation_residue(self) -> None:

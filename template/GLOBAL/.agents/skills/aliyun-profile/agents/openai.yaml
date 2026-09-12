@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：阿里云与云效账号管理"
+  short_description: "管理阿里云多 Profile、云效组织授权、恢复与安全路由"
+  default_prompt: "使用 $aliyun-profile 检查并恢复当前项目需要的阿里云或云效身份。"

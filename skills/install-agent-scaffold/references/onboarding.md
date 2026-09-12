@@ -110,8 +110,10 @@ GLOBAL 文件导览应该发生在全局个性化提示词保存、通用助手�
 - `OBSIDIAN_LINK.md`：Obsidian 外部知识库的入口、只读边界、目录理解和优先阅读顺序。
 - `SKILL_DEPENDENCIES.md`：需要恢复、安装、同步的全局 Skill 清单。
 - `LARK_PROFILES.md`：飞书公司、应用和 Profile 路由；不放 token。
-- `SERVER_PROFILES.md`：服务器 Profile、服务归属和操作边界；不放私钥、密码或票据。
 - `GITHUB_ACCOUNTS.md`：GitHub 账号和仓库操作路由；不放 token。
+- `ALIYUN_PROFILES.md`：阿里云 CLI Profile 与云效组织逻辑身份路由；不放 PAT、AK/SK 或票据。
+- `SERVER_PROFILES.md`：服务器 Profile 索引、服务归属和操作边界；不放私钥、密码或票据。
+- `servers/`：按 `servers/<profile>.md` 拆分的单机详情目录；只在选定 Profile 后读取对应详情。
 - `SCHEDULE_PREFERENCES.md`：个人排程稳定偏好和跨账号日历同步口径。
 - `.agents/skills/`：用户自维护的全局 Skill 源稿，不等于宿主运行时安装目录。
 - `obsidian-resource`：指向 Obsidian Vault 的只读入口；不是把 Vault 复制进 GLOBAL。
@@ -121,7 +123,7 @@ GLOBAL 文件导览应该发生在全局个性化提示词保存、通用助手�
 1. 先展示完整文件列表。
 2. 用一句话解释每个文件的作用。
 3. 问用户：“你想先了解哪个？我可以按你选的顺序一个一个讲，也可以按推荐顺序讲。”
-4. 如果用户没有偏好，按推荐顺序讲：`README.md` → `GLOBAL_CONTEXT.md` → `PROJECTS.md` → `OBSIDIAN_LINK.md` → `SKILL_DEPENDENCIES.md` → `LARK_PROFILES.md` / `GITHUB_ACCOUNTS.md` → `SERVER_PROFILES.md` → `SCHEDULE_PREFERENCES.md` → `.agents/skills/`。
+4. 如果用户没有偏好，按推荐顺序讲：`README.md` → `GLOBAL_CONTEXT.md` → `PROJECTS.md` → `OBSIDIAN_LINK.md` → `SKILL_DEPENDENCIES.md` → `LARK_PROFILES.md` / `GITHUB_ACCOUNTS.md` → `ALIYUN_PROFILES.md` → `SERVER_PROFILES.md` / `servers/` → `SCHEDULE_PREFERENCES.md` → `.agents/skills/`。
 5. 每讲完一个文件，给一个很短例子说明未来什么时候会用到，并询问是否继续下一个。
 
 用户选择跳过导览时，通用助手总经理应说明以后可以让 Agent 读取 `GLOBAL/README.md` 重新讲解，并把“GLOBAL 导览未完成”列入待办。
@@ -167,7 +169,8 @@ Agent/
 先展示 Skills 分组：
 
 - 项目与治理：`init-agent-project`、`record-skill-dependency`、`align-agent-projects-with-global`、`migrate-agent-root`。
-- 账号与工具：`github-cli`、`feishu-profile`。
+- 账号与工具：`github-cli`、`feishu-profile`、`aliyun-profile`、`server-profile`。
+- DevOps 审查：`yunxiao-mr-review`，只在项目规则和云效身份明确后处理 Codeup MR；不自动合并或部署。
 - 任务与排程：`feishu-task`、`personal-schedule-planner`、`decide-next-action`。
 - 知识库：`json-canvas`、`obsidian-bases`、`obsidian-cli`，以及已安装或待安装的 Obsidian 连接能力。
 - 视觉与前端协作：`visual-iteration-workflow`，以及可选外部 UI/UX 能力。

@@ -2,9 +2,9 @@
   "schema_version": 1,
   "source": {
     "kind": "generalized-live-global",
-    "baseline_file_count": 57
+    "baseline_file_count": 76
   },
-  "template_file_count": 64,
+  "template_file_count": 76,
   "template_root": "template",
   "required_paths": [
     "GLOBAL/README.md",
@@ -13,7 +13,9 @@
     "GLOBAL/OBSIDIAN_LINK.md",
     "GLOBAL/SKILL_DEPENDENCIES.md",
     "GLOBAL/LARK_PROFILES.md",
+    "GLOBAL/ALIYUN_PROFILES.md",
     "GLOBAL/SERVER_PROFILES.md",
+    "GLOBAL/servers/README.md",
     "GLOBAL/GITHUB_ACCOUNTS.md",
     "GLOBAL/SCHEDULE_PREFERENCES.md",
     "GLOBAL/FOUNDATION_STATE.json",

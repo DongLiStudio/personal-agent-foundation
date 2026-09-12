@@ -20,7 +20,9 @@
 - `OBSIDIAN_LINK.md`：个人 Obsidian 库的只读连接规则和目录理解。
 - `SKILL_DEPENDENCIES.md`：需要主动恢复的全局 Skill 依赖清单；默认预装和插件缓存不记录。
 - `LARK_PROFILES.md`：飞书 CLI 公司、应用和 profile 对应关系；不记录密钥或 token。
-- `SERVER_PROFILES.md`：跨项目服务器连接路由、服务归属与安全边界；不记录私钥、密码或票据。
+- `ALIYUN_PROFILES.md`：阿里云 CLI 多 Profile 与云效组织授权上下文的非敏感映射；不记录 AK/SK、PAT 或票据。
+- `SERVER_PROFILES.md`：跨项目服务器 Profile 索引、选择规则和共通操作边界；不记录每台服务器的完整细节。
+- `servers/`：每台受管服务器一个详情文件，记录该 Profile 的非敏感连接事实、服务归属、安全边界和恢复信息；公开模板默认只提供登记说明。
 - `SCHEDULE_PREFERENCES.md`：个人稳定排程偏好、容量边界和跨 Profile 日历同步口径；不记录每日计划或执行流水。
 - `FOUNDATION_STATE.json`：当前基座根目录与统一恢复入口的机器可读状态；换机或换 Agent 后由 `restore-agent-foundation` 校准。
 - `GITHUB_ACCOUNTS.md`：GitHub CLI 账号用途、权限参考、实时核验方式和切换约定；不记录 token 或 PAT。
@@ -40,7 +42,9 @@
 - `SKILL_DEPENDENCIES.md`：涉及全局 Skill 创建、安装、同步、检查或恢复时读取。
 - `GITHUB_ACCOUNTS.md`：涉及 GitHub 认证、账号用途或账号切换时读取。
 - `LARK_PROFILES.md`：涉及飞书 CLI、公司、应用或 profile 选择时读取。
-- `SERVER_PROFILES.md`：涉及 SSH、服务器、共享基础设施、部署目标或服务归属时读取；执行前仍须实时核验身份、权限和主机指纹。
+- `ALIYUN_PROFILES.md`：涉及阿里云 CLI、云效组织、Codeup、Flow、云资源账号或授权路由时读取。
+- `SERVER_PROFILES.md`：涉及 SSH、服务器、共享基础设施、部署目标或服务归属时先读取，用于解析唯一服务器 Profile。
+- `servers/<profile>.md`：解析出服务器 Profile 后只读取对应详情；不要默认递归或批量读取全部 `servers/`。
 - `SCHEDULE_PREFERENCES.md`：涉及个人时间规划、任务排程、工作节奏或跨 Profile 日历同步时读取。
 - `FOUNDATION_STATE.json`：涉及换机、迁移、宿主切换、自检或修复时读取。
 - `OBSIDIAN_LINK.md` 和 `obsidian-resource`：任务确实需要长期知识、业务背景或既有规划时读取。

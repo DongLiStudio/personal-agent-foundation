@@ -8,7 +8,7 @@
 
 这些输入不得包含密码、token、App Secret、恢复码或私钥。
 
-飞书、GitHub 和 Obsidian 不属于初始模板渲染输入。GLOBAL 与 Skills 恢复后，安装器再分别询问是否现在连接，默认选项必须是“现在连接”；连接时调用对应 Skill 或官方 CLI 完成授权并回读真实身份或路径，不要求用户预先知道飞书 Profile 名、GitHub 用户名或 Obsidian 目录结构。
+飞书、GitHub、Obsidian、阿里云/云效和服务器不属于初始模板渲染输入。GLOBAL 与 Skills 恢复后，安装器再分别询问是否现在连接、配置或登记；飞书、GitHub 和 Obsidian 的默认选项必须是“现在连接”。连接时调用对应 Skill、官方 CLI 或宿主安全凭据通道完成授权并回读真实身份、路径或边界，不要求用户预先知道飞书 Profile 名、GitHub 用户名、Obsidian 目录结构、云效凭据槽或 SSH 细节。
 
 Obsidian Vault 真实路径是连接阶段的临时输入，不属于模板占位符，不得长期写入 `GLOBAL/OBSIDIAN_LINK.md`。安装器必须先确认或有界发现用户 Vault 的基础结构、目录理解和优先阅读入口；只创建 `GLOBAL/obsidian-resource` 软连接/Junction 不构成 Obsidian 配置完成。生成的 `OBSIDIAN_LINK.md` 应与产品模板同构，只替换“目录理解”和“优先阅读”中涉及用户个人目录设计的条目。
 
@@ -24,8 +24,9 @@ Obsidian Vault 真实路径是连接阶段的临时输入，不属于模板占�
 4. `install`：在目标同级临时 staging 渲染，验证后原子移动到目标。
 5. `verify`：从目标重新读取并检查必需文件、占位符残留和编码。
 6. Skill 恢复 GLOBAL Skills。
-7. Skill 询问并调用对应能力完成飞书、GitHub 和 Obsidian 连接；“现在连接”为默认选项，用户主动选择稍后再配时才保留未配置说明。飞书连接默认新建专用应用/Profile，禁止自动复用已有 Profile。
-8. Skill 完成 GLOBAL Git、知识库连接和 onboarding。
+7. Skill 询问并调用对应能力完成飞书、GitHub、Obsidian、阿里云/云效和服务器连接/恢复；飞书、GitHub 与 Obsidian 首次安装时“现在连接”为默认选项，用户主动选择稍后再配时才保留未配置说明。飞书连接默认新建专用应用/Profile，禁止自动复用已有 Profile。
+8. 阿里云/云效只恢复非敏感身份路由、CLI/插件和安全凭据输入门禁；服务器只恢复 Profile 索引、单机详情读取路由、SSH 客户端与指纹/身份只读核验门禁，不自动执行仓库、流水线、MR、部署或远端变更。
+9. Skill 完成 GLOBAL Git、知识库连接和 onboarding。
 
 ## 目标保护
 
