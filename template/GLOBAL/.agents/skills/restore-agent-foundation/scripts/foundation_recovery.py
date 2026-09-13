@@ -78,6 +78,7 @@ SKIP_DIRS = {
     "build",
     "dist",
     ".foundation-recovery",
+    ".foundation-update",
 }
 SECRET_NAMES = {
     ".env",

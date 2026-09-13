@@ -135,6 +135,16 @@ class FoundationRecoveryTests(unittest.TestCase):
             self.assertEqual(before, recovery.tree_inventory(root))
             self.assertEqual(plan["plan_sha256"], recovery.plan_digest(plan))
 
+    def test_update_backups_are_excluded_from_placeholder_scan(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root, _ = self.make_foundation(self.temp_path(temp))
+            backup = root / "GLOBAL" / ".foundation-update" / "fixture" / "before.md"
+            backup.parent.mkdir(parents=True)
+            token = chr(123) * 2 + "AGENT_ROOT" + chr(125) * 2
+            backup.write_text(token + "\n", encoding="utf-8", newline="\n")
+            plan = recovery.make_plan(root, None, [], None)
+            self.assertFalse(plan["placeholder_residue"])
+
     def test_project_parser_ignores_non_project_sections(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root, _ = self.make_foundation(self.temp_path(temp))
