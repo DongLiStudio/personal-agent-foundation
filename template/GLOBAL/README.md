@@ -87,6 +87,7 @@
 - 系统 skill、插件 skill、缓存文件和运行时安装产物不放入 `GLOBAL`。
 - 全局 Skill 恢复遵循 `SKILL_DEPENDENCIES.md`。
 - 已存在基座的换机、迁移、宿主切换和故障恢复统一使用 `restore-agent-foundation`；该 Skill 的核心恢复程序自包含，不以其他 Skill 已可用为前提。
+- 已存在且健康的基座需要从用户确认的可信 Personal Agent Foundation 上游升级时统一使用 `update-agent-foundation`；先审计和确认带哈希的计划，再更新受管 Skill、保留用户状态，并对治理文档只给出语义合并清单。
 - 需要主动恢复的外部或自维护 skill 记录在 `SKILL_DEPENDENCIES.md`；默认预装 skill 不记录。
 
 ## 安全约定

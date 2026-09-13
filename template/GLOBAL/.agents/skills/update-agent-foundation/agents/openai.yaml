@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：更新 Agent 基座"
+  short_description: "安全检查、规划并更新已有 Personal Agent Foundation"
+  default_prompt: "Use $update-agent-foundation to check and safely update my existing Personal Agent Foundation."

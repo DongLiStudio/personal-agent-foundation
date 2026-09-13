@@ -2,9 +2,9 @@
   "schema_version": 1,
   "source": {
     "kind": "generalized-live-global",
-    "baseline_file_count": 76
+    "baseline_file_count": 81
   },
-  "template_file_count": 76,
+  "template_file_count": 81,
   "template_root": "template",
   "required_paths": [
     "GLOBAL/README.md",
@@ -21,6 +21,8 @@
     "GLOBAL/FOUNDATION_STATE.json",
     "GLOBAL/.agents/skills/restore-agent-foundation/SKILL.md",
     "GLOBAL/.agents/skills/restore-agent-foundation/scripts/foundation_recovery.py",
+    "GLOBAL/.agents/skills/update-agent-foundation/SKILL.md",
+    "GLOBAL/.agents/skills/update-agent-foundation/scripts/foundation_update.py",
     "GLOBAL/.agents/skills/init-agent-project/SKILL.md"
   ],
   "placeholders": {

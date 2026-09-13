@@ -1,6 +1,6 @@
 # GLOBAL 通用化映射
 
-模板以真实 GLOBAL 的公开治理结构为来源，当前公开模板清单为 76 个文件，并增加公开产品自身的恢复状态与 `restore-agent-foundation` 模块；个人服务器地址、账号、指纹和服务拓扑不进入公开模板。
+模板以真实 GLOBAL 的公开治理结构为来源，当前公开模板清单为 81 个文件，并增加公开产品自身的恢复状态、`restore-agent-foundation` 与 `update-agent-foundation` 模块；个人服务器地址、账号、指纹和服务拓扑不进入公开模板。
 
 ## 保留
 
@@ -31,4 +31,4 @@
 
 ## 完整性要求
 
-当前模板受管文件数为 76：包含公开 GLOBAL 治理文件、`FOUNDATION_STATE.json`、自维护全局 Skill 源稿、恢复 Skill 文件和服务器详情目录说明。有意新增或删除 GLOBAL 模块时，必须同时更新 `template-manifest.json`、本文件和测试。不能为了通过脱敏扫描静默漏掉源文件。
+当前模板受管文件数为 81：包含公开 GLOBAL 治理文件、`FOUNDATION_STATE.json`、自维护全局 Skill 源稿、恢复/更新 Skill 文件和服务器详情目录说明。有意新增或删除 GLOBAL 模块时，必须同时更新 `template-manifest.json`、本文件和测试。不能为了通过脱敏扫描静默漏掉源文件。

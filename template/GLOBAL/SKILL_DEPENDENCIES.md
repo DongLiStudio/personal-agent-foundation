@@ -37,6 +37,13 @@
 - 恢复方式：换机或宿主 Skill 安装副本不可用时，直接让当前 Agent 读取上述源稿中的 `SKILL.md`；该 Skill 使用自身脚本恢复包括自己在内的全部安装副本，不依赖其他 Skill 先可用。
 - 用途：对已经存在、整体复制、迁移过、局部损坏或更换宿主的 Personal Agent Foundation 进行统一发现、路径校准、链接重建、Skill 恢复、GitHub/飞书/Obsidian/阿里云/云效/服务器权限与连接引导、自检修复和最终验收；服务器恢复只处理非敏感 Profile、SSH 运行时和授权门禁，不自动执行远程变更。
 
+### `update-agent-foundation`
+
+- 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\update-agent-foundation`
+- 恢复方式：从 GLOBAL 源稿安装或同步到当前 Agent 可发现的全局 Skill 位置；更新时也随公开产品模板进入 `GLOBAL/.agents/skills/`。
+- 运行依赖：Python 3.11+、Git，以及可读取的可信 Personal Agent Foundation 产品源；执行前核验产品模板审计和实际 source commit。
+- 用途：在保留项目、账号/Profile、Obsidian、服务器、排程和个人规则的前提下，检查上游新版、生成计划、备份并更新受管 Skills/新增公共文件，列出治理语义合并项，并提供验证与安全回滚。
+
 ### `init-agent-project`
 
 - 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\init-agent-project`

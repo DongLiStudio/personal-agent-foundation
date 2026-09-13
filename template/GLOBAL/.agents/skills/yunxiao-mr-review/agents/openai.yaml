@@ -1,4 +1,4 @@
 interface:
   display_name: "GLOBAL：云效 MR 审查"
-  short_description: "跨项目审查云效 MR，问题行评，无问题直接通过"
-  default_prompt: "使用 $yunxiao-mr-review 核验项目云效身份与仓库路由，审查当前 Codeup 合并请求；问题写入对应代码行，证据完整且无问题时直接通过评审。"
+  short_description: "全量首审、增量复审云效 MR，无阻断直接通过"
+  default_prompt: "使用 $yunxiao-mr-review 核验项目云效身份与仓库路由，首次审查一次性覆盖完整 Codeup 合并请求；复审只核验既有评论、修复和新增差异，问题写入对应代码行，无阻断时直接通过评审。"

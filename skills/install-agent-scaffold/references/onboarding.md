@@ -168,7 +168,7 @@ Agent/
 
 先展示 Skills 分组：
 
-- 项目与治理：`init-agent-project`、`record-skill-dependency`、`align-agent-projects-with-global`、`migrate-agent-root`。
+- 项目与治理：`init-agent-project`、`record-skill-dependency`、`align-agent-projects-with-global`、`migrate-agent-root`、`restore-agent-foundation`、`update-agent-foundation`。
 - 账号与工具：`github-cli`、`feishu-profile`、`aliyun-profile`、`server-profile`。
 - DevOps 审查：`yunxiao-mr-review`，只在项目规则和云效身份明确后处理 Codeup MR；不自动合并或部署。
 - 任务与排程：`feishu-task`、`personal-schedule-planner`、`decide-next-action`。

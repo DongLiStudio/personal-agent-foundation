@@ -67,6 +67,8 @@ Agent 如果无法读取公开仓库、执行本地工具或请求必要权限�
 
 `restore-agent-foundation` 自包含路径校准、状态检查、链接重建、Skill 重装、备份、回滚和最终验证，不要求其他 Skill 先可用。它会识别换机、根目录变化、宿主变化、安装副本丢失和授权失效，并把需要 GitHub、飞书、Obsidian、阿里云/云效、服务器 SSH 或系统权限的部分转换成清晰的官方授权步骤；用户完成后继续验收，不要求手工编排多个 Skill。
 
+已有基座需要获取公开上游新版时，使用 `GLOBAL/.agents/skills/update-agent-foundation/SKILL.md`。它会锁定实际 source commit，先比较和生成带哈希的更新计划；账号/Profile、项目索引、Obsidian、服务器、排程和个人规则只保留或语义合并，自维护 Skills 与新增公共文件在备份后确定性更新，并支持验证与安全回滚。
+
 阿里云/云效恢复采用身份与业务分离：先读取 `ALIYUN_PROFILES.md` 的非敏感路由，安装或验证 `aliyun` 与 `aliyun-cli-devops`，再由用户通过安全凭据通道重新授权。云效 PAT 与阿里云通用 Profile 是两套认证；恢复成功也不自动创建仓库、改流水线、审查 MR、合并或部署。
 
 服务器恢复采用渐进式治理：先读取 `SERVER_PROFILES.md` 的非敏感索引，由用户明确选择要恢复的服务器 Profile；再只读取对应 `servers/<profile>.md` 详情，重建或检查本机 SSH 配置、身份文件是否存在、主机指纹是否可信，并对目标服务做有界只读回读。恢复器不会默认批量展开全部服务器详情，不会自动接受未知主机密钥，不会把私钥、密码或票据写入 GLOBAL，也不会自动部署、重启、改网、改卷或修改远端配置。
@@ -117,6 +119,7 @@ Skill 按以下顺序执行：
 
 - 一个独立的 `GLOBAL/`，保存全局规则、项目索引、账号路由和 Skill 依赖记录。
 - 一个随 GLOBAL 携带的 `restore-agent-foundation`，用于换机、换 Agent、迁移和故障后的统一恢复。
+- 一个随 GLOBAL 携带的 `update-agent-foundation`，用于检查公开上游新版、保护用户定制、计划更新、备份、验证与回滚。
 - 一套公开脱敏的自维护 Skills。
 - 飞书、GitHub 和 Obsidian 的可选连接引导，不包含任何预置凭据。
 - 阿里云/云效的公开脱敏身份治理结构，用于登记 CLI Profile、组织路由、PAT 安全输入和 DevOps 操作边界；不包含真实凭据。
@@ -148,6 +151,7 @@ Skill 按以下顺序执行：
 - `template/GLOBAL/`：公开脱敏的 GLOBAL 模板，包括项目索引、账号路由、阿里云/云效身份、Obsidian 入口和多服务器治理结构。
 - `skills/install-agent-scaffold/`：对话式安装、验证和首次项目教程。
 - `skills/restore-agent-foundation/`：自包含的现有基座恢复、自检、修复与验收入口；同一副本随模板进入 `GLOBAL/.agents/skills/`。
+- `skills/update-agent-foundation/`：已有基座的可信上游版本检查、保护性更新、备份、验证与回滚入口；同一副本随模板进入 `GLOBAL/.agents/skills/`。
 - `template-manifest.json`：模板文件与占位符契约。
 - `tests/`：模板完整性、脱敏、渲染、目标保护和跨平台测试。
 - `docs/`：安装契约、通用化说明和维护资料。
@@ -158,6 +162,7 @@ Skill 按以下顺序执行：
 python -m unittest discover -s tests -v
 python skills/install-agent-scaffold/scripts/scaffold_guard.py audit-template --template template --manifest template-manifest.json
 python skills/restore-agent-foundation/scripts/test_foundation_recovery.py -v
+python skills/update-agent-foundation/scripts/test_foundation_update.py -v
 ```
 
 ## 许可证

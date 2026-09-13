@@ -27,10 +27,26 @@ spec.loader.exec_module(guard)
 
 def tree_hash(root: Path) -> str:
     value = sha256()
-    for path in sorted(item for item in root.rglob("*") if item.is_file()):
+    for path in sorted(
+        item
+        for item in root.rglob("*")
+        if item.is_file()
+        and "__pycache__" not in item.parts
+        and item.suffix != ".pyc"
+    ):
         value.update(path.relative_to(root).as_posix().encode("utf-8"))
         value.update(path.read_bytes())
     return value.hexdigest()
+
+
+def release_files(root: Path) -> list[str]:
+    return sorted(
+        path.relative_to(root).as_posix()
+        for path in root.rglob("*")
+        if path.is_file()
+        and "__pycache__" not in path.parts
+        and path.suffix != ".pyc"
+    )
 
 
 def values(target: Path) -> dict[str, str]:
@@ -54,7 +70,7 @@ class ScaffoldGuardTests(unittest.TestCase):
 
     def test_full_template_inventory_and_placeholders(self) -> None:
         report = guard.audit_template(TEMPLATE, self.manifest)
-        self.assertEqual(76, report["file_count"])
+        self.assertEqual(81, report["file_count"])
         self.assertEqual(
             {
                 "AGENT_ROOT",
@@ -76,7 +92,7 @@ class ScaffoldGuardTests(unittest.TestCase):
                 TEMPLATE, self.manifest, config, target
             )
             self.assertEqual("dry-run", report["mode"])
-            self.assertEqual(76, report["file_count"])
+            self.assertEqual(81, report["file_count"])
             self.assertFalse(target.exists())
             self.assertTrue(all(b"{{" not in content for _, content in rendered))
         self.assertEqual(before, tree_hash(TEMPLATE))
@@ -106,6 +122,17 @@ class ScaffoldGuardTests(unittest.TestCase):
                     / "foundation_recovery.py"
                 ).is_file()
             )
+            self.assertTrue(
+                (
+                    target
+                    / "GLOBAL"
+                    / ".agents"
+                    / "skills"
+                    / "update-agent-foundation"
+                    / "scripts"
+                    / "foundation_update.py"
+                ).is_file()
+            )
             with self.assertRaisesRegex(guard.GuardError, "target directory is not empty"):
                 guard.install(TEMPLATE, self.manifest, config, target)
 
@@ -120,8 +147,8 @@ class ScaffoldGuardTests(unittest.TestCase):
         )
         self.assertEqual(tree_hash(product), tree_hash(bundled))
         self.assertEqual(
-            sorted(path.relative_to(product).as_posix() for path in product.rglob("*") if path.is_file()),
-            sorted(path.relative_to(bundled).as_posix() for path in bundled.rglob("*") if path.is_file()),
+            release_files(product),
+            release_files(bundled),
         )
 
     def test_recovery_skill_uses_global_display_prefix(self) -> None:
@@ -131,6 +158,13 @@ class ScaffoldGuardTests(unittest.TestCase):
         ):
             metadata = (skill / "agents" / "openai.yaml").read_text(encoding="utf-8")
             self.assertIn('display_name: "GLOBAL：恢复 Agent 基座"', metadata)
+
+    def test_update_skill_product_and_template_copies_match(self) -> None:
+        product = ROOT / "skills" / "update-agent-foundation"
+        bundled = TEMPLATE / "GLOBAL" / ".agents" / "skills" / "update-agent-foundation"
+        self.assertEqual(tree_hash(product), tree_hash(bundled))
+        metadata = (product / "agents" / "openai.yaml").read_text(encoding="utf-8")
+        self.assertIn('display_name: "GLOBAL：更新 Agent 基座"', metadata)
 
     def test_windows_agent_root_is_valid_json_after_render(self) -> None:
         text = '{"installed_agent_root":"{{AGENT_ROOT}}"}\n'

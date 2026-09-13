@@ -7,6 +7,8 @@ description: 对已经存在、整体复制、迁移过、局部损坏或更换 
 
 把本 Skill 当作已存在 Agent 基座的唯一恢复入口。核心路径校准、链接重建、Skill 重装、状态验证、备份和回滚均使用本 Skill 自带的 `scripts/foundation_recovery.py`；不要把其他 Skill 能否运行作为恢复前提，也不要用临时 shell 替代确定性护栏。
 
+如果现有基座结构健康、用户目标是从可信上游获取新版本，应转用 `update-agent-foundation`；不要把版本升级伪装成故障恢复。
+
 ## 开始前
 
 完整读取 [恢复契约](references/recovery-contract.md)。需要处理宿主 Skill 安装位置、图形授权或宿主切换时，再读取 [宿主恢复](references/host-recovery.md)。
