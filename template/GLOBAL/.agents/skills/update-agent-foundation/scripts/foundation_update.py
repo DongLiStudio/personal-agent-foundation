@@ -27,6 +27,9 @@ USER_STATE_FILES = {
 }
 PLACEHOLDER = re.compile(r"\{\{[A-Z0-9_]+\}\}")
 AGENT_ROOT_TOKEN = chr(123) * 2 + "AGENT_ROOT" + chr(125) * 2
+GENERAL_ASSISTANT_PROJECT_TOKEN = (
+    chr(123) * 2 + "GENERAL_ASSISTANT_PROJECT" + chr(125) * 2
+)
 
 
 def abs_path(path: Path) -> Path:
@@ -85,8 +88,21 @@ def read_text(path: Path) -> str:
     return raw.decode("utf-8")
 
 
+def installation_values(root: Path) -> dict[str, str]:
+    values = {AGENT_ROOT_TOKEN: str(root)}
+    state_path = root / "GLOBAL" / "FOUNDATION_STATE.json"
+    if state_path.is_file():
+        state = load_json(state_path)
+        project = state.get("general_assistant_project")
+        if isinstance(project, str) and project.strip():
+            values[GENERAL_ASSISTANT_PROJECT_TOKEN] = project.strip()
+    return values
+
+
 def rendered_bytes(path: Path, root: Path) -> bytes:
-    text = read_text(path).replace(AGENT_ROOT_TOKEN, str(root))
+    text = read_text(path)
+    for token, value in installation_values(root).items():
+        text = text.replace(token, value)
     return text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
 
 

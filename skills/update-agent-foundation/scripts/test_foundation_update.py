@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -24,6 +25,15 @@ class FoundationUpdateTests(unittest.TestCase):
         skill.write_text("old\n", encoding="utf-8", newline="\n")
         (global_root / "PROJECTS.md").write_text("用户项目\n", encoding="utf-8", newline="\n")
         (global_root / "GLOBAL_CONTEXT.md").write_text("用户规则\n", encoding="utf-8", newline="\n")
+        (global_root / "FOUNDATION_STATE.json").write_text(
+            json.dumps(
+                {"general_assistant_project": "通用助手"},
+                ensure_ascii=False,
+                indent=2,
+            ) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
         source = base / "product"
         template = source / "template" / "GLOBAL"
         source_skill = template / ".agents" / "skills" / "sample" / "SKILL.md"
@@ -79,6 +89,19 @@ class FoundationUpdateTests(unittest.TestCase):
             unknown_placeholder = chr(123) * 2 + "UNKNOWN" + chr(125) * 2 + "\n"
             file.write_text(unknown_placeholder, encoding="utf-8")
             self.assertTrue(update.make_plan(root, source)["blocking_issues"])
+
+    def test_general_assistant_project_is_rendered_from_foundation_state(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root, source = self.fixture(Path(temp))
+            file = source / "template" / "GLOBAL" / ".agents" / "skills" / "sample" / "SKILL.md"
+            token = chr(123) * 2 + "GENERAL_ASSISTANT_PROJECT" + chr(125) * 2
+            file.write_text(f"handoff to {token}\n", encoding="utf-8", newline="\n")
+            plan = update.make_plan(root, source)
+            self.assertFalse(plan["blocking_issues"])
+            self.assertEqual(
+                b"handoff to \xe9\x80\x9a\xe7\x94\xa8\xe5\x8a\xa9\xe6\x89\x8b\n",
+                update.rendered_bytes(file, root),
+            )
 
     def test_rollback_restores_replaced_and_removes_added(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

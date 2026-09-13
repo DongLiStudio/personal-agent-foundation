@@ -4,7 +4,8 @@ param(
     [ValidateSet('connect', 'status', 'verify', 'run', 'remove', 'self-test')]
     [string]$Action,
 
-    [string]$SlotName = '<云效逻辑 Profile>',
+    [Parameter(Mandatory = $true)]
+    [string]$SlotName,
     [string]$OrganizationId,
     [string]$AliyunPath,
     [string]$StoreRoot,
