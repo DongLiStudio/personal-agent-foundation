@@ -6,3 +6,4 @@
 *.yml text eol=lf
 *.json text eol=lf
 *.py text eol=lf
+*.ps1 text eol=lf
