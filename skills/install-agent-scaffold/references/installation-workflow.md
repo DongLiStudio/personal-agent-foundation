@@ -29,7 +29,7 @@ macOS/Linux 使用对应绝对路径。`AGENT_ROOT` 必须与命令的 `--target
 
 ## 连接意图门禁
 
-GLOBAL 安装验证和 Skill 恢复完成后，分别询问：
+安装开场先展示完整服务总览，让用户从一开始就知道稍后会逐项配置什么；此时不索取账号、Profile、路径或凭据。GLOBAL 安装验证和 Skill 恢复完成后，再以同一张清单分别询问：
 
 1. 是否现在连接飞书账号或创建默认飞书 Profile。
 2. 是否现在连接 GitHub 账号并设置默认账号。
@@ -41,7 +41,14 @@ GLOBAL 安装验证和 Skill 恢复完成后，分别询问：
 8. 是否在当前 Windows 宿主连接本机微信只读 Profile。
 9. 是否现在登记或恢复服务器 Profile。
 
-每一项都必须得到明确回答。安装器展示飞书、GitHub、Obsidian 选项时，默认推荐和预选项必须是“现在连接”；“稍后连接 / 当前没有账号 / 当前没有 Vault”只能作为用户主动选择的备选项。用户选择连接时，不询问实现标识；直接调用对应 Skill 或官方 CLI 发起授权、验证码或网页登录流程，并用回读结果写入 GLOBAL。用户选择稍后再配、当前没有账号或当前没有 Vault 时，才保留未配置说明。认证过程中只走官方 OAuth、CLI、宿主安全凭据通道或授权流程，不能要求用户在对话中提供 token、密码、App Secret、私钥、PAT、AK/SK 或恢复码。
+每一项都必须得到明确回答，并保存在本轮服务状态表中。状态表字段固定为 `name`、`purpose`、`platform_or_dependency`、`decision`、`status`、`evidence`、`next_action`；`status` 只能从 `pending`、`configured`、`deferred_by_user`、`unavailable_on_host`、`blocked` 中选择。安装器展示飞书、GitHub、Obsidian 选项时，默认推荐和预选项必须是“现在连接”；“稍后连接 / 当前没有账号 / 当前没有 Vault”只能作为用户主动选择的备选项。其他六项可以是可选配置，但也必须显式决定。用户选择连接时，不询问实现标识；直接调用对应 Skill 或官方 CLI 发起授权、验证码或网页登录流程，并用回读结果写入 GLOBAL。只有用户主动选择稍后处理时才用 `deferred_by_user`；平台确实不支持时用 `unavailable_on_host`；依赖、授权或验收失败时用 `blocked`。认证过程中只走官方 OAuth、CLI、宿主安全凭据通道或授权流程，不能要求用户在对话中提供 token、密码、App Secret、私钥、PAT、AK/SK 或恢复码。
+
+首次安装还必须展示两个“条件能力”，但不得把它们伪装成已配置的账号服务：
+
+- `feishu-exam-builder`：说明它在飞书身份和权限就绪后可按项目创建考试、评分和阅卷流程；没有真实考试需求时状态为“已安装可按需调用”，不自动创建资产。
+- `allinssl-certificate-automation`：说明它需要明确域名、DNS/云账号、服务器和通知边界后才能配置；首次安装不自动申请证书、部署、改 DNS 或重启服务。
+
+最终收尾前逐项对账九类连接。任何项目仍为 `pending` 都表示流程遗漏，安装器必须返回该项目继续询问或诊断，不能宣布安装完成。
 
 阿里云/云效连接有额外硬门禁：先用通俗语言说明“阿里云通用 Profile”和“云效 PAT 组织身份”是两套认证，再调用 `aliyun-profile` 验证 `aliyun`、`aliyun-cli-devops` 和 `ALIYUN_PROFILES.md`。PAT 只能通过宿主安全凭据通道或隐藏输入进入当前进程，不能写入 GLOBAL、命令参数、日志或普通环境变量。授权成功只代表身份可用，不自动执行仓库创建、流水线、MR 审查、合并或部署。
 
@@ -61,7 +68,7 @@ Gitee 连接必须通过官方 CLI 回读真实 username；本机微信连接只
 
 ```text
 source-bootstrap -> collect-minimal -> runtime-preflight -> audit -> plan -> confirm
-        -> install -> verify -> skills -> identities -> devops-identities
+        -> install -> verify -> skills -> service-matrix -> identities -> devops-identities
         -> server-profiles -> knowledge-layout -> knowledge-link -> local-git -> global-prompt
         -> project-layout-lesson -> general-assistant
         -> general-assistant-open-gate -> general-assistant-manager
@@ -71,7 +78,7 @@ source-bootstrap -> collect-minimal -> runtime-preflight -> audit -> plan -> con
 
 任何阶段失败都保留已经验证成功的事实，不跳过失败门禁。文件安装失败时，只允许清理本轮随机 staging 和本轮自动获取的临时产品源；目标目录、目标父目录和用户原本提供的模板源不得删除。
 
-安装器必须把当前阶段当作可恢复状态保存到对话中：每次等待用户输入前，明确当前阶段、已完成证据、下一步会做什么、是否会写入或授权。用户在安装过程中说起其他事情时，不得丢失状态或重新开始；先判断该输入是安装补充、暂停请求还是无关插话。无关插话只简短回应并继续当前阶段；暂停请求必须输出恢复检查点、已完成步骤、未完成门禁和建议恢复命令。
+安装器必须把当前阶段和服务状态表当作可恢复状态保存到对话中：每次等待用户输入前，明确当前阶段、已完成证据、九类连接的已决定/待决定数量、下一步会做什么、是否会写入或授权。用户在安装过程中说起其他事情时，不得丢失状态或重新开始；先判断该输入是安装补充、暂停请求还是无关插话。无关插话只简短回应并继续当前阶段；暂停请求必须输出恢复检查点、已完成步骤、未完成门禁、仍为 `pending` 的服务和建议恢复命令。
 
 交互式操作和安装护栏贯穿全流程，不只适用于前半段。进入 `identities`、`devops-identities`、`server-profiles`、`knowledge-layout`、`knowledge-link`、`local-git`、`project-layout-lesson`、`global-prompt`、`general-assistant`、`general-assistant-open-gate`、`general-assistant-manager`、`global-tour-handoff`、`first-project-open-gate`、`first-project-manager` 和 `skill-smoke-tests` 时，仍必须遵守：宿主有可视化能力先尝试、写入前展示计划、外部授权前说明权限、真实操作前取得确认、操作后独立回读证据、失败时保留诊断并停止越权推进。
 

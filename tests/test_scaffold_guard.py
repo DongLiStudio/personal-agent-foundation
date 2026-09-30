@@ -411,13 +411,55 @@ class ProductBoundaryTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         combined = installer + "\n" + workflow
         for text in (
-            "不得把飞书、GitHub、Obsidian、阿里云/云效或服务器静默设为“未配置”",
+            "不得把飞书、GitHub、Obsidian、阿里云/云效、腾讯云、邮箱、Gitee、本机微信或服务器静默设为“未配置”",
             "是否现在连接飞书",
             "是否现在连接 GitHub",
             "是否现在连接 Obsidian",
             "默认推荐和预选项应为“现在连接”",
+            "任何项目仍为 `pending` 都表示流程遗漏",
+            "feishu-exam-builder",
+            "allinssl-certificate-automation",
         ):
             self.assertIn(text, combined)
+
+    def test_installer_has_complete_service_matrix_and_reconciliation(self) -> None:
+        paths = (
+            ROOT / "README.md",
+            ROOT / "skills" / "install-agent-scaffold" / "SKILL.md",
+            ROOT / "skills" / "install-agent-scaffold" / "references" / "installation-workflow.md",
+            ROOT / "skills" / "install-agent-scaffold" / "references" / "host-integration.md",
+            ROOT / "docs" / "installation-contract.md",
+        )
+        combined = "\n".join(path.read_text(encoding="utf-8") for path in paths)
+        for service in (
+            "飞书",
+            "GitHub",
+            "Obsidian",
+            "阿里云/云效",
+            "腾讯云",
+            "邮箱",
+            "Gitee",
+            "本机微信",
+            "服务器",
+        ):
+            self.assertIn(service, combined)
+        for status in (
+            "configured",
+            "deferred_by_user",
+            "unavailable_on_host",
+            "blocked",
+            "pending",
+        ):
+            self.assertIn(status, combined)
+        for field in (
+            "purpose",
+            "platform_or_dependency",
+            "decision",
+            "evidence",
+            "next_action",
+        ):
+            self.assertIn(field, combined)
+        self.assertIn("最终收尾前逐项对账九类连接", combined)
 
     def test_installer_defers_identity_names_until_tools_can_authorize(self) -> None:
         installer = (
@@ -439,7 +481,7 @@ class ProductBoundaryTests(unittest.TestCase):
             "先安装 GLOBAL 和 Skills",
             "不要向用户询问“Profile 名是什么”作为前置条件",
             "不要向用户询问“GitHub 用户名是什么”作为前置条件",
-            "飞书、GitHub、Obsidian、阿里云/云效和服务器不属于初始模板渲染输入",
+            "飞书、GitHub、Obsidian、阿里云/云效、腾讯云、邮箱、Gitee、本机微信和服务器不属于初始模板渲染输入",
         ):
             self.assertIn(text, combined)
         self.assertNotIn("用户选择连接时再收集默认 Profile 名", combined)
@@ -473,7 +515,7 @@ class ProductBoundaryTests(unittest.TestCase):
         for text in (
             "默认推荐和预选项均为“现在连接”",
             "默认推荐和预选项必须是“现在连接”",
-            "三个连接项的默认选项都应是“现在连接”",
+            "飞书、GitHub、Obsidian 的默认选项都应是“现在连接”",
             "默认选项必须是“现在连接”",
             "用户主动选择稍后再配时才保留未配置说明",
         ):
@@ -565,11 +607,14 @@ class ProductBoundaryTests(unittest.TestCase):
         for text in (
             "任何宿主支持可视化安装面板",
             "当前宿主可用时必须优先尝试可视化安装面板或确认摘要",
-            "例如 Codex 中可能表现为 `Visualize` 插件/能力",
+            "例如 Codex 可使用 `[@visualize](plugin://visualize@openai-bundled)`",
             "不要把某个宿主或插件名称当作唯一实现",
             "必须先尝试",
             "本次安装不得直接继续收集配置",
             "图形交互未使用",
+            "visual_fallback_reason",
+            "字段完全相同的结构化文本",
+            "最终对账",
         ):
             self.assertIn(text, combined)
 
