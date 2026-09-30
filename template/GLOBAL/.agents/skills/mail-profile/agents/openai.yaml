@@ -1,0 +1,4 @@
+interface:
+  display_name: "多租户邮箱管理"
+  short_description: "管理多邮箱身份、授权恢复与只读发票检索"
+  default_prompt: "Use $mail-profile to connect and verify a mailbox profile or find invoice attachments without changing mailbox state."

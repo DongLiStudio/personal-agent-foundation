@@ -52,6 +52,9 @@ Agent 工作采用项目制管理。
 - 项目索引：见 `PROJECTS.md`
 - 服务器 Profile：见 `SERVER_PROFILES.md`
 - 阿里云与云效身份：见 `ALIYUN_PROFILES.md`
+- 腾讯云账号与身份路由：见 `TENCENTCLOUD_PROFILES.md`
+- 本机微信只读身份路由：见 `WECHAT_PROFILES.md`
+- 邮箱账号与租户路由：见 `MAIL_PROFILES.md`
 
 ## 用户知识库
 
@@ -91,7 +94,10 @@ Obsidian 连接、目录理解和优先阅读入口见 `OBSIDIAN_LINK.md`。
 - 各项目原则上独立维护自己的 Git 仓库和版本历史；完成可验证的功能或文档增量后，按项目规则创建聚焦、可回退的提交，提交前检查 diff、相关验证和敏感信息，不跨项目暂存或混入无关改动。是否自动 push 以用户在 GLOBAL 或项目中确认并记录的持续授权为准：已经授权且 remote/upstream 已配置并核验时，提交后立即 push 并回读；尚未授权时只询问一次并记录选择。commit、push、MR/合并、Release 和部署仍分别报告，不得把持续 push 授权扩大为自动合并、发布或部署。
 - 如果已配置全局默认 GitHub 账号，且项目没有指定专属账号，项目需要远程备份时优先使用全局默认账号；项目存在专属账号或路由规则时，以项目规则为准。首次创建远程仓库、确定仓库名与可见性、配置 remote 和首次 push 前必须获得用户明确授权，不能因存在本地 commit 或默认账号而自动上传。
 - 涉及阿里云或云效时，先从 `ALIYUN_PROFILES.md` 与项目规则解析唯一逻辑身份，并使用全局 `aliyun-profile` 处理 CLI、插件和授权生命周期。通用 Codeup MR 审查闭环由全局 `yunxiao-mr-review` 维护，项目 Skill 只保留身份、组织、仓库和业务授权覆盖；仓库创建、保护分支、流水线配置和部署等其他业务流程仍进入对应项目 Skill。云效 PAT 与阿里云通用 Profile 是两套认证，不得互相推导。
+- 涉及腾讯云时，先从 `TENCENTCLOUD_PROFILES.md` 与项目规则解析唯一逻辑身份，并使用全局 `tencentcloud-profile` 管理官方 TCCLI、浏览器授权/SSO 与多 Profile 身份路由。资源清单通过腾讯云 API 实时查询，不在账号索引中缓存，也不建立账号到服务器的静态绑定。每次 API 调用显式指定 Profile、地域和资源 ID；认证成功不自动授权创建、变更、网络开放、发布或删除云资源。
+- 涉及本机微信记录时，先从 `WECHAT_PROFILES.md` 与项目规则解析唯一逻辑 Profile，并使用全局 `wechat-readonly-analyst` 管理本机绑定和只读查询。每次查询必须显式指定 Profile；用户确认账号归属并绑定后，即授予该 Profile 持续只读权限，直到删除 Profile。仅首次取钥或明确刷新密钥时需要只读扫描微信进程，日常查询直接使用 DPAPI CurrentUser 保护的本机密钥目录；不得设置默认 Profile、自动猜测最近账号、发送消息、输出原始数据库或迁移 DPAPI 密文。
 - 涉及服务器或共享基础设施时，先从 `SERVER_PROFILES.md` 解析服务器 Profile、租户/项目和目标服务；不使用隐式默认服务器。服务器登记只提供路由，不扩大授权，执行前必须实时核验身份、权限、主机指纹和目标服务边界。
+- 涉及邮箱时，先从 `MAIL_PROFILES.md` 与项目规则解析唯一邮箱 Profile，并使用全局 `mail-profile` 处理连接、授权恢复、身份核验和只读检索。邮箱当前登录态不是业务路由依据；默认不得标记已读、移动、删除、回复、转发或发送。邮箱中找到附件不自动授权写入项目、账目或审批。
 - 只有任务确实依赖长期个人知识、战略、资源、业务背景或既有规划时，才搜索或读取 Obsidian。
 - 搜索本地上下文时优先使用 `rg`。
 - 新笔记或重大修改先在对应 Agent 项目工作区起草。

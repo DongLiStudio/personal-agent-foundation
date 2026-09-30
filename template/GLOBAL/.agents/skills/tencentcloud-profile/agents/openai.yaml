@@ -1,0 +1,4 @@
+interface:
+  display_name: "腾讯云 Profile"
+  short_description: "管理 TCCLI 多账号身份与授权路由"
+  default_prompt: "使用 $tencentcloud-profile 安全连接或核验腾讯云账号，并维护非敏感 GLOBAL 路由。"

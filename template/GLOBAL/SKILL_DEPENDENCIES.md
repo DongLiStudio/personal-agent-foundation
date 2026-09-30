@@ -74,11 +74,25 @@
 - 恢复方式：从 GLOBAL 源稿安装或同步到当前 Agent 可发现的全局 Skill 位置。
 - 用途：跨项目解析飞书账号、人员角色、时间、任务详情和附件，安全完成附件局部脱敏、任务去重、创建、更新与回读；项目未指定账号时使用 GLOBAL 记录的全局默认 Profile。
 
+### `feishu-exam-builder`
+
+- 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\feishu-exam-builder`
+- 恢复方式：从 GLOBAL 源稿同步到当前 Agent 可发现的全局 Skill 位置；具体考试的身份、资源路由与阅卷 Skill 留在对应项目。
+- 运行依赖：Python 3.11+、已授权的 `lark-cli` 及相关飞书 Skills；缺失 Profile 由 `feishu-profile` 恢复。浏览器/UI 专属配置缺失时必须明确人工门禁。
+- 用途：引导确认考试需求与归档位置，创建和校验飞书试卷、评分表、答题表单、考场权限及实操阅卷 Skill。
+
 ### `feishu-profile`
 
 - 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\feishu-profile`
 - 恢复方式：从 GLOBAL 源稿安装或同步到当前 Agent 可发现的全局 Skill 位置。
 - 用途：统一管理飞书 CLI 多 Profile 的新增、一键创建应用、用户授权、失效恢复、换机迁移、项目局部路由、重命名与安全删除。
+
+### `mail-profile`
+
+- 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\mail-profile`
+- 恢复方式：从 GLOBAL 源稿同步到当前 Agent 可发现的全局 Skill 位置；OAuth 与本机安全凭据按 `MAIL_PROFILES.md` 重新授权，不迁移密码、授权码、token 或密文。
+- 运行依赖：对应服务商 OAuth/连接器，或 Python 3、IMAP SSL 与服务商客户端授权；最小验证只做身份探测或窄范围只读搜索。
+- 用途：管理跨项目、多公司和个人邮箱的逻辑 Profile、授权恢复、身份隔离与只读附件检索。
 
 ### `aliyun-profile`
 
@@ -86,6 +100,20 @@
 - 恢复方式：从 GLOBAL 源稿安装或同步到当前 Agent 可发现的全局 Skill 位置。
 - 运行依赖：阿里云 CLI 与官方云效插件 `aliyun-cli-devops`；Windows 长期 PAT 槽依赖系统 DPAPI CurrentUser。恢复后先执行 `aliyun version`、`aliyun plugin list`、`aliyun devops version`，再按 `ALIYUN_PROFILES.md` 使用 `scripts/yunxiao-credential-slot.ps1 -Action connect` 隐藏输入并重新授权。DPAPI 密文不随 GLOBAL 或整套基座迁移。
 - 用途：统一管理阿里云 CLI 多 Profile、云效组织逻辑身份、插件安装、授权恢复、项目路由和安全删除；具体业务流程由对应的全局业务 Skill 或项目 Skill 承担。
+
+### `tencentcloud-profile`
+
+- 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\tencentcloud-profile`
+- 恢复方式：从 GLOBAL 源稿同步到当前 Agent 可发现的全局 Skill 位置；按 `TENCENTCLOUD_PROFILES.md` 重新走浏览器授权、SSO 或角色授权，不复制旧宿主凭据文件。
+- 运行依赖：官方 Tencent Cloud CLI（TCCLI）与 Python/Pip；恢复后使用 STS 做最小只读身份验证。
+- 用途：管理腾讯云 TCCLI 安装、多 Profile 生命周期、真实主体验证和非敏感 GLOBAL 身份路由。
+
+### `wechat-readonly-analyst`
+
+- 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\wechat-readonly-analyst`
+- 恢复方式：同步到当前 Agent 的用户级 Skill 位置，再在安装副本执行离线安装；依赖包由 Skill 自带 wheelhouse 和哈希锁定清单提供。
+- 运行依赖：Windows 11 x64、Python 3.12 x64 与 DPAPI CurrentUser；首次取钥或刷新密钥还需要兼容的微信桌面客户端。DPAPI 槽、数据库路径、wxid、密钥和聊天内容均不迁移。
+- 用途：管理多个本机微信数据身份的非敏感逻辑 Profile，并在用户明确绑定后提供持续只读查询、搜索、统计和总结能力。
 
 ### `yunxiao-mr-review`
 
@@ -119,6 +147,13 @@
 - 恢复方式：从 GLOBAL 源稿安装或同步到当前 Agent 可发现的全局 Skill 位置。
 - 运行依赖：全局 `feishu-profile`、当前 `lark-cli` 内嵌的 `lark-task` 与 `lark-calendar`，以及外部 `json-canvas`、`obsidian-cli`；仪表盘实际关联 `.base` 时还需要 `obsidian-bases`。各依赖按本清单对应条目恢复并执行最小只读验证。
 - 用途：只读汇总全部治理层飞书任务与近期日历、Obsidian 仪表盘和活跃项目状态，推荐当前最值得立即执行的一个下一步，并在需要时转交任务维护或完整排程 Skill。
+
+### `allinssl-certificate-automation`
+
+- 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\allinssl-certificate-automation`
+- 恢复方式：从 GLOBAL 源稿同步到当前 Agent 可发现的全局 Skill 位置；API Key、DNS/SSH/通知凭据通过独立安全渠道恢复。
+- 运行依赖：经核验的 ALLinSSL 实例、服务器 Profile、HTTPS/SSH 客户端及按目标需要恢复的云账号 Profile；所有验证先从只读接口开始。
+- 用途：编排证书接入、DNS 验证、申请与续期、受控部署、失败通知、监控和迁移恢复。
 
 ## 主动安装的外部 Skill
 

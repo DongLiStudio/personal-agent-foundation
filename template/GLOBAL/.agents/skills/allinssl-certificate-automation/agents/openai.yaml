@@ -1,0 +1,3 @@
+interface:
+  display_name: "ALLinSSL 证书自动化"
+  short_description: "编排安全接入、自动续期、部署、双渠道失败通知与逐域名监控验收"

@@ -16,7 +16,7 @@ description: 检查并安全更新已经安装的 Personal Agent Foundation。�
 ## 固定保护边界
 
 - 不覆盖、删除或重建用户项目、项目 Git、未提交内容、外部知识库或链接目标。
-- `PROJECTS.md`、`LARK_PROFILES.md`、`GITHUB_ACCOUNTS.md`、`ALIYUN_PROFILES.md`、`SERVER_PROFILES.md`、`servers/`、`OBSIDIAN_LINK.md`、`SCHEDULE_PREFERENCES.md` 和 `FOUNDATION_STATE.json` 始终视为用户状态，只做语义补充，不用公开模板替换。
+- `PROJECTS.md`、`LARK_PROFILES.md`、`GITHUB_ACCOUNTS.md`、`GITEE_PROFILES.md`、`ALIYUN_PROFILES.md`、`TENCENTCLOUD_PROFILES.md`、`MAIL_PROFILES.md`、`WECHAT_PROFILES.md`、`SERVER_PROFILES.md`、`servers/`、`OBSIDIAN_LINK.md`、`SCHEDULE_PREFERENCES.md` 和 `FOUNDATION_STATE.json` 始终视为用户状态，只做语义补充，不用公开模板替换。
 - `GLOBAL/.agents/skills/` 中与上游同名的产品自维护 Skill 属于受管程序文件，可以在计划确认后逐文件更新；用户额外创建的 Skill 不删除。
 - `README.md`、`GLOBAL_CONTEXT.md`、`SKILL_DEPENDENCIES.md`、`.gitignore` 等治理文件发生变化时进入人工可读的语义合并清单，保留用户个性化规则与真实路由。
 - 不接受模板残留占位符，不跟随 Junction、symlink 或 reparse point，不把 token、PAT、AK/SK、密码、私钥或 Cookie 写入计划、备份说明或报告。

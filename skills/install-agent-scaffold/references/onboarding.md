@@ -112,6 +112,10 @@ GLOBAL 文件导览应该发生在全局个性化提示词保存、通用助手�
 - `LARK_PROFILES.md`：飞书公司、应用和 Profile 路由；不放 token。
 - `GITHUB_ACCOUNTS.md`：GitHub 账号和仓库操作路由；不放 token。
 - `ALIYUN_PROFILES.md`：阿里云 CLI Profile 与云效组织逻辑身份路由；不放 PAT、AK/SK 或票据。
+- `TENCENTCLOUD_PROFILES.md`：腾讯云 TCCLI 多 Profile 与真实主体路由；不放 SecretId、SecretKey 或票据。
+- `MAIL_PROFILES.md`：邮箱主体、服务商与项目用途路由；不放密码、授权码、token 或密文。
+- `WECHAT_PROFILES.md`：本机微信只读逻辑 Profile；不放 wxid、数据库路径、密钥或聊天内容。
+- `GITEE_PROFILES.md`：Gitee 账号、官方 CLI 和项目路由；不放 PAT 或私钥。
 - `SERVER_PROFILES.md`：服务器 Profile 索引、服务归属和操作边界；不放私钥、密码或票据。
 - `servers/`：按 `servers/<profile>.md` 拆分的单机详情目录；只在选定 Profile 后读取对应详情。
 - `SCHEDULE_PREFERENCES.md`：个人排程稳定偏好和跨账号日历同步口径。
@@ -123,7 +127,7 @@ GLOBAL 文件导览应该发生在全局个性化提示词保存、通用助手�
 1. 先展示完整文件列表。
 2. 用一句话解释每个文件的作用。
 3. 问用户：“你想先了解哪个？我可以按你选的顺序一个一个讲，也可以按推荐顺序讲。”
-4. 如果用户没有偏好，按推荐顺序讲：`README.md` → `GLOBAL_CONTEXT.md` → `PROJECTS.md` → `OBSIDIAN_LINK.md` → `SKILL_DEPENDENCIES.md` → `LARK_PROFILES.md` / `GITHUB_ACCOUNTS.md` → `ALIYUN_PROFILES.md` → `SERVER_PROFILES.md` / `servers/` → `SCHEDULE_PREFERENCES.md` → `.agents/skills/`。
+4. 如果用户没有偏好，按推荐顺序讲：`README.md` → `GLOBAL_CONTEXT.md` → `PROJECTS.md` → `OBSIDIAN_LINK.md` → `SKILL_DEPENDENCIES.md` → `LARK_PROFILES.md` / `GITHUB_ACCOUNTS.md` / `GITEE_PROFILES.md` → `ALIYUN_PROFILES.md` / `TENCENTCLOUD_PROFILES.md` → `MAIL_PROFILES.md` / `WECHAT_PROFILES.md` → `SERVER_PROFILES.md` / `servers/` → `SCHEDULE_PREFERENCES.md` → `.agents/skills/`。
 5. 每讲完一个文件，给一个很短例子说明未来什么时候会用到，并询问是否继续下一个。
 
 用户选择跳过导览时，通用助手总经理应说明以后可以让 Agent 读取 `GLOBAL/README.md` 重新讲解，并把“GLOBAL 导览未完成”列入待办。
@@ -173,6 +177,8 @@ Agent/
 - DevOps 审查：`yunxiao-mr-review`，只在项目规则和云效身份明确后处理 Codeup MR；不自动合并或部署。
 - 任务与排程：`feishu-task`、`personal-schedule-planner`、`decide-next-action`。
 - 知识库：`json-canvas`、`obsidian-bases`、`obsidian-cli`，以及已安装或待安装的 Obsidian 连接能力。
+- 身份与数据连接：`tencentcloud-profile`、`mail-profile`、`wechat-readonly-analyst`、`github-cli`、`feishu-profile` 和 `aliyun-profile`。
+- 业务自动化：`feishu-exam-builder`、`allinssl-certificate-automation` 与 `yunxiao-mr-review`；只有依赖、身份和目标边界都明确后才执行真实写入。
 - 视觉与前端协作：`visual-iteration-workflow`，以及可选外部 UI/UX 能力。
 
 然后执行最小无害试用：

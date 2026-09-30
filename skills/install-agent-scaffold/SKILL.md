@@ -51,12 +51,13 @@ description: 对话式首次安装和验证 Personal Agent Foundation。用于�
 9. 运行独立 `verify`，确认必需文件、编码和占位符残留。
 10. 从 `GLOBAL/.agents/skills/` 恢复当前宿主可发现的全局 Skill，并按 `SKILL_DEPENDENCIES.md` 恢复主动安装的外部 Skills。现有同名安装先比较文件，不能静默覆盖。
 11. 逐项询问是否现在连接飞书、GitHub 和 Obsidian，默认推荐和预选项均为“现在连接”。用户选择连接飞书时调用已恢复的 `feishu-profile`，默认创建新的飞书应用和新的专用 Profile，打开验证码、OAuth 或官方授权流程，完成 `whoami` 回读后把真实 Profile 写回 `GLOBAL/LARK_PROFILES.md`；不得询问用户预先提供 Profile 名，不得自动复用本机已有 Profile、active Profile、旧应用或其他项目应用。写入公司列表时，章节标题和公司名称必须使用回读到的真实公司/租户名称；CLI profile 名只能写在 profile 字段和命令示例中，不能替代公司名称。若建议 Profile 名称冲突，应生成新的不冲突名称或让用户确认新名称；只有用户明确选择高级迁移/共用已有配置，并确认共享权限与身份路由影响后，才允许复用已有 Profile。用户选择连接 GitHub 时调用 `github-cli`，完成 `gh auth status` 和 `gh api user` 回读后把真实账号写回 `GLOBAL/GITHUB_ACCOUNTS.md`；不得询问用户预先提供 GitHub 用户名，账号列表标题、username 和切换命令必须使用 `gh api user` 回读的真实 login，不得使用程序自拟名称。用户选择连接 Obsidian 时，先完整读取 `references/obsidian-layout.md`，不得只询问软连接路径；必须通过对话或经授权的有界只读发现确认基础结构、目录理解、优先阅读入口和读写边界。只有用户主动选择稍后连接、当前没有账号、当前没有 Vault，或明确表示 Obsidian 结构之后再定时，才保留未配置或待配置状态。
-12. 询问是否现在配置阿里云/云效身份治理；用户选择现在配置时调用 `aliyun-profile`，完成 CLI/插件发现、逻辑 Profile 解释、安全凭据输入和最小只读组织回读。只把非敏感路由写入 `GLOBAL/ALIYUN_PROFILES.md`；不得把 PAT、AK/SK、票据、凭据槽密文或项目专属仓库/流水线细节写入公开或通用位置。
-13. 询问是否现在登记或恢复服务器 Profile；用户选择现在处理时调用 `server-profile`，先建立或读取 `SERVER_PROFILES.md` 索引，再按单个 Profile 读取或创建 `servers/<profile>.md` 详情。私钥、密码、主机指纹可信来源和服务回读都必须单独确认；未成功只读验收时标为待验收。
-14. 用户配置了真实 Vault 时，通过对话和经授权的浅层只读检查理解用户实际目录结构、入口文件和读写边界；展示拟写入的完整 `GLOBAL/OBSIDIAN_LINK.md` 草案并取得确认后，只更新已安装实例，再创建并验证 `GLOBAL/obsidian-resource` Junction 或 symlink。草案必须与产品模板整体结构同构，只替换“目录理解”和“优先阅读”中涉及用户个人 Vault 的条目；不得写入 Vault 原始绝对路径，不得生成过度泛化表格，不得修改产品模板、强套作者结构或递归扫描 Vault。未配置时保持通用说明，不创建伪链接。
-15. 在新 `GLOBAL` 中初始化本地 Git；完成敏感信息扫描后创建包含已确认账号、知识库、云账号和服务器配置状态的安装基线提交。不创建 remote，不 push。
-16. 执行 `references/onboarding.md` 的全局提示词、项目目录位置教学、通用助手项目打开门禁、通用助手总经理创建、GLOBAL 导览交接和首次项目教程。先让用户把全局个性化提示词保存到宿主，再教学所有项目应在 `AGENT_ROOT` 下与 `GLOBAL` 同级；创建任何总经理长期会话前都必须先完成对应项目打开门禁；独立任务只是用户明确选择的降级路径。
-17. 删除临时配置、staging 和本轮自动获取的临时产品源，输出完成项、人工步骤、未验证项及建议下一步。
+12. 继续逐项展示可选连接：阿里云/云效、腾讯云、邮箱、Gitee、本机微信和服务器。每项都先用通俗语言说明用途、读取/写入边界、凭据保存位置与最小验收，再让用户选择现在配置或稍后配置；不得因工具未安装而静默记为未配置。
+13. 用户选择阿里云/云效时调用 `aliyun-profile`；选择腾讯云时调用 `tencentcloud-profile` 并以 STS 回读真实主体；选择邮箱时调用 `mail-profile` 并只做身份探测或窄范围只读搜索；选择 Gitee 时使用官方 CLI 回读真实 username；选择本机微信时调用 `wechat-readonly-analyst`，明确它仅支持 Windows、本机离线安装、用户确认账号归属和一次性取钥。所有索引只写非敏感路由，不写 PAT、AK/SK、SecretId、SecretKey、密码、授权码、token、wxid、数据库路径或 DPAPI 密文。
+14. 用户选择服务器时调用 `server-profile`，先建立或读取 `SERVER_PROFILES.md` 索引，再按单个 Profile 读取或创建 `servers/<profile>.md` 详情。私钥、密码、主机指纹可信来源和服务回读都必须单独确认；未成功只读验收时标为待验收。服务器与云账号是两套路由，不能因云账号授权成功而推断 SSH 已可用。
+15. 用户配置了真实 Vault 时，通过对话和经授权的浅层只读检查理解用户实际目录结构、入口文件和读写边界；展示拟写入的完整 `GLOBAL/OBSIDIAN_LINK.md` 草案并取得确认后，只更新已安装实例，再创建并验证 `GLOBAL/obsidian-resource` Junction 或 symlink。草案必须与产品模板整体结构同构，只替换“目录理解”和“优先阅读”中涉及用户个人 Vault 的条目；不得写入 Vault 原始绝对路径，不得生成过度泛化表格，不得修改产品模板、强套作者结构或递归扫描 Vault。未配置时保持通用说明，不创建伪链接。
+16. 在新 `GLOBAL` 中初始化本地 Git；完成敏感信息扫描后创建包含已确认账号、知识库、云账号和服务器配置状态的安装基线提交。不创建 remote，不 push。
+17. 执行 `references/onboarding.md` 的全局提示词、项目目录位置教学、通用助手项目打开门禁、通用助手总经理创建、GLOBAL 导览交接和首次项目教程。先让用户把全局个性化提示词保存到宿主，再教学所有项目应在 `AGENT_ROOT` 下与 `GLOBAL` 同级；创建任何总经理长期会话前都必须先完成对应项目打开门禁；独立任务只是用户明确选择的降级路径。
+18. 删除临时配置、staging 和本轮自动获取的临时产品源，输出完成项、人工步骤、未验证项及建议下一步。
 
 ## 护栏命令
 

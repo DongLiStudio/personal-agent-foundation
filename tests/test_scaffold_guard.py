@@ -70,7 +70,7 @@ class ScaffoldGuardTests(unittest.TestCase):
 
     def test_full_template_inventory_and_placeholders(self) -> None:
         report = guard.audit_template(TEMPLATE, self.manifest)
-        self.assertEqual(81, report["file_count"])
+        self.assertEqual(160, report["file_count"])
         self.assertEqual(
             {
                 "AGENT_ROOT",
@@ -92,9 +92,24 @@ class ScaffoldGuardTests(unittest.TestCase):
                 TEMPLATE, self.manifest, config, target
             )
             self.assertEqual("dry-run", report["mode"])
-            self.assertEqual(81, report["file_count"])
+            self.assertEqual(160, report["file_count"])
             self.assertFalse(target.exists())
-            self.assertTrue(all(b"{{" not in content for _, content in rendered))
+            literal_paths = set(self.manifest["literal_template_paths"])
+            self.assertTrue(
+                all(
+                    b"{{" not in content
+                    for item, content in rendered
+                    if item.text is not None
+                    and item.relative.as_posix() not in literal_paths
+                )
+            )
+            self.assertTrue(
+                all(
+                    content == item.raw
+                    for item, content in rendered
+                    if item.relative.as_posix() in literal_paths
+                )
+            )
         self.assertEqual(before, tree_hash(TEMPLATE))
 
     def test_install_verifies_and_second_install_is_rejected(self) -> None:
@@ -293,6 +308,8 @@ class ProductBoundaryTests(unittest.TestCase):
             re.compile(r"[\w.+-]+@(?!(?:example\.invalid)\b)[\w.-]+\.[A-Za-z]{2,}"),
         )
         for path in (item for item in TEMPLATE.rglob("*") if item.is_file()):
+            if path.suffix.lower() == ".whl":
+                continue
             text = path.read_text(encoding="utf-8")
             for pattern in forbidden_patterns:
                 self.assertIsNone(pattern.search(text), f"{pattern.pattern} in {path}")
@@ -708,6 +725,10 @@ class ProductBoundaryTests(unittest.TestCase):
             "SKILL_DEPENDENCIES.md",
             "LARK_PROFILES.md",
             "ALIYUN_PROFILES.md",
+            "TENCENTCLOUD_PROFILES.md",
+            "MAIL_PROFILES.md",
+            "WECHAT_PROFILES.md",
+            "GITEE_PROFILES.md",
             "SERVER_PROFILES.md",
             "servers/",
             "GITHUB_ACCOUNTS.md",
@@ -873,6 +894,32 @@ class ProductBoundaryTests(unittest.TestCase):
             "test_aliyun_is_always_an_interactive_recovery_gate",
         ):
             self.assertIn(text, combined)
+
+    def test_new_public_profile_and_skill_capabilities_are_complete(self) -> None:
+        expected = (
+            "TENCENTCLOUD_PROFILES.md",
+            "MAIL_PROFILES.md",
+            "WECHAT_PROFILES.md",
+            "GITEE_PROFILES.md",
+        )
+        for name in expected:
+            self.assertTrue((TEMPLATE / "GLOBAL" / name).is_file(), name)
+        for name in (
+            "tencentcloud-profile",
+            "mail-profile",
+            "wechat-readonly-analyst",
+            "feishu-exam-builder",
+            "allinssl-certificate-automation",
+        ):
+            self.assertTrue(
+                (TEMPLATE / "GLOBAL" / ".agents" / "skills" / name / "SKILL.md").is_file(),
+                name,
+            )
+        update_script = (
+            ROOT / "skills" / "update-agent-foundation" / "scripts" / "foundation_update.py"
+        ).read_text(encoding="utf-8")
+        for name in expected:
+            self.assertIn(f'"{name}"', update_script)
 
     def test_all_product_text_is_utf8_without_bom_and_lf(self) -> None:
         text_suffixes = {"", ".md", ".json", ".yaml", ".yml", ".py", ".txt"}

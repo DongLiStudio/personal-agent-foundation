@@ -29,6 +29,7 @@
 - GitHub：以 `gh auth status` 和 `gh api user` 回读为准。
 - 飞书：逐个 GLOBAL Profile 使用当前 CLI 支持的 `auth status --verify --json --profile <Profile>` 显式验证用户身份；业务 API 仍按 Profile 规则显式使用用户身份。缺失 Profile 时恢复应用配置或重新建立授权，不复制明文 secret。
 - 阿里云与云效：安装并验证 `aliyun` 与 `aliyun-cli-devops`；通用阿里云账号按 `ALIYUN_PROFILES.md` 逐个恢复 Profile，云效按逻辑身份重新输入 PAT 并回读目标组织。PAT 与 AK/SK 不随基座复制，不写入报告或命令行。
+- 本机微信只读分析：从 GLOBAL 同步 `wechat-readonly-analyst` 后，在用户级安装副本运行其离线安装和 DPAPI 自检；按 `WECHAT_PROFILES.md` 逐个重新发现、绑定并执行一次性取钥，验证 `offline_key_available=true`。旧宿主 DPAPI 槽、数据库路径、wxid、密钥和聊天内容均不迁移；新宿主绑定后重新建立持续只读授权。
 - Obsidian：先确认 Vault 位置和边界，再重建稳定链接。Windows 只接受 1.12.7+ 安装器随附并经设置注册的 `Obsidian.com` CLI 重定向器，不把 `Obsidian.exe` 的存在视为 CLI 可用。
 - 服务器：从 `SERVER_PROFILES.md` 恢复非敏感 SSH 路由；私钥只通过安全渠道进入用户本机密钥目录。连接前从可信渠道核验主机指纹，再以明确 Profile 和 `BatchMode` 完成身份及目标服务只读回读。不得自动接受变化的主机密钥。
 

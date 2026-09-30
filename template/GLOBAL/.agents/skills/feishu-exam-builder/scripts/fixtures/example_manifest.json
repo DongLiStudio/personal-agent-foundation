@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "exam_id": "synthetic-safety-demo",
+  "version": "1.0",
+  "total_max": "10",
+  "rounding": {"places": 2, "mode": "HALF_UP"},
+  "sections": [{"id": "knowledge", "raw_max": "2", "contribution_max": "10"}],
+  "questions": [{
+    "id": "S01", "section_id": "knowledge", "type": "single",
+    "stem": "本题是用于离线测试的虚构题：1 加 1 等于几？",
+    "source": "Synthetic fixture created solely for offline validation",
+    "max_score": "2", "required": true,
+    "options": [{"key": "A", "text": "1"}, {"key": "B", "text": "2"}], "answer": "B"
+  }],
+  "layout": {
+    "fields": [
+      {"table_id": "synthetic-answer", "field_id": "synthetic-fld-S01", "question_id": "S01", "name": "S01", "type": "single", "description": "本题是用于离线测试的虚构题：1 加 1 等于几？", "options": [{"key": "A", "text": "1"}, {"key": "B", "text": "2"}]},
+      {"table_id": "synthetic-score", "field_id": "synthetic-fld-total", "question_id": null, "name": "总分", "type": "formula", "description": "测试成绩汇总", "options": []}
+    ],
+    "forms": [{"table_id": "synthetic-answer", "form_id": "synthetic-form", "question_order": ["S01"], "questions": [{"question_id": "S01", "field_id": "synthetic-fld-S01", "title": "S01", "description": "本题是用于离线测试的虚构题：1 加 1 等于几？", "type": "single", "options": [{"key": "A", "text": "1"}, {"key": "B", "text": "2"}], "required": true}]}],
+    "grids": [
+      {"table_id": "synthetic-answer", "view_id": "synthetic-grid-answer", "field_order": ["synthetic-fld-S01"]},
+      {"table_id": "synthetic-score", "view_id": "synthetic-grid-score", "field_order": ["synthetic-fld-total"]}
+    ]
+  }
+}

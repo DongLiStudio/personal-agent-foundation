@@ -35,7 +35,7 @@ class TemplateFile:
     source: Path
     relative: Path
     raw: bytes
-    text: str
+    text: str | None
 
 
 def digest(data: bytes) -> str:
@@ -75,8 +75,35 @@ def walk_files(root: Path) -> list[Path]:
     return sorted(result, key=lambda item: item.relative_to(root).as_posix())
 
 
-def read_template_file(root: Path, path: Path) -> TemplateFile:
+def binary_extensions(manifest: dict[str, Any]) -> set[str]:
+    values = manifest.get("binary_extensions", [])
+    if not isinstance(values, list) or any(
+        not isinstance(value, str) or not re.fullmatch(r"\.[a-z0-9]+", value)
+        for value in values
+    ):
+        raise GuardError("manifest.binary_extensions must be an array of lowercase suffixes")
+    return set(values)
+
+
+def literal_template_paths(manifest: dict[str, Any]) -> set[str]:
+    values = manifest.get("literal_template_paths", [])
+    if not isinstance(values, list) or any(
+        not isinstance(value, str)
+        or not value
+        or Path(value).is_absolute()
+        or ".." in Path(value).parts
+        for value in values
+    ):
+        raise GuardError("manifest.literal_template_paths must be safe relative paths")
+    return set(values)
+
+
+def read_template_file(
+    root: Path, path: Path, allowed_binary_extensions: set[str]
+) -> TemplateFile:
     raw = path.read_bytes()
+    if path.suffix.lower() in allowed_binary_extensions:
+        return TemplateFile(path, path.relative_to(root), raw, None)
     if raw.startswith(b"\xef\xbb\xbf"):
         raise GuardError(f"UTF-8 BOM is not allowed: {path}")
     try:
@@ -101,7 +128,12 @@ def manifest_placeholders(manifest: dict[str, Any]) -> set[str]:
 def audit_template(template: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     template = template.resolve()
     allowed = manifest_placeholders(manifest)
-    files = [read_template_file(template, path) for path in walk_files(template)]
+    allowed_binary_extensions = binary_extensions(manifest)
+    literal_paths = literal_template_paths(manifest)
+    files = [
+        read_template_file(template, path, allowed_binary_extensions)
+        for path in walk_files(template)
+    ]
     expected_count = manifest.get("template_file_count")
     if expected_count is None:
         expected_count = manifest.get("source", {}).get("tracked_file_count")
@@ -120,6 +152,8 @@ def audit_template(template: Path, manifest: dict[str, Any]) -> dict[str, Any]:
 
     used: set[str] = set()
     for item in files:
+        if item.text is None or item.relative.as_posix() in literal_paths:
+            continue
         raw_tokens = set(ANY_TEMPLATE_TOKEN_RE.findall(item.text))
         malformed = sorted(token for token in raw_tokens if not PLACEHOLDER_RE.fullmatch(token))
         if malformed:
@@ -219,12 +253,16 @@ def plan_install(
     target = target.expanduser().resolve()
     target_status = ensure_target_available(target)
     audit = audit_template(template, manifest)
+    allowed_binary_extensions = binary_extensions(manifest)
+    literal_paths = literal_template_paths(manifest)
     values = load_values(values_path, manifest, target)
     rendered: list[tuple[TemplateFile, bytes]] = []
     plan_files: list[dict[str, Any]] = []
     for path in walk_files(template):
-        item = read_template_file(template, path)
-        rendered_bytes = render(item.text, values, item.relative).encode("utf-8")
+        item = read_template_file(template, path, allowed_binary_extensions)
+        rendered_bytes = item.raw
+        if item.text is not None and item.relative.as_posix() not in literal_paths:
+            rendered_bytes = render(item.text, values, item.relative).encode("utf-8")
         rendered.append((item, rendered_bytes))
         plan_files.append(
             {
@@ -253,14 +291,23 @@ def verify_target(target: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     target = target.expanduser().resolve()
     if not target.is_dir():
         raise GuardError(f"installed target does not exist: {target}")
-    files = [read_template_file(target, path) for path in walk_files(target)]
+    allowed_binary_extensions = binary_extensions(manifest)
+    literal_paths = literal_template_paths(manifest)
+    files = [
+        read_template_file(target, path, allowed_binary_extensions)
+        for path in walk_files(target)
+    ]
     names = {item.relative.as_posix() for item in files}
     missing = sorted(path for path in manifest.get("required_paths", []) if path not in names)
     if missing:
         raise GuardError(f"installed target misses required paths: {', '.join(missing)}")
     residue: list[str] = []
     for item in files:
-        if ANY_TEMPLATE_TOKEN_RE.search(item.text):
+        if (
+            item.text is not None
+            and item.relative.as_posix() not in literal_paths
+            and ANY_TEMPLATE_TOKEN_RE.search(item.text)
+        ):
             residue.append(item.relative.as_posix())
     if residue:
         raise GuardError(f"installed target contains placeholder residue: {', '.join(residue)}")

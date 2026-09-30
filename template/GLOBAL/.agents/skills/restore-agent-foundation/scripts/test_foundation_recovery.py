@@ -27,6 +27,10 @@ CORE = (
     "SKILL_DEPENDENCIES.md",
     "LARK_PROFILES.md",
     "ALIYUN_PROFILES.md",
+    "TENCENTCLOUD_PROFILES.md",
+    "MAIL_PROFILES.md",
+    "WECHAT_PROFILES.md",
+    "GITEE_PROFILES.md",
     "SERVER_PROFILES.md",
     "GITHUB_ACCOUNTS.md",
     "SCHEDULE_PREFERENCES.md",
@@ -135,6 +139,22 @@ class FoundationRecoveryTests(unittest.TestCase):
             self.assertEqual(before, recovery.tree_inventory(root))
             self.assertEqual(plan["plan_sha256"], recovery.plan_digest(plan))
 
+    def test_skill_inventory_ignores_private_runtime(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            base = self.temp_path(temp)
+            source = base / "source"
+            installed = base / "installed"
+            source.mkdir()
+            installed.mkdir()
+            (source / "SKILL.md").write_text("fixture\n", encoding="utf-8")
+            (installed / "SKILL.md").write_text("fixture\n", encoding="utf-8")
+            runtime = installed / ".runtime" / "Scripts"
+            runtime.mkdir(parents=True)
+            (runtime / "python.exe").write_bytes(b"runtime-only")
+            self.assertEqual(
+                recovery.tree_inventory(source), recovery.tree_inventory(installed)
+            )
+
     def test_update_backups_are_excluded_from_placeholder_scan(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root, _ = self.make_foundation(self.temp_path(temp))
@@ -192,6 +212,36 @@ class FoundationRecoveryTests(unittest.TestCase):
                     item["kind"] == "aliyun_authorization"
                     for item in plan["interactive_gates"]
                 )
+            )
+
+    def test_wechat_profiles_are_core_and_rebinding_is_an_interactive_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root, _ = self.make_foundation(self.temp_path(temp))
+            profile_index = root / "GLOBAL" / "WECHAT_PROFILES.md"
+            profile_index.unlink()
+            plan = recovery.make_plan(root, None, [], None)
+            self.assertIn("WECHAT_PROFILES.md", plan["missing_core_files"])
+            self.assertTrue(
+                any(
+                    item["kind"] == "wechat_readonly_profiles"
+                    for item in plan["interactive_gates"]
+                )
+            )
+
+    def test_new_identity_profiles_are_core_and_have_recovery_gates(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root, _ = self.make_foundation(self.temp_path(temp))
+            for name in ("TENCENTCLOUD_PROFILES.md", "MAIL_PROFILES.md", "GITEE_PROFILES.md"):
+                (root / "GLOBAL" / name).unlink()
+            plan = recovery.make_plan(root, None, [], None)
+            self.assertTrue(
+                {"TENCENTCLOUD_PROFILES.md", "MAIL_PROFILES.md", "GITEE_PROFILES.md"}
+                <= set(plan["missing_core_files"])
+            )
+            kinds = {item["kind"] for item in plan["interactive_gates"]}
+            self.assertTrue(
+                {"tencentcloud_authorization", "mail_profiles", "gitee_authorization"}
+                <= kinds
             )
 
     def test_unrelated_mustache_template_is_not_foundation_residue(self) -> None:

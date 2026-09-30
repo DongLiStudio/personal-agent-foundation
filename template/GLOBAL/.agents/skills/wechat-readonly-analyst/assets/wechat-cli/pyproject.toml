@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wechat-cli"
+version = "0.3.0+dongli.readonly"
+description = "Hardened Windows-only WeChat read-only query engine"
+requires-python = ">=3.10"
+dependencies = [
+    "click==8.1.8",
+    "pycryptodome==3.23.0",
+    "zstandard==0.23.0",
+]
+
+[project.scripts]
+wechat-cli = "wechat_cli.main:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+wechat_cli = ["bin/*"]

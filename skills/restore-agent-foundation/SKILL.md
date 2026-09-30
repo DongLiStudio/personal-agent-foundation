@@ -29,7 +29,7 @@ description: 对已经存在、整体复制、迁移过、局部损坏或更换 
 - GLOBAL 核心入口、项目索引、项目三入口和独立 Git 边界可读取。
 - `GLOBAL/.agents/skills/` 是自维护 Skill 权威源；当前宿主的安装副本逐文件一致。
 - Junction/symlink 只重建链接本体，不复制、删除或递归遍历外部目标。
-- GitHub、飞书、Obsidian、阿里云/云效、服务器连接和宿主能力均经过实时发现；缺权限时引导用户走官方授权或安全恢复，完成后独立回读。
+- GitHub、Gitee、飞书、邮箱、Obsidian、阿里云/云效、腾讯云、本机微信、服务器连接和宿主能力均经过实时发现；缺权限时引导用户走官方授权或安全恢复，完成后独立回读。
 - 用户项目、Git 历史、未提交内容、凭据和外部知识库内容不被覆盖。
 - 最终 `verify` 及交互式门禁全部通过；未完成项不得表述为成功。
 
@@ -82,6 +82,10 @@ Python 必须为 3.11+。当前 Python 不满足时，展示当前系统的官�
 - **GitHub**：发现 `gh`；执行 `gh auth status` 和 `gh api user`。缺失时使用 GitHub CLI 官方安装方式；未登录时打开官方登录流程。回读真实 login，核对 `GITHUB_ACCOUNTS.md`，不输出 token。
 - **飞书**：发现 `lark-cli` 及用户级 shim；按 `LARK_PROFILES.md` 的每个 Profile 显式执行 `lark-cli auth status --verify --json --profile <Profile>`，并回读用户身份。`auth status` 不附加业务命令才使用的 `--as user`。失效时打开官方授权流程并等待用户完成；不得把 App Secret 写入报告或命令历史。
 - **阿里云与云效**：发现 `aliyun`，回读版本、插件和 `configure list`；按 `ALIYUN_PROFILES.md` 恢复通用阿里云 Profile 与云效逻辑身份。云效额外验证 `aliyun-cli-devops`，通过宿主安全凭据通道重新输入 PAT 并执行组织只读回读；不得把 PAT、AK/SK 或票据写入 GLOBAL、报告、命令参数或普通环境变量。账号授权成功不自动执行仓库、流水线、MR 或部署写操作。
+- **腾讯云**：发现 TCCLI，按 `TENCENTCLOUD_PROFILES.md` 逐个重新执行浏览器授权、SSO 或角色授权，并以 STS 回读真实主体。不得复制旧宿主凭据文件，也不得把认证成功扩大为云资源变更授权。
+- **邮箱**：按 `MAIL_PROFILES.md` 逐个恢复服务商 OAuth、连接器或本机安全凭据槽，只做身份探测和有界只读搜索；不得自动标记已读、移动、删除、回复、转发或发送。
+- **Gitee**：发现官方 CLI，按 `GITEE_PROFILES.md` 重新登录并回读真实 username；不得从项目名、浏览器登录态或 Git remote 猜测身份。
+- **本机微信只读分析**：确认 `wechat-readonly-analyst` 已同步到当前宿主的用户级 Skill 目录，在安装副本运行离线、哈希锁定的 `scripts/install.ps1` 与 `profile_manager.py self-test`；按 `WECHAT_PROFILES.md` 逐个发现候选并让用户确认归属后重新绑定和一次性取钥。旧电脑 DPAPI 槽不迁移，不自动选择账号。取钥使用 `--confirm-memory-read --grant-standing-read`，验证 `offline_key_available=true` 后执行最多 3 条会话的最小回读；后续查询复用 DPAPI 密钥目录，不要求微信在线或重复授权。
 - **Obsidian**：检查 `GLOBAL/obsidian-resource` 链接本体和目标可达性；只把官方注册的 CLI（Windows 为 1.12.7+ 安装器随附的 `Obsidian.com` 重定向器）判定为 CLI，不把 GUI `Obsidian.exe` 误判为 CLI。有官方 CLI 时执行版本及有界只读检查，没有 CLI 时按官方设置完成注册，或以开放文件格式做最小只读验证。禁止递归遍历 Vault。
 - **服务器**：读取 `SERVER_PROFILES.md` 的非敏感路由，发现 `ssh` 客户端；由用户明确选择需要恢复的服务器 Profile 后，检查本机 SSH 别名、身份文件是否存在但不读取私钥，先从可信渠道核验主机指纹，再以 `BatchMode` 做身份和目标服务的有界只读回读。缺少私钥或权限时引导用户通过安全渠道恢复或重新授权，不把私钥、密码、票据写入 GLOBAL、报告或命令历史。不得设置隐式默认服务器，也不得自动部署、重启、改网、改卷或修改远端配置。
 - **宿主**：确认全部自维护 Skill 已被当前 Agent 发现；宿主需要重启或重新加载时明确提示并在恢复后复查。检查全局个性化提示词是否已设置，不能从界面回读时标记为待用户确认。
@@ -100,7 +104,7 @@ Python 必须为 3.11+。当前 Python 不满足时，展示当前系统的官�
 
 换机或换根后应把已确认的旧根传给 `--old-root`，对 native、正斜杠、反斜杠和 JSON 转义形式做最终残留扫描；原地修复且不存在旧根时可省略。
 
-4. 汇总确定性 `verify` 与 GitHub、飞书、Obsidian、阿里云/云效、服务器、宿主授权回读。只有全部必要项通过，或用户明确选择某项暂不连接且 GLOBAL 如实记录，才能宣布恢复完成。
+4. 汇总确定性 `verify` 与 GitHub、Gitee、飞书、邮箱、Obsidian、阿里云/云效、腾讯云、本机微信、服务器、宿主授权回读。只有全部必要项通过，或用户明确选择某项暂不连接且 GLOBAL 如实记录，才能宣布恢复完成。
 
 ## 回滚
 

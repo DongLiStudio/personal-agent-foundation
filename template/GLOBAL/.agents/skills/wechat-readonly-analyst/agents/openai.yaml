@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：微信只读分析与 Profile 管理"
+  short_description: "安全管理多微信 Profile，并按授权只读分析本机聊天记录"
+  default_prompt: "使用 $wechat-readonly-analyst 按明确 Profile 只读分析本机微信记录，并遵守双重授权与脱敏门禁。"

@@ -2,10 +2,15 @@
   "schema_version": 1,
   "source": {
     "kind": "generalized-live-global",
-    "baseline_file_count": 81
+    "baseline_file_count": 160
   },
-  "template_file_count": 81,
+  "template_file_count": 160,
   "template_root": "template",
+  "binary_extensions": [".whl"],
+  "literal_template_paths": [
+    "GLOBAL/.agents/skills/feishu-exam-builder/assets/grader-SKILL.template.md",
+    "GLOBAL/.agents/skills/wechat-readonly-analyst/scripts/render_report.py"
+  ],
   "required_paths": [
     "GLOBAL/README.md",
     "GLOBAL/GLOBAL_CONTEXT.md",
@@ -14,6 +19,10 @@
     "GLOBAL/SKILL_DEPENDENCIES.md",
     "GLOBAL/LARK_PROFILES.md",
     "GLOBAL/ALIYUN_PROFILES.md",
+    "GLOBAL/TENCENTCLOUD_PROFILES.md",
+    "GLOBAL/MAIL_PROFILES.md",
+    "GLOBAL/WECHAT_PROFILES.md",
+    "GLOBAL/GITEE_PROFILES.md",
     "GLOBAL/SERVER_PROFILES.md",
     "GLOBAL/servers/README.md",
     "GLOBAL/GITHUB_ACCOUNTS.md",
@@ -23,7 +32,12 @@
     "GLOBAL/.agents/skills/restore-agent-foundation/scripts/foundation_recovery.py",
     "GLOBAL/.agents/skills/update-agent-foundation/SKILL.md",
     "GLOBAL/.agents/skills/update-agent-foundation/scripts/foundation_update.py",
-    "GLOBAL/.agents/skills/init-agent-project/SKILL.md"
+    "GLOBAL/.agents/skills/init-agent-project/SKILL.md",
+    "GLOBAL/.agents/skills/tencentcloud-profile/SKILL.md",
+    "GLOBAL/.agents/skills/mail-profile/SKILL.md",
+    "GLOBAL/.agents/skills/wechat-readonly-analyst/SKILL.md",
+    "GLOBAL/.agents/skills/feishu-exam-builder/SKILL.md",
+    "GLOBAL/.agents/skills/allinssl-certificate-automation/SKILL.md"
   ],
   "placeholders": {
     "AGENT_ROOT": {"required": true, "description": "Agent 项目总根目录的绝对路径"},

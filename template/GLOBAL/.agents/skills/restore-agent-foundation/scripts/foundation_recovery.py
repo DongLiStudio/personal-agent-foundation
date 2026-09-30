@@ -36,6 +36,10 @@ CORE_GLOBAL_FILES = (
     "SKILL_DEPENDENCIES.md",
     "LARK_PROFILES.md",
     "ALIYUN_PROFILES.md",
+    "TENCENTCLOUD_PROFILES.md",
+    "MAIL_PROFILES.md",
+    "WECHAT_PROFILES.md",
+    "GITEE_PROFILES.md",
     "SERVER_PROFILES.md",
     "GITHUB_ACCOUNTS.md",
     "SCHEDULE_PREFERENCES.md",
@@ -72,6 +76,7 @@ SKIP_DIRS = {
     ".hg",
     ".svn",
     ".idea",
+    ".runtime",
     "__pycache__",
     "node_modules",
     "target",
@@ -633,6 +638,32 @@ def make_plan(
                     "SSH identity check and bounded read-only service readback"
                 )
             interactive_gates.append({"kind": kind, "reason": reason})
+
+    interactive_gates.append(
+        {
+            "kind": "wechat_readonly_profiles",
+            "reason": (
+                "requires the global wechat-readonly-analyst installation, offline runtime self-test, "
+                "explicit per-Profile local rebinding, one-time DPAPI key capture and minimal readback"
+            ),
+        }
+    )
+    interactive_gates.extend(
+        [
+            {
+                "kind": "tencentcloud_authorization",
+                "reason": "requires TCCLI discovery, explicit Profile authorization and live STS identity readback",
+            },
+            {
+                "kind": "mail_profiles",
+                "reason": "requires per-Profile provider authorization and a bounded read-only identity/search check",
+            },
+            {
+                "kind": "gitee_authorization",
+                "reason": "requires official CLI discovery, explicit account login and live identity readback",
+            },
+        ]
+    )
 
     plan: dict[str, Any] = {
         "schema_version": 1,

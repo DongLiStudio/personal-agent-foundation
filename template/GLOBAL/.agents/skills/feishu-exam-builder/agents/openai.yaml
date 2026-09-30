@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLOBAL：飞书通用试卷制作"
+  short_description: "引导考试需求，创建试卷评分表、分页问卷、考场权限与阅卷入口并验收"
+  default_prompt: "使用 $feishu-exam-builder 引导我确认考试内容与资产工程归档位置，完整创建并验收试卷、评分表、考场权限和阅卷教学。"
