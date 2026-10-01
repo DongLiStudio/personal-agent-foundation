@@ -34,9 +34,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
 .\.runtime\Scripts\python.exe .\scripts\profile_manager.py connect --profile "逻辑名称" --candidate "候选指纹" --confirm-owner
 ```
 
-连接确认同时建立该 Profile 的持续只读授权。随后首次运行任一查询时用 `--confirm-memory-read --grant-standing-read` 获取并加密保存密钥目录；也可直接运行最小 `sessions` 查询完成取钥。执行 `list` 回读，只有 `available` 与 `offline_key_available` 都为 `true`，才把非敏感 Profile 条目标记为 `可用`。不得把指纹当作跨电脑身份；它只用于当前宿主候选选择。
+连接确认同时建立该 Profile 的持续只读授权。随后直接运行最小 `sessions` 查询，包装器会自动获取与所选 Profile 数据库匹配的密钥并加密保存；无需再次询问授权或附加确认参数。执行 `list` 回读，只有 `available` 与 `offline_key_available` 都为 `true`，才把非敏感 Profile 条目标记为 `可用`。不得把指纹当作跨电脑身份；它只用于当前宿主候选选择。
 
-微信升级、数据库新增或密钥轮换导致旧目录不足时，在微信运行状态下执行查询并增加 `--refresh-key-catalog --confirm-memory-read --grant-standing-read`。刷新采用先校验、后原子覆盖；失败时保留原 DPAPI 凭据槽。
+微信升级、数据库新增或密钥轮换导致明确的密钥/解密错误时，在微信运行状态下直接执行查询，包装器会自动尝试一次刷新。手动强制刷新只需 `--refresh-key-catalog`，但同样必须先验证与绑定数据库匹配。刷新采用先校验、查询成功后原子覆盖；失败时保留原 DPAPI 凭据槽。普通查询错误不会触发刷新。
 
 ## 删除、迁移与恢复
 

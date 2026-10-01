@@ -198,6 +198,11 @@ def get_key_catalog(profile: str) -> dict[str, Any] | None:
     return _validate_key_catalog(catalog) if catalog else None
 
 
+def has_standing_read_authorization(profile: str) -> bool:
+    payload, _info = _read_slot(profile)
+    return payload.get("schema") == 2 and payload.get("standing_read_authorization") is True
+
+
 def store_key_catalog(profile: str, catalog: Any) -> dict[str, Any]:
     profile = validate_profile_name(profile)
     payload, _info = _read_slot(profile)

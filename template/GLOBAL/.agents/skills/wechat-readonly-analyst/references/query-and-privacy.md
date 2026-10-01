@@ -7,7 +7,7 @@
 1. 首次取钥及以后必要的密钥刷新会只读扫描当前微信进程的可读内存；不会写入、注入或修改微信。校验后的密钥目录由 DPAPI CurrentUser 加密持久保存。
 2. 此 Profile 建立持续只读授权：用户后续提出的具体微信查询，可直接读取本机数据库并把必要语义放入当前 Agent/模型上下文。如果当前模型是云端模型，这不属于“数据完全不出机”。
 
-授权随 Profile 保留，直到用户删除该 Profile；每个查询请求本身确定范围，不再重复弹出同意门禁。只有首次取钥或刷新密钥时需要传入 `--confirm-memory-read --grant-standing-read`。
+授权随 Profile 保留，直到用户删除该 Profile；每个查询请求本身确定范围，不再重复弹出同意门禁。首次取钥及确定需要刷新时由包装器自动读取已绑定 Profile 的授权槽、仅匹配该 Profile 的数据库并取钥；旧 `--confirm-memory-read --grant-standing-read` 参数仅为兼容保留，不会授予权限。无法验证账号一致性才停止并向用户说明。
 
 ## 查询命令
 
@@ -23,7 +23,7 @@ $py = '.\.runtime\Scripts\python.exe'
 & $py .\scripts\wechat_readonly.py --profile "个人微信" stats "群名"
 ```
 
-首次取钥在上述任一命令前增加 `--confirm-memory-read --grant-standing-read`。先用 `sessions --limit 3` 做最小验证。大量总结按工具稳定性逐页推进，不设置隐私条数上限，直至覆盖用户指定的全部本机可用范围。
+首次取钥可直接运行 `sessions --limit 3` 做最小验证，不再要求额外确认参数。`history` 与 `stats` 的日期可用 `YYYY-MM-DD`、本地时间 `YYYY-MM-DD HH:MM[:SS]`，或含时区的 ISO 8601；包装器会把 ISO 时间转为本地时间后交给底层 CLI。大量总结按工具稳定性逐页推进，不设置隐私条数上限，直至覆盖用户指定的全部本机可用范围。
 
 `history` 可用 `--sender` 做展示名级过滤，`--type` 按消息类型过滤；仅需数量时使用 `--summary-only`，避免无意义输出明细。`limit` 作用于群聊原始结果，因此按发送者分析时应让它覆盖目标时间段的全部本机可用消息。
 

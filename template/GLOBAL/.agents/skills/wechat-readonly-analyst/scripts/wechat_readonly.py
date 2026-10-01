@@ -14,10 +14,11 @@ import subprocess
 import sys
 import tempfile
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from profile_store import get_key_catalog, resolve, store_key_catalog
+from profile_store import get_key_catalog, has_standing_read_authorization, resolve, store_key_catalog
 from wechat_cli.keys import extract_keys
 
 
@@ -90,9 +91,9 @@ def invoke(env: dict[str, str], args: list[str], stdin_data: str | None = None) 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Profile-routed ephemeral WeChat read-only query")
     parser.add_argument("--profile", required=True, help="logical Profile from GLOBAL/WECHAT_PROFILES.md")
-    parser.add_argument("--confirm-memory-read", action="store_true", help="allow one-time read-only process-memory access when this Profile has no stored key catalog")
-    parser.add_argument("--grant-standing-read", action="store_true", help="store the verified key catalog with DPAPI for subsequent offline read-only access")
-    parser.add_argument("--refresh-key-catalog", action="store_true", help="replace the stored key catalog by scanning a running WeChat process")
+    parser.add_argument("--confirm-memory-read", action="store_true", help="legacy compatibility; bound Profile authorization is read from its DPAPI slot")
+    parser.add_argument("--grant-standing-read", action="store_true", help="legacy compatibility; cannot grant or change authorization")
+    parser.add_argument("--refresh-key-catalog", action="store_true", help="force a verified refresh for the bound Profile without changing its authorization")
     parser.add_argument("--confirm-content-processing", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--max-chars", type=int, default=240)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -125,15 +126,57 @@ def bounded_limit(value: int) -> int:
     return value
 
 
+def normalize_time(value: str) -> str:
+    """Convert ISO timestamps to the local-time syntax accepted by the bundled CLI."""
+    value = value.strip()
+    if not value:
+        return value
+    for fmt in ("%Y-%m-%d", "%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S"):
+        try:
+            datetime.strptime(value, fmt)
+            return value
+        except ValueError:
+            pass
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            raise ValueError
+        return parsed.astimezone().strftime("%Y-%m-%d %H:%M:%S")
+    except ValueError as exc:
+        raise ValueError("Invalid time; use YYYY-MM-DD, local date-time, or ISO 8601 with timezone") from exc
+
+
+def key_failure(detail: str) -> bool:
+    """Only verified key/decryption diagnostics authorize an automatic refresh."""
+    return bool(re.search(r"(?i)(?:密钥|decrypt|decryption|hmac|invalid key|missing key|no key|key mismatch)", detail))
+
+
+def capture_bound_keys(profile: str, db_dir: Path) -> dict[str, Any]:
+    if not has_standing_read_authorization(profile):
+        raise PermissionError("Standing read authorization is absent for this Profile")
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            catalog = extract_keys(str(db_dir), None)
+    except RuntimeError as exc:
+        if "未运行" in str(exc):
+            raise RuntimeError("WeChat is not running; cached offline reads remain available") from exc
+        if "未能从任何微信进程中提取到密钥" in str(exc):
+            raise LookupError("No running WeChat key matched the bound Profile database") from exc
+        raise RuntimeError("The read-only key scanner failed; stored keys were not changed") from exc
+    if not isinstance(catalog, dict) or not catalog:
+        raise LookupError("No running WeChat key matched the bound Profile database")
+    return catalog
+
+
 def cli_args(args: argparse.Namespace) -> list[str]:
     if args.command == "sessions":
         return ["sessions", "--limit", str(bounded_limit(args.limit)), "--format", "json"]
     if args.command == "history":
         result = ["history", args.chat, "--limit", str(bounded_limit(args.limit)), "--offset", str(max(0, args.offset)), "--format", "json"]
         if args.start_time:
-            result += ["--start-time", args.start_time]
+            result += ["--start-time", normalize_time(args.start_time)]
         if args.end_time:
-            result += ["--end-time", args.end_time]
+            result += ["--end-time", normalize_time(args.end_time)]
         if args.message_type:
             result += ["--type", args.message_type]
         return result
@@ -144,9 +187,9 @@ def cli_args(args: argparse.Namespace) -> list[str]:
         return result
     result = ["stats", args.chat, "--format", "json"]
     if args.start_time:
-        result += ["--start-time", args.start_time]
+        result += ["--start-time", normalize_time(args.start_time)]
     if args.end_time:
-        result += ["--end-time", args.end_time]
+        result += ["--end-time", normalize_time(args.end_time)]
     return result
 
 
@@ -160,6 +203,7 @@ def main() -> int:
         if platform.system() != "Windows" or not CLI.exists():
             raise RuntimeError("Run scripts/install.ps1 first on Windows")
         db_dir = resolve(args.profile)
+        query_args = cli_args(args)  # Reject bad input before any process-memory access.
         scratch = Path(tempfile.mkdtemp(prefix="query-", dir=RUNTIME_ROOT))
         env = os.environ.copy()
         env.update({
@@ -169,45 +213,70 @@ def main() -> int:
             "WECHAT_CLI_DB_DIR": str(db_dir),
             "WECHAT_CLI_KEYS_STDIN": "1",
         })
-        catalog = None if args.refresh_key_catalog else get_key_catalog(args.profile)
+        if not has_standing_read_authorization(args.profile):
+            raise PermissionError("This Profile has no standing read authorization; confirm ownership and bind it first")
+        cached_catalog = get_key_catalog(args.profile)
+        catalog = cached_catalog
         key_source = "dpapi-cache"
-        if catalog is None:
-            if not args.confirm_memory_read or not args.grant_standing_read:
-                result = {
-                    "ok": False,
-                    "stage": "key_capture_required",
-                    "message": "This Profile needs an initial or refreshed key catalog. Process-memory confirmation and standing-read grant are required.",
-                }
-                code = 2
-            else:
-                try:
-                    with contextlib.redirect_stdout(io.StringIO()):
-                        catalog = extract_keys(str(db_dir), None)
-                    store_key_catalog(args.profile, catalog)
-                    key_source = "process-memory-captured-and-dpapi-stored"
-                except Exception:
-                    result = {"ok": False, "stage": "init", "message": "One-time read-only key capture failed."}
-                    code = 3
+        refreshed = args.refresh_key_catalog or catalog is None
+        if refreshed:
+            catalog = {**(cached_catalog or {}), **capture_bound_keys(args.profile, db_dir)}
+            key_source = "process-memory-verified"
         if code == 0:
-            queried = invoke(env, cli_args(args), json.dumps(catalog, ensure_ascii=False))
+            queried = invoke(env, query_args, json.dumps(catalog, ensure_ascii=False))
+            if queried.returncode != 0 and not refreshed and key_failure(queried.stderr):
+                catalog = {**cached_catalog, **capture_bound_keys(args.profile, db_dir)}
+                refreshed = True
+                key_source = "process-memory-verified"
+                queried = invoke(env, query_args, json.dumps(catalog, ensure_ascii=False))
             if queried.returncode != 0:
-                result = {"ok": False, "stage": args.command, "message": "The requested read-only query failed; a newly created database may require an authorized key refresh while WeChat is running."}
+                result = {"ok": False, "stage": args.command, "message": "The read-only query failed. Check the Profile, chat name, input and local data; no key issue has been established."}
                 code = 4
             else:
                 payload = json.loads(queried.stdout)
-                if args.command == "history":
-                    payload = filter_history_payload(payload, args.sender, args.summary_only)
-                result = {
-                    "ok": True,
-                    "profile": args.profile,
-                    "command": args.command,
-                    "key_source": key_source,
-                    "data": sanitize(payload, max(40, args.max_chars)),
-                }
+                failures = payload.get("failures") if isinstance(payload, dict) else None
+                if failures and key_failure(" ".join(str(item) for item in failures)) and not refreshed:
+                    catalog = {**cached_catalog, **capture_bound_keys(args.profile, db_dir)}
+                    refreshed = True
+                    key_source = "process-memory-verified"
+                    queried = invoke(env, query_args, json.dumps(catalog, ensure_ascii=False))
+                    if queried.returncode == 0:
+                        payload = json.loads(queried.stdout)
+                if queried.returncode != 0:
+                    result = {"ok": False, "stage": args.command, "message": "The read-only query still failed after a verified key refresh. Stored keys were not changed."}
+                    code = 4
+                elif refreshed and isinstance(payload, dict) and payload.get("failures") and key_failure(" ".join(str(item) for item in payload["failures"])):
+                    result = {"ok": False, "stage": "key_validation", "message": "The refreshed keys did not resolve database decryption errors. Stored keys were not changed."}
+                    code = 4
+                else:
+                    if refreshed:
+                        store_key_catalog(args.profile, catalog)
+                        key_source = "process-memory-verified-and-dpapi-stored"
+                    if args.command == "history":
+                        payload = filter_history_payload(payload, args.sender, args.summary_only)
+                    result = {
+                        "ok": True,
+                        "profile": args.profile,
+                        "command": args.command,
+                        "key_source": key_source,
+                        "data": sanitize(payload, max(40, args.max_chars)),
+                    }
     except subprocess.TimeoutExpired:
         result = {"ok": False, "stage": "timeout", "message": "The read-only scan timed out."}
         code = 5
-    except (KeyError, FileNotFoundError, ValueError, RuntimeError) as exc:
+    except LookupError:
+        result = {"ok": False, "stage": "account_identity_unverified", "message": "The running WeChat account could not be verified against the selected Profile database. Stored keys were not changed; check the signed-in account."}
+        code = 8
+    except PermissionError:
+        result = {"ok": False, "stage": "authorization", "message": "The selected Profile has no standing read authorization. Confirm ownership and bind it before reading."}
+        code = 9
+    except FileNotFoundError as exc:
+        result = {"ok": False, "stage": "profile_or_input", "message": redact_text(str(exc), 240)}
+        code = 6
+    except OSError:
+        result = {"ok": False, "stage": "credential_unavailable", "message": "The bound Profile credential could not be read in this Windows user context. No account mismatch or key expiry has been established; no key scan was attempted."}
+        code = 10
+    except (KeyError, ValueError, RuntimeError) as exc:
         result = {"ok": False, "stage": "profile_or_input", "message": redact_text(str(exc), 240)}
         code = 6
     except Exception:
