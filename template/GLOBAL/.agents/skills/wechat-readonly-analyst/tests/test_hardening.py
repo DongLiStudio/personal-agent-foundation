@@ -8,6 +8,7 @@ import io
 import sys
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
@@ -26,7 +27,8 @@ class HardeningTests(unittest.TestCase):
     def test_date_normalization_and_key_error_classification(self):
         self.assertEqual(wechat_readonly.normalize_time("2026-08-30"), "2026-08-30")
         self.assertEqual(wechat_readonly.normalize_time("2026-08-30 09:10"), "2026-08-30 09:10")
-        self.assertEqual(wechat_readonly.normalize_time("2026-08-30T09:10:00+08:00"), "2026-08-30 09:10:00")
+        expected = datetime.fromisoformat("2026-08-30T09:10:00+08:00").astimezone().strftime("%Y-%m-%d %H:%M:%S")
+        self.assertEqual(wechat_readonly.normalize_time("2026-08-30T09:10:00+08:00"), expected)
         with self.assertRaises(ValueError):
             wechat_readonly.normalize_time("not-a-date")
         self.assertFalse(wechat_readonly.key_failure("start_time 格式无效"))
@@ -51,7 +53,8 @@ class HardeningTests(unittest.TestCase):
                 self.assertEqual(wechat_readonly.main(), 4)
             self.assertIn('"ok": false', output.getvalue())
             self.assertNotIn("key refresh", output.getvalue())
-            self.assertIn("2026-08-30 00:00:00", invoke.call_args.args[1])
+            expected = datetime.fromisoformat("2026-08-30T00:00:00+08:00").astimezone().strftime("%Y-%m-%d %H:%M:%S")
+            self.assertIn(expected, invoke.call_args.args[1])
             capture.assert_not_called()
 
     def test_missing_catalog_uses_standing_grant_and_only_stores_after_success(self):
