@@ -87,7 +87,7 @@ Python 必须为 3.11+。当前 Python 不满足时，展示当前系统的官�
 - **Gitee**：发现官方 CLI，按 `GITEE_PROFILES.md` 重新登录并回读真实 username；不得从项目名、浏览器登录态或 Git remote 猜测身份。
 - **本机微信只读分析**：确认 `wechat-readonly-analyst` 已同步到当前宿主的用户级 Skill 目录，在安装副本运行离线、哈希锁定的 `scripts/install.ps1` 与 `profile_manager.py self-test`；按 `WECHAT_PROFILES.md` 逐个发现候选并让用户确认归属后重新绑定和一次性取钥。旧电脑 DPAPI 槽不迁移，不自动选择账号。取钥使用 `--confirm-memory-read --grant-standing-read`，验证 `offline_key_available=true` 后执行最多 3 条会话的最小回读；后续查询复用 DPAPI 密钥目录，不要求微信在线或重复授权。
 - **Obsidian**：检查 `GLOBAL/obsidian-resource` 链接本体和目标可达性；只把官方注册的 CLI（Windows 为 1.12.7+ 安装器随附的 `Obsidian.com` 重定向器）判定为 CLI，不把 GUI `Obsidian.exe` 误判为 CLI。有官方 CLI 时执行版本及有界只读检查，没有 CLI 时按官方设置完成注册，或以开放文件格式做最小只读验证。禁止递归遍历 Vault。
-- **服务器**：读取 `SERVER_PROFILES.md` 的非敏感路由，发现 `ssh` 客户端；由用户明确选择需要恢复的服务器 Profile 后，检查本机 SSH 别名、身份文件是否存在但不读取私钥，先从可信渠道核验主机指纹，再以 `BatchMode` 做身份和目标服务的有界只读回读。缺少私钥或权限时引导用户通过安全渠道恢复或重新授权，不把私钥、密码、票据写入 GLOBAL、报告或命令历史。不得设置隐式默认服务器，也不得自动部署、重启、改网、改卷或修改远端配置。
+- **服务器**：读取 `SERVER_PROFILES.md` 的非敏感路由，发现 `ssh` 客户端；由用户明确选择 Profile 后，默认安装/解锁 Bitwarden 桌面端并启用 SSH Agent，按平台核验 socket/通道和目标公开指纹，不以磁盘私钥存在作为前提，不默认生成或导出私钥。先可信核验主机指纹，再以显式地址、账号和新的 Agent 连接做身份及目标服务的有界只读回读；授权拒绝或权限缺失时引导正规接入，不自动回退文件身份。文件私钥例外仅按 SERVER_PROFILES 的再次确认规则处理，不把私钥、密码、票据写入 GLOBAL、报告或命令历史。不得设置隐式默认服务器，也不得自动部署、重启、改网、改卷或修改远端配置。
 - **宿主**：确认全部自维护 Skill 已被当前 Agent 发现；宿主需要重启或重新加载时明确提示并在恢复后复查。检查全局个性化提示词是否已设置，不能从界面回读时标记为待用户确认。
 
 任何官方授权、软件安装、系统权限提升或宿主设置修改都要在执行前说明影响并取得确认。用户完成授权后，从中断门禁继续，不重新运行已经成功的写入。

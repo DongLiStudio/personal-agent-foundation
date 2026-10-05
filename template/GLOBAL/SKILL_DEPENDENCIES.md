@@ -28,8 +28,9 @@
 
 - 源稿：`{{AGENT_ROOT}}\GLOBAL\.agents\skills\server-profile`
 - 恢复方式：从 GLOBAL 源稿同步到当前 Agent 可发现的全局 Skill 位置。
-- 运行依赖：OpenSSH 客户端及 Python 3；先验证 `ssh -V` 和 Python 可用，再按 Skill 核验密钥与指纹；私钥必须另行安全恢复，不进入基座。
+- 运行依赖：OpenSSH 客户端、Bitwarden 桌面端及 SSH Agent；先验证 `ssh -V`、Agent 公开指纹和平台 socket/通道，再独立连接。人工密钥默认在 Bitwarden 生成和保管，不导出到本机磁盘；Python 3 仅在具体核验脚本需要时使用。
 - 用途：服务器首次 SSH 接入、连接诊断、密钥轮换与全局服务器登记；不执行业务部署或重启。
+- 会话约定：同一任务的连续操作复用一个 SSH 会话并及时退出；首次身份验收独立连接，签名仍始终提示，进程名称不是可信身份凭据。
 
 ### `restore-agent-foundation`
 

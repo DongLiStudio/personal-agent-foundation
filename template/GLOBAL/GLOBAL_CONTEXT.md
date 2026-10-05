@@ -50,7 +50,8 @@ Agent 工作采用项目制管理。
 
 - 全局资产空间：`{{AGENT_ROOT}}\GLOBAL`
 - 项目索引：见 `PROJECTS.md`
-- 服务器 Profile：见 `SERVER_PROFILES.md`
+- 服务器 Profile：见 `SERVER_PROFILES.md`；人工 SSH（含隧道）默认使用 Bitwarden SSH Agent，每次签名提示授权，不默认创建或导出磁盘私钥。接入、轮换、恢复与明确文件身份例外统一按该索引及 `server-profile` Skill 执行。
+- 同一任务对同一服务器的连续操作复用一个任务内 SSH 会话，操作完成立即退出；首次独立身份验收仍使用新连接，不通过降低 Bitwarden 授权提示频率减少弹窗。进程名称仅用于辨认，不作为可信身份或防木马依据。
 - 阿里云与云效身份：见 `ALIYUN_PROFILES.md`
 - 腾讯云账号与身份路由：见 `TENCENTCLOUD_PROFILES.md`
 - 本机微信只读身份路由：见 `WECHAT_PROFILES.md`

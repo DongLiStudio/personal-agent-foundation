@@ -70,7 +70,7 @@ class ScaffoldGuardTests(unittest.TestCase):
 
     def test_full_template_inventory_and_placeholders(self) -> None:
         report = guard.audit_template(TEMPLATE, self.manifest)
-        self.assertEqual(160, report["file_count"])
+        self.assertEqual(161, report["file_count"])
         self.assertEqual(
             {
                 "AGENT_ROOT",
@@ -92,7 +92,7 @@ class ScaffoldGuardTests(unittest.TestCase):
                 TEMPLATE, self.manifest, config, target
             )
             self.assertEqual("dry-run", report["mode"])
-            self.assertEqual(160, report["file_count"])
+            self.assertEqual(161, report["file_count"])
             self.assertFalse(target.exists())
             literal_paths = set(self.manifest["literal_template_paths"])
             self.assertTrue(
@@ -898,7 +898,18 @@ class ProductBoundaryTests(unittest.TestCase):
         server_skill = (
             TEMPLATE / "GLOBAL" / ".agents" / "skills" / "server-profile" / "SKILL.md"
         ).read_text(encoding="utf-8")
-        combined = "\n".join([readme, server_profiles, server_detail_readme, server_skill])
+        agent_access = (
+            TEMPLATE
+            / "GLOBAL"
+            / ".agents"
+            / "skills"
+            / "server-profile"
+            / "references"
+            / "agent-access.md"
+        ).read_text(encoding="utf-8")
+        combined = "\n".join(
+            [readme, server_profiles, server_detail_readme, server_skill, agent_access]
+        )
         for text in (
             "servers/<profile>.md",
             "不要默认递归或批量读取全部 `servers/`",
@@ -906,6 +917,10 @@ class ProductBoundaryTests(unittest.TestCase):
             "公开模板不预置真实服务器地址",
             "主机指纹核验",
             "服务表采用模板六列",
+            "Bitwarden SSH Agent",
+            "不默认在磁盘生成、导出或恢复私钥",
+            "同一任务、同一服务器、同一主体",
+            "ForwardAgent=no",
         ):
             self.assertIn(text, combined)
         for forbidden in (

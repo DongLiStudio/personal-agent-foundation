@@ -1,6 +1,6 @@
 # GLOBAL 通用化映射
 
-模板以真实 GLOBAL 的公开治理结构为来源，当前公开模板清单为 160 个文件，并增加公开产品自身的恢复状态、`restore-agent-foundation` 与 `update-agent-foundation` 模块；个人服务器地址、账号、邮箱、UIN、wxid、数据库路径、指纹和服务拓扑不进入公开模板。
+模板以真实 GLOBAL 的公开治理结构为来源，当前公开模板清单为 161 个文件，并增加公开产品自身的恢复状态、`restore-agent-foundation` 与 `update-agent-foundation` 模块；个人服务器地址、账号、邮箱、UIN、wxid、数据库路径、指纹和服务拓扑不进入公开模板。
 
 ## 保留
 
@@ -31,4 +31,4 @@
 
 ## 完整性要求
 
-当前模板受管文件数为 160：包含公开 GLOBAL 治理文件、`FOUNDATION_STATE.json`、自维护全局 Skill 源稿、恢复/更新 Skill 文件、服务器详情目录说明，以及微信只读能力所需的哈希锁定离线 wheel。`.whl` 作为清单允许的二进制文件原样复制，不参与文本渲染；其他模板文件继续强制 UTF-8 无 BOM 与 LF。有意新增或删除 GLOBAL 模块时，必须同时更新 `template-manifest.json`、本文件和测试。不能为了通过脱敏扫描静默漏掉源文件。
+当前模板受管文件数为 161：包含公开 GLOBAL 治理文件、`FOUNDATION_STATE.json`、自维护全局 Skill 源稿、恢复/更新 Skill 文件、服务器详情目录说明、Bitwarden SSH Agent 接入与验收参考，以及微信只读能力所需的哈希锁定离线 wheel。`.whl` 作为清单允许的二进制文件原样复制，不参与文本渲染；其他模板文件继续强制 UTF-8 无 BOM 与 LF。有意新增或删除 GLOBAL 模块时，必须同时更新 `template-manifest.json`、本文件和测试。不能为了通过脱敏扫描静默漏掉源文件。
