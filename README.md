@@ -1,175 +1,126 @@
-# Personal Agent Foundation
+<div align="center">
+  <h1>Personal Agent Foundation</h1>
+  <p><strong>让你的规则、项目与工作经验，跟随你使用的 Agent。</strong></p>
+  <p>可安装 · 可迁移 · 可恢复 · 可扩展的个人 Agent 工作基座</p>
+  <p>
+    <a href="https://github.com/DongLiStudio/personal-agent-foundation/actions/workflows/test.yml"><img src="https://github.com/DongLiStudio/personal-agent-foundation/actions/workflows/test.yml/badge.svg" alt="跨平台测试"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="Apache 2.0"></a>
+    <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-555" alt="平台">
+    <a href="https://github.com/DongLiStudio/personal-agent-foundation/stargazers"><img src="https://img.shields.io/github/stars/DongLiStudio/personal-agent-foundation?style=flat" alt="GitHub Stars"></a>
+  </p>
+  <p><a href="#快速开始">快速开始</a> · <a href="docs/getting-started.md">完整使用指南</a> · <a href="#恢复与更新">恢复与更新</a> · <a href="#参与贡献">参与贡献</a></p>
+</div>
 
-Personal Agent Foundation 是一套可移植的个人 Agent 工作基座，用来解决个人 AI 工作流里的“数据孤岛”和“上下文断裂”问题。
+---
 
-不同 Agent 宿主、不同工作空间中，往往安装着不同 Skill，保存着不同上下文，并连接着不同账号与知识库入口。用户一旦换 Agent、换项目或换设备，长期规则、项目经验、身份路由、工具授权和协作方式就很难继续复用。本项目把经过实际使用的 GLOBAL 治理层、项目制协作方式、Skill 依赖、账号路由和知识库连接通用化，并通过对话式安装 Skill 帮助用户建立自己的 Agent 根目录。
+## 为什么需要个人 Agent 基座？
 
-你不需要理解模板内部结构。安装过程中，Agent 会先展示计划，在你确认后再写入文件，并继续引导账号连接、个性化设置和第一个项目的创建。
+换一个 Agent、开启新会话或切换项目，往往意味着重新解释规则、寻找资料、确认账号、安装工具。Personal Agent Foundation 将这些长期信息组织成由你掌握的工作目录，让兼容的 Agent 读取同一套规则、项目入口与能力说明。
 
-## 核心特色
+它提供公开脱敏模板、对话式安装 Skill，以及现有基座的恢复和保护性更新流程。个人内容继续留在你的工作目录或原系统中，不需要提交到本仓库。
 
-这套基座的重点不是把几个工具简单放在一起，而是让用户自己的 AI 工作环境变成可安装、可迁移、可恢复、可扩展的长期基座：
+> 当前公开工程基线与跨平台自动化验证已完成；真实新电脑的账号授权及不同宿主黑盒验收仍在推进，尚未发布首个正式 Release。宿主兼容性以实际验收为准。
 
-- **打通 Agent 数据孤岛**：把不同 Agent 宿主、不同工作空间中的规则、上下文、Skill 依赖和项目入口组织到统一的 Agent 根目录中，让新会话不再从零开始。
-- **GLOBAL 治理层**：沉淀长期规则、身份路由、项目索引、安全边界和工作方式，让不同项目能共享同一套基础约定。
-- **项目制协作**：为每个项目保留独立上下文、状态、任务和验收边界，同时继承 GLOBAL 的通用规则。
-- **飞书多账号管理**：管理多个飞书 Profile，在明确身份路由下连接任务、日历、文档等信息，避免不同账号之间混用。
-- **GitHub 多账号管理**：管理多个 GitHub 账号及其项目路由，让仓库、Issue、PR、Actions 等操作始终使用正确身份。
-- **阿里云 / 云效身份治理**：管理阿里云 CLI Profile、云效组织逻辑身份和 Codeup / Flow 等 DevOps 操作边界；PAT、AK/SK 等凭据只走宿主安全通道，不写入 GLOBAL 或项目仓库。
-- **腾讯云多账号治理**：管理 TCCLI 多 Profile、浏览器授权/SSO、真实主体回读与项目路由；云资源实时查询，不把账号授权等同于资源变更授权。
-- **邮箱与本机微信只读聚合**：用非敏感 Profile 统一路由多个邮箱和本机微信数据身份；默认只读，凭据、数据库路径、密钥和聊天原文不进入 GLOBAL 或 Git。
-- **Gitee 身份路由**：通过官方 CLI 管理真实账号与项目路由，避免浏览器登录态、Git remote 和业务身份混用。
-- **Obsidian 知识聚合**：把用户自己的 Obsidian Vault 作为外部知识库连接给 Agent；安装时通过对话理解并适配用户现有的目录结构、知识入口和访问边界，不要求照搬作者的组织方式。
-- **多服务器连接与治理**：用 `SERVER_PROFILES.md` 管理多个服务器 Profile、SSH 路由、服务归属和操作边界；人工连接默认使用 Bitwarden SSH Agent，不把私钥导出到磁盘。连接前必须明确目标服务器、核验身份权限和主机指纹，默认只做有界只读回读，不自动部署、重启或修改远端配置。
-- **全 AI 化操作**：由 Agent 完成跨来源采集、分析、规划、执行和结果回读；用户主要负责目标表达、必要选择和高影响操作确认。
+## 核心能力
 
-这里的“聚合”不是把个人数据上传或复制进本仓库。公开模板不包含任何用户数据或凭据；运行时只在用户授权范围内通过官方工具连接原系统，凭据仍由各平台的官方认证机制管理。
+| 能力 | 解决的问题 |
+| --- | --- |
+| GLOBAL 治理层 | 集中长期规则、项目索引、身份路由与安全边界 |
+| 项目制上下文 | 每个项目保留独立 AGENTS、README、STATUS 与任务资料，继承公共规则 |
+| 可复用 Skills | 记录能力来源与依赖，按任务读取，支持恢复安装副本 |
+| 多账号身份路由 | 操作前明确飞书、GitHub、Gitee、云平台及邮箱身份 |
+| 知识库连接 | 将 Obsidian 作为默认只读的外部知识入口，适配现有目录 |
+| 服务器治理 | 使用明确 Profile 与可信主机指纹，人工 SSH 默认由 Bitwarden Agent 签名 |
+| 恢复与保护性更新 | 先审计、展示计划，再备份、执行、验证和回滚 |
 
-## 适合谁
+适合希望多个项目共享长期约定、通过对话配置工具、并在更换设备或 Agent 时保留工作方式的用户。它是工作基座，不是独立聊天应用；Agent 宿主需能读取文件、执行本地工具并请求必要授权。
 
-- 希望多个 Agent 或多个项目共享一套长期规则的人。
-- 希望在 Windows、macOS 或 Linux 上建立可迁移 Agent 工作目录的人。
-- 希望通过对话完成安装，而不是手工复制和替换大量文件的人。
+## 快速开始
 
-本项目不会提供独立 GUI。任何宿主 Agent 支持图形提问、选项卡片、目录选择、可视化安装面板或交互式确认时，都应优先使用宿主界面展示阶段进度、安装计划、完整服务清单、逐项选择和最终对账；例如 Codex 可使用 `[@visualize](plugin://visualize@openai-bundled)`。没有图形能力或调用失败时使用字段完全相同的结构化对话，说明具体原因，不能静默降级或省略步骤。
-
-## 开始使用
-
-把仓库链接交给能够读取公开 GitHub 仓库并执行本地工具的 Agent：
+把下面这段话交给你的 Agent：
 
 ```text
 请安装这个个人 Agent 基座：
 https://github.com/DongLiStudio/personal-agent-foundation
 ```
 
-剩余准备工作由 Agent 完成。用户不需要手工克隆仓库、安装 Skill、寻找 Python 或编辑模板。
+Agent 会读取仓库中的 `skills/install-agent-scaffold/SKILL.md`，推荐一个新的空 Agent 根目录，检查 Python 3.11+，展示安装计划和 dry-run；得到你的明确确认后才写入文件，再逐项引导连接、个性化和首项目使用。
 
-Agent 应当：
+你主要需要决定根目录、时区和默认助手项目名。不要把密码、token、私钥或恢复码发到聊天中；账号连接使用对应官方授权流程。
 
-1. 把完整产品仓库获取到新的系统临时目录。
-2. 读取 `skills/install-agent-scaffold/SKILL.md` 及其按需引用，把它作为本次安装流程。
-3. 先推荐 Agent 根目录，并说明推荐理由。默认推荐路径的最后一级目录叫 `Agent`；用户可以指定其他空目录。目标不存在时创建，目标已存在且为空时使用，目标已有内容时停止并说明不会合并或覆盖。
-4. 自动检测宿主或系统中的 Python 3.11+；缺失时先展示官方安装方案，经确认后自动安装。
-5. 收集最小非敏感配置并执行模板审计、安装计划和 dry-run。飞书、GitHub 和 Obsidian 在初始模板中只写入“待连接”状态，不要求用户提前知道 Profile 名或账号名。
-6. 只有在展示计划并获得明确确认后，才执行真实安装和验证。
-7. GLOBAL 和 Skills 恢复完成后，再分别询问是否现在连接飞书、GitHub 和 Obsidian；默认推荐并预选“现在连接”。用户选择连接飞书时，默认创建新的飞书应用和新的专用 Profile，本机已有 Profile 或其他应用只能在用户明确选择高级迁移/复用路径后使用，不能自动复用；写入 `LARK_PROFILES.md` 的公司列表名称必须使用授权回读到的真实公司/租户名称。用户选择连接 GitHub 时，由 `gh api user` 等官方回读确定真实 GitHub 账号名并写入 `GITHUB_ACCOUNTS.md`，不得由程序自拟账号名称。用户选择连接 Obsidian 时，必须先确认或辅助发现 Vault 基础结构、目录理解和优先阅读入口，再创建并验证 `GLOBAL/obsidian-resource`；`OBSIDIAN_LINK.md` 只记录稳定入口和结构理解，不记录 Vault 原始绝对路径。只有用户主动选择稍后再配或当前没有账号/Vault 时，才保留未配置说明。
-8. 安装开场就展示九类连接的完整清单；恢复 Skills 后再逐项确认飞书、GitHub、Obsidian、阿里云/云效、腾讯云、邮箱、Gitee、本机微信只读和服务器。可选不等于可以省略询问：每项都必须留下已配置、用户稍后处理、当前宿主不支持或准确阻断之一，最终不能存在未决定项。
-9. 同时说明飞书考试构建与 ALLinSSL 证书自动化两类条件能力：它们随 GLOBAL 安装，但只有飞书身份、域名、云账号、服务器等实际依赖明确后才按需启用，不会在首次安装中擅自创建考试、改 DNS、申请证书或部署服务。
+完整步骤与门禁见 [使用指南](docs/getting-started.md) 和 [安装契约](docs/installation-contract.md)。已有内容的目录不会被首次安装器覆盖或合并。
 
-Agent 如果无法读取公开仓库、执行本地工具或请求必要权限，应准确说明阻断，不应把克隆、Skill 注册、Python 安装或模板处理重新交给用户手工完成。
+## 安装后得到什么？
 
-## 换电脑、换 Agent 或修复现有基座
+```text
+Agent/
+├── GLOBAL/                   # 公共治理、身份路由、项目索引
+│   └── .agents/skills/       # 能力源稿与恢复、更新入口
+├── 通用助手/                # 示例名称，可自定义
+│   ├── AGENTS.md            # 工作规则与授权边界
+│   ├── README.md            # 项目定位与资料入口
+│   └── STATUS.md            # 当前事实、阻塞与下一步
+└── 你的业务项目/            # 独立上下文与版本历史
+```
 
-已经拥有基座时，不要重新走首次安装，也不要把模板覆盖到非空目录。把完整 Agent 根复制到新电脑或交给新宿主后，让 Agent 直接读取随基座携带的统一恢复入口：
+GLOBAL 和具体项目同级。长期公共约定进入 GLOBAL，项目任务进入各自项目，外部知识库保持独立。
+
+## 连接与生态
+
+安装会完整告知并逐项确认九类连接：**飞书、GitHub、Obsidian、阿里云/云效、腾讯云、邮箱、Gitee、本机微信只读和服务器**。每项都留下已配置、用户稍后处理、当前宿主不支持或明确阻断，不能静默跳过。
+
+飞书考试构建与 ALLinSSL 证书自动化属于条件能力：依赖身份与目标确认后才按需启用。安装 Skill 不等于创建考试、改 DNS、签发证书或部署业务。
+
+本机微信只读分析目前限 Windows 11 x64 / Python 3.12 x64。其他连接与图形引导取决于宿主和官方工具；支持图形交互时优先展示计划、选择及验收状态，无法使用时明确说明原因。
+
+## 恢复与更新
+
+| 场景 | 入口与行为 |
+| --- | --- |
+| 首次建立工作目录 | `skills/install-agent-scaffold/SKILL.md`；仅安装到不存在或空目录 |
+| 换电脑、换 Agent、复制后修复 | 已有根目录的 `GLOBAL/.agents/skills/restore-agent-foundation/SKILL.md`；自包含恢复与自检 |
+| 已有基座获取上游更新 | `GLOBAL/.agents/skills/update-agent-foundation/SKILL.md`；锁定来源提交、展示带哈希计划、保护个人状态 |
+
+恢复示例：
 
 ```text
 请读取并执行：
 <复制后的 Agent 根>/GLOBAL/.agents/skills/restore-agent-foundation/SKILL.md
-
-全面检查这套已经存在的 Personal Agent Foundation，
-并在我确认计划后恢复到当前电脑和当前 Agent 中的完整可用状态。
+全面检查已有基座，并在我确认计划后恢复到当前电脑和 Agent 中。
 ```
 
-`restore-agent-foundation` 自包含路径校准、状态检查、链接重建、Skill 重装、备份、回滚和最终验证，不要求其他 Skill 先可用。它会识别换机、根目录变化、宿主变化、安装副本丢失和授权失效，并把需要 GitHub、飞书、Obsidian、阿里云/云效、Bitwarden SSH Agent 或系统权限的部分转换成清晰的官方授权步骤；用户完成后继续验收，不要求手工编排多个 Skill。
+更新保留账号、项目索引、知识库、服务器和个人规则，必要时给出语义合并清单，不用公开模板覆盖个人状态。详见 [完整恢复与更新说明](docs/getting-started.md)。
 
-已有基座需要获取公开上游新版时，使用 `GLOBAL/.agents/skills/update-agent-foundation/SKILL.md`。它会锁定实际 source commit，先比较和生成带哈希的更新计划；账号/Profile、项目索引、Obsidian、服务器、排程和个人规则只保留或语义合并，自维护 Skills 与新增公共文件在备份后确定性更新，并支持验证与安全回滚。
+## 安全与数据边界
 
-阿里云/云效恢复采用身份与业务分离：先读取 `ALIYUN_PROFILES.md` 的非敏感路由，安装或验证 `aliyun` 与 `aliyun-cli-devops`，再由用户通过安全凭据通道重新授权。云效 PAT 与阿里云通用 Profile 是两套认证；恢复成功也不自动创建仓库、改流水线、审查 MR、合并或部署。
+- 公开模板不包含真实个人项目、身份凭据、服务器信息或历史资料。
+- 只替换清单声明的占位符；模板源不原地修改，安装前审计并先 dry-run。
+- 使用 staging 渲染与独立验证，不递归跟随 Junction 或 symlink。
+- Obsidian 和邮箱等外部资料默认只读，写入和高影响操作按明确授权执行。
+- SSH 保留主机校验、Agent 授权及独立连接验收，不默认导出私钥或回退密码。
+- 工具授权与实际业务操作分开；无法回读的步骤明确报告，不能冒充完成。
 
-服务器恢复采用渐进式治理：先读取 `SERVER_PROFILES.md` 的非敏感索引，由用户明确选择要恢复的服务器 Profile；再只读取对应 `servers/<profile>.md` 详情，安装或解锁 Bitwarden 桌面端、启用 SSH Agent、核验平台通道、目标公开指纹与可信主机指纹，并对目标服务做新的 Agent 认证和有界只读回读。恢复器不会默认批量展开全部服务器详情，不会自动接受未知主机密钥、生成或导出私钥、回退到密码，也不会自动部署、重启、改网、改卷或修改远端配置。
+基座提供规则与程序护栏；实际安全仍依赖宿主权限、工具配置和使用过程。模板检查、CI 通过与真实账号授权、完整恢复验收是不同证据。
 
-## 安装时会询问什么
+## 仓库导航
 
-Agent 会询问以下非敏感配置：
+| 路径 | 内容 |
+| --- | --- |
+| `template/GLOBAL/` | 公开脱敏模板与公共能力 |
+| `skills/install-agent-scaffold/` | 对话式首次安装 |
+| `skills/restore-agent-foundation/` | 恢复、自检与修复 |
+| `skills/update-agent-foundation/` | 保护性升级、验证与回滚 |
+| `template-manifest.json` | 文件与占位符契约 |
+| `tests/` | 渲染、完整性、隐私与目标保护测试 |
+| `docs/` | 使用指南、安装契约、发布检查与维护说明 |
 
-1. 新 Agent 根目录；推荐最终目录名为 `Agent`，并解释为什么适合放在该位置。
-2. IANA 时区，例如 `Asia/Shanghai`。
-3. 默认助手项目名称。
+## 参与贡献
 
-安装开场会先展示完整服务总览，让用户知道整套流程稍后会覆盖哪些连接，但不会提前索取账号、Profile、路径或凭据。GLOBAL 和 Skills 恢复后，Agent 才会逐项询问是否现在连接飞书、GitHub、Obsidian、阿里云/云效、腾讯云、邮箱、Gitee、本机微信只读和服务器。飞书、GitHub、Obsidian 的默认选项都应是“现在连接”，而不是“稍后连接”；其余项目虽然可选，也必须由用户明确决定。用户选择连接飞书或 GitHub 时，不需要提前知道 Profile 名或账号名；Agent 应调用对应 Skill 或官方 CLI 完成授权并回读真实身份。
+欢迎通过 [Issues](https://github.com/DongLiStudio/personal-agent-foundation/issues) 提交问题和建议，或通过 Pull Request 改进模板、工作流与文档。报告请附平台、Agent 宿主、复现步骤和脱敏结果，不提交凭据或个人目录内容。
 
-每项服务都会进入统一状态清单：已配置、用户稍后处理、当前宿主不支持或阻断。安装结束前必须逐项对账，不允许仍有“未决定”。飞书考试构建与 ALLinSSL 证书自动化会作为条件能力单独说明；Skill 已安装不代表真实考试、域名、证书或服务器已配置。
+自动化测试覆盖 Windows、macOS、Ubuntu 与 Python 3.11/3.12。修改安装器或模板时，应同步契约和对应验证：
 
-飞书首次连接必须默认创建新的飞书应用和新的专用 Profile，用于当前 Personal Agent Foundation / GLOBAL 基座。本机已有 Profile 或旧应用最多只能做只读检查以避免命名冲突；不得自动授权、自动切换或自动复用。只有用户明确选择“高级迁移/复用已有飞书应用/Profile”，并理解这会共享原应用权限、身份路由和审计边界后，Agent 才能复用已有配置。若建议名称已存在，应生成新的不冲突名称或请用户确认新名称，而不是退回复用已有 Profile。
-
-注意区分“内部配置标识”和“用户身份名称”：飞书 CLI profile 名可以由工具生成并用于命令参数，但公司列表标题、公司名称、App 名称等展示字段必须来自官方授权/`whoami` 回读或用户确认的真实组织信息；GitHub 账号列表必须使用 `gh api user` 回读的真实 login/账号名称。程序不得为了好看或统一风格自行给公司、组织或 GitHub 账号起名。
-
-用户选择连接 Obsidian 时，不能只填写软连接路径。Agent 应先询问 Vault 是否已有内容、基础目录结构、总纲/索引入口、长期资料/项目资料/附件等用途分布、默认读写边界和排除项；用户不知道如何描述时，应请求允许只读列出 Vault 根目录一层和用户点名入口来辅助判断。只有用户明确表示之后再定、暂不连接或当前没有 Vault，才把 Obsidian 标记为未配置或待配置。
-
-生成的 `OBSIDIAN_LINK.md` 应保持与模板同构：保留“定位”“安全规则”“目录理解”“优先阅读”等结构，只替换其中涉及用户个人 Vault 目录设计的条目。文件中只写 `GLOBAL/obsidian-resource` 这个稳定入口，不把 Vault 原始绝对路径当作长期记录。
-
-不要在对话中提供 token、密码、App Secret、私钥或恢复码。需要登录时，由对应工具打开官方授权流程。
-
-## 安装过程
-
-Skill 按以下顺序执行：
-
-```text
-收集最小配置 → 环境预检 → 模板审计 → 安装计划 → dry-run
-→ 用户确认 → 安装 → 独立验证 → 恢复 Skills
-→ 询问并连接飞书 / GitHub / Obsidian
-→ 可选配置阿里云/云效、腾讯云、邮箱、Gitee、本机微信与服务器 Profile
-→ 初始化 GLOBAL 本地 Git
-→ 全局个性化提示词 → 项目目录位置教学
-→ 通用助手项目打开门禁 → 通用助手总经理
-→ 通用助手总经理承接 GLOBAL 导览 → 可选创建第一个业务项目
-→ 业务项目打开门禁 → 项目总经理 → GLOBAL Skills 快速试用
-```
-
-在显示 dry-run 结果并获得明确确认前，Skill 不应执行真实安装。
-安装过程中用户说起其他事情时，Agent 应保留当前阶段和恢复检查点；除非用户明确暂停，否则不要丢失安装主线或重新开始。
-
-创建“通用助手总经理”或业务项目总经理前，Agent 必须先引导用户打开、添加或导入对应项目目录，并确认该会话绑定到正确项目根；不能先创建或重命名长期任务来替代打开项目。若当前宿主没有可调用的添加项目接口，应先给出手动打开步骤并等待用户确认。独立长期任务只能作为用户明确选择的降级路径，并且启动后必须先核验项目根目录、当前工作目录和三入口文件。
-
-创建通用助手项目前，Agent 应先引导用户保存全局个性化提示词，再教学项目目录位置：`GLOBAL/`、`通用助手/` 和后续业务项目都位于同一个 Agent 根目录下，彼此同级；`GLOBAL/` 只保存全局规则和工具入口，不放具体项目任务。用户确认理解后，再把通用助手作为第一个示范项目创建并打开。
-
-## 安装后会得到什么
-
-- 一个独立的 `GLOBAL/`，保存全局规则、项目索引、账号路由和 Skill 依赖记录。
-- 一个随 GLOBAL 携带的 `restore-agent-foundation`，用于换机、换 Agent、迁移和故障后的统一恢复。
-- 一个随 GLOBAL 携带的 `update-agent-foundation`，用于检查公开上游新版、保护用户定制、计划更新、备份、验证与回滚。
-- 一套公开脱敏的自维护 Skills。
-- 飞书、GitHub 和 Obsidian 的可选连接引导，不包含任何预置凭据。
-- 阿里云/云效的公开脱敏身份治理结构，用于登记 CLI Profile、组织路由、PAT 安全输入和 DevOps 操作边界；不包含真实凭据。
-- 腾讯云、邮箱、Gitee 与本机微信只读分析的公开脱敏身份治理结构；不包含真实账号、邮箱、UIN、wxid、数据库路径、凭据或聊天内容。
-- 飞书考试构建与 ALLinSSL 证书自动化 Skill；它们只提供可复用工作流和安全门禁，不预置真实考试、服务器、域名、云账号或通知渠道。
-- 多服务器 Profile 的公开脱敏治理结构，用于登记服务器用途、SSH 路由、服务归属、授权边界和恢复检查；不包含真实服务器地址、账号、主机指纹、私钥路径或服务拓扑。
-- 内置的完整全局个性化提示词，以及针对当前宿主设置入口的保存与核验引导。
-- 已打开或明确降级绑定的通用助手项目和“通用助手总经理”会话，用于承接 GLOBAL 导览、跨项目协调和后续项目创建引导。
-- 可选的第一个业务项目创建教程，包括建立项目总经理会话并调用 `init-agent-project`。
-- GLOBAL Skills 的分组说明和最小安全试用，区分已可用、需要授权、待安装外部依赖和当前宿主不支持的能力。
-
-## 安全保证
-
-- 模板不包含作者的真实项目、个人目录、账号、App ID、token、服务器地址、主机指纹、私钥路径或历史记录。
-- 只有清单声明的占位符可以被替换。
-- 模板源目录不会在安装时被原地修改。
-- 目标目录不存在时创建；已存在且为空时使用；已有内容时拒绝覆盖或合并。
-- 使用临时 staging 渲染，成功验证后再原子落盘。
-- 安装后检查 UTF-8、LF、必需文件和占位符残留。
-- 不递归跟随模板中的 Junction 或 symlink。
-- 服务器治理只记录脱敏 Profile 结构和安全操作边界；真实人工连接默认由 Bitwarden SSH Agent 保管并完成签名，文件私钥只作为用户明确确认风险后的例外。每次操作前仍须实时核验身份、权限、主机指纹和目标服务。
-
-## 平台与验证状态
-
-- 自动化测试覆盖 Windows、macOS、Ubuntu，以及 Python 3.11 和 3.12。
-- `wechat-readonly-analyst` 当前是 Windows 11 x64 / Python 3.12 x64 专属可选能力；其依赖 wheel 以 SHA-256 锁定并随 Skill 离线携带，其他平台应明确标记不支持，而不是尝试替代安装。
-- Python 和 IANA 时区数据由安装 Skill 自动预检；需要安装 Python 或 `tzdata` 时会先单独征得确认，不会静默修改系统环境。
-- 真实宿主中的 Skill 安装位置、账号网页登录、全局提示词入口和图形交互由宿主决定；无法验证的步骤必须如实报告，不能假装完成。
-
-## 仓库内容
-
-- `template/GLOBAL/`：公开脱敏的 GLOBAL 模板，包括项目索引、多平台账号路由、邮箱/本机微信只读身份、云账号、Obsidian 入口和多服务器治理结构。
-- `skills/install-agent-scaffold/`：对话式安装、验证和首次项目教程。
-- `skills/restore-agent-foundation/`：自包含的现有基座恢复、自检、修复与验收入口；同一副本随模板进入 `GLOBAL/.agents/skills/`。
-- `skills/update-agent-foundation/`：已有基座的可信上游版本检查、保护性更新、备份、验证与回滚入口；同一副本随模板进入 `GLOBAL/.agents/skills/`。
-- `template-manifest.json`：模板文件与占位符契约。
-- `tests/`：模板完整性、脱敏、渲染、目标保护和跨平台测试。
-- `docs/`：安装契约、通用化说明和维护资料。
-
-## 开发与验证
-
-```shell
+```sh
 python -m unittest discover -s tests -v
 python skills/install-agent-scaffold/scripts/scaffold_guard.py audit-template --template template --manifest template-manifest.json
 python skills/restore-agent-foundation/scripts/test_foundation_recovery.py -v
@@ -178,7 +129,7 @@ python skills/update-agent-foundation/scripts/test_foundation_update.py -v
 
 ## 许可证
 
-本项目采用 [Apache License 2.0](LICENSE)。
+[Apache License 2.0](LICENSE)
 
 ## 作者、生态与联系
 
@@ -201,4 +152,16 @@ python skills/update-agent-foundation/scripts/test_foundation_update.py -v
 
 <p>
   <img src="docs/assets/feishu-open-source-community.jpg" alt="AI 开源交流社区飞书二维码" width="360">
+</p>
+
+## Star History
+
+<p align="center">
+  <a href="https://www.star-history.com/#DongLiStudio/personal-agent-foundation&Date">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=DongLiStudio/personal-agent-foundation&type=Date&theme=dark">
+      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=DongLiStudio/personal-agent-foundation&type=Date">
+      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=DongLiStudio/personal-agent-foundation&type=Date" width="800">
+    </picture>
+  </a>
 </p>
