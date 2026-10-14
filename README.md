@@ -1,4 +1,8 @@
 <div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/logo-dark.svg">
+    <img src="docs/assets/brand/logo.svg" width="112" height="112" alt="Personal Agent Foundation 图标">
+  </picture>
   <h1>Personal Agent Foundation</h1>
   <p><strong>让你的规则、项目与工作经验，跟随你使用的 Agent。</strong></p>
   <p>可安装 · 可迁移 · 可恢复 · 可扩展的个人 Agent 工作基座</p>
