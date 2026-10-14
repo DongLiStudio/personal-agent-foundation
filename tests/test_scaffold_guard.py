@@ -935,7 +935,9 @@ class ProductBoundaryTests(unittest.TestCase):
             "服务表采用模板六列",
             "Bitwarden SSH Agent",
             "不默认在磁盘生成、导出或恢复私钥",
-            "同一任务、同一服务器、同一主体",
+            "同一用户请求/同一回答轮次",
+            "session_id",
+            "下一条用户请求必须重新",
             "ForwardAgent=no",
         ):
             self.assertIn(text, combined)
