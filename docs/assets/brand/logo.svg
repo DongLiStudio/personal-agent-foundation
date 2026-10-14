@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" role="img" aria-labelledby="title desc">
   <title id="title">Personal Agent Foundation</title>
   <desc id="desc">Connected nodes supported by a layered foundation.</desc>
-  
+
   <g stroke="#244C74" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
     <path d="M44 176 128 218 212 176"/>
     <path d="M44 152 128 194 212 152"/>
