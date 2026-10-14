@@ -25,6 +25,14 @@ sys.modules[spec.name] = guard
 spec.loader.exec_module(guard)
 
 
+def public_installation_docs() -> str:
+    """Check the homepage and its linked, detailed user guide as one contract."""
+    return "\n".join(
+        (ROOT / relative).read_text(encoding="utf-8")
+        for relative in ("README.md", "docs/getting-started.md")
+    )
+
+
 def tree_hash(root: Path) -> str:
     value = sha256()
     for path in sorted(
@@ -291,6 +299,13 @@ class ScaffoldGuardTests(unittest.TestCase):
 
 
 class ProductBoundaryTests(unittest.TestCase):
+    def test_homepage_links_complete_installation_guide(self) -> None:
+        homepage = (ROOT / "README.md").read_text(encoding="utf-8")
+        guide = (ROOT / "docs" / "getting-started.md").read_text(encoding="utf-8")
+        self.assertIn("](docs/getting-started.md)", homepage)
+        for heading in ("## 安装时会询问什么", "## 安装过程", "## 安全保证"):
+            self.assertIn(heading, guide)
+
     def test_product_is_not_an_agent_management_project(self) -> None:
         for forbidden in ("AGENTS.md", "STATUS.md", "tasks", "archive"):
             self.assertFalse((ROOT / forbidden).exists(), forbidden)
@@ -359,7 +374,7 @@ class ProductBoundaryTests(unittest.TestCase):
             / "references"
             / "obsidian-layout.md"
         ).read_text(encoding="utf-8")
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = public_installation_docs()
         contract = (ROOT / "docs" / "installation-contract.md").read_text(
             encoding="utf-8"
         )
@@ -425,6 +440,7 @@ class ProductBoundaryTests(unittest.TestCase):
     def test_installer_has_complete_service_matrix_and_reconciliation(self) -> None:
         paths = (
             ROOT / "README.md",
+            ROOT / "docs" / "getting-started.md",
             ROOT / "skills" / "install-agent-scaffold" / "SKILL.md",
             ROOT / "skills" / "install-agent-scaffold" / "references" / "installation-workflow.md",
             ROOT / "skills" / "install-agent-scaffold" / "references" / "host-integration.md",
@@ -505,7 +521,7 @@ class ProductBoundaryTests(unittest.TestCase):
             / "references"
             / "host-integration.md"
         ).read_text(encoding="utf-8")
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = public_installation_docs()
         contract = (ROOT / "docs" / "installation-contract.md").read_text(
             encoding="utf-8"
         )
@@ -535,7 +551,7 @@ class ProductBoundaryTests(unittest.TestCase):
         contract = (ROOT / "docs" / "installation-contract.md").read_text(
             encoding="utf-8"
         )
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = public_installation_docs()
         lark_profiles = (TEMPLATE / "GLOBAL" / "LARK_PROFILES.md").read_text(
             encoding="utf-8"
         )
@@ -568,7 +584,7 @@ class ProductBoundaryTests(unittest.TestCase):
         contract = (ROOT / "docs" / "installation-contract.md").read_text(
             encoding="utf-8"
         )
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = public_installation_docs()
         lark_profiles = (TEMPLATE / "GLOBAL" / "LARK_PROFILES.md").read_text(
             encoding="utf-8"
         )
@@ -602,7 +618,7 @@ class ProductBoundaryTests(unittest.TestCase):
             / "references"
             / "host-integration.md"
         ).read_text(encoding="utf-8")
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = public_installation_docs()
         combined = host_integration + "\n" + readme
         for text in (
             "任何宿主支持可视化安装面板",
@@ -622,7 +638,7 @@ class ProductBoundaryTests(unittest.TestCase):
         installer = (
             ROOT / "skills" / "install-agent-scaffold" / "SKILL.md"
         ).read_text(encoding="utf-8")
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = public_installation_docs()
         contract = (ROOT / "docs" / "installation-contract.md").read_text(
             encoding="utf-8"
         )
@@ -644,7 +660,7 @@ class ProductBoundaryTests(unittest.TestCase):
             / "references"
             / "onboarding.md"
         ).read_text(encoding="utf-8")
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = public_installation_docs()
         combined = onboarding + "\n" + readme
         for text in (
             "创建或打开通用助手项目",
@@ -682,7 +698,7 @@ class ProductBoundaryTests(unittest.TestCase):
             / "references"
             / "onboarding.md"
         ).read_text(encoding="utf-8")
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = public_installation_docs()
         combined = "\n".join([installer, workflow, onboarding, readme])
         for text in (
             "project-layout-lesson",
@@ -729,7 +745,7 @@ class ProductBoundaryTests(unittest.TestCase):
             / "references"
             / "onboarding.md"
         ).read_text(encoding="utf-8")
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = public_installation_docs()
         combined = "\n".join([installer, workflow, onboarding, readme])
         for text in (
             "打开/添加通用助手项目是建立通用助手总经理会话前的硬门禁",
