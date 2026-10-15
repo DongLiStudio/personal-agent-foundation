@@ -150,6 +150,16 @@ python skills/update-agent-foundation/scripts/test_foundation_update.py -v
 | MemNetAI | [memnetai.com](https://memnetai.com/) | 面向 AI 智能体的长期记忆服务平台 |
 | Personal Agent Foundation | 本仓库 | 面向个人 Agent 工作基座、GLOBAL 治理层、跨 Agent Skill 与上下文迁移 |
 
+## 开源交流社区
+
+欢迎加入 AI 开源交流社区，交流与共享各种开源 AI 相关资讯，以开源精神为导向，共建 AI 时代数据主权空间。
+
+<p>
+  <img src="docs/assets/feishu-open-source-community.jpg" alt="AI 开源交流社区飞书二维码" width="360">
+</p>
+
+<br>
+
 ## 商务与合作
 
 如有明确的业务或技术合作需求，请按需求类型联系对应团队：
@@ -168,14 +178,6 @@ python skills/update-agent-foundation/scripts/test_foundation_update.py -v
     </td>
   </tr>
 </table>
-
-## 开源交流社区
-
-欢迎加入 AI 开源交流社区，交流与共享各种开源 AI 相关资讯，以开源精神为导向，共建 AI 时代数据主权空间。
-
-<p>
-  <img src="docs/assets/feishu-open-source-community.jpg" alt="AI 开源交流社区飞书二维码" width="360">
-</p>
 
 ## Star History
 
